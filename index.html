@@ -8,20 +8,20 @@
     <meta name="author" content="Nguyễn Trung Kiên">
     <meta property="og:title" content="ToolHub - Hộp Công Cụ Đa Năng">
     <meta property="og:description" content="Khám phá bộ công cụ miễn phí: tóm tắt văn bản, chuyển đổi đơn vị, tạo mã QR, và hơn thế nữa.">
-    <meta property="og:image" content="assets/icons/toolbox.png">
+    <meta property="og:image" content="/toolhub/assets/icons/toolbox.png">
     <meta name="twitter:card" content="summary_large_image">
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
         script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
         style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
-        font-src 'self' https://fonts.gstatic.com;
+        font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
         img-src 'self' data:;
         connect-src 'self';
     ">
     <title>ToolHub - Hộp Công Cụ Đa Năng</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onerror="this.onerror=null; this.href='styles/fallback.css'">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="/toolhub/styles.css">
 </head>
 <body>
     <div class="bg-decor">
@@ -73,7 +73,7 @@
     <section class="hero" id="hero">
         <h1>Hộp Công Cụ Đa Năng Cho Mọi Nhu Cầu</h1>
         <p>Tóm tắt văn bản, chuyển đổi đơn vị, tạo mã QR và hơn thế nữa - tất cả miễn phí và dễ dùng.</p>
-        <img src="assets/icons/toolbox.png" alt="Hình minh họa hộp công cụ" class="hero-image" loading="lazy">
+        <img src="/toolhub/assets/icons/toolbox.png" alt="Hình minh họa hộp công cụ" class="hero-image" loading="lazy">
         <div class="search-bar">
             <i class="fas fa-search" aria-hidden="true"></i>
             <input type="text" id="searchInput" placeholder="Tìm kiếm công cụ..." aria-label="Tìm kiếm công cụ">
@@ -413,6 +413,6 @@
 
     <script defer src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js" crossorigin="anonymous"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/compressorjs@1.2.1/dist/compressor.min.js" crossorigin="anonymous"></script>
-    <script defer src="script.js"></script>
+    <script defer src="/toolhub/script.js"></script>
 </body>
 </html>
