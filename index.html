@@ -50,19 +50,19 @@
 
     <div class="modal" id="contactModal">
         <div class="modal-content">
-            <h2>Thông Tin Liên Hệ</h2>
-            <p><strong>Người tạo:</strong> Nguyễn Trung Kiên</p>
-            <p><strong>Ngày sinh:</strong> 03/01/2006</p>
-            <p><strong>Email:</strong> <a href="mailto:kiennguyen0301@gmail.com">kiennguyen0301@gmail.com</a></p>
-            <p><strong>Số điện thoại:</strong> <a href="tel:0925344777">0925344777</a></p>
+            <h2 lang="vi">Thông Tin Liên Hệ</h2>
+            <p lang="vi"><strong>Người tạo:</strong> Nguyễn Trung Kiên</p>
+            <p lang="vi"><strong>Ngày sinh:</strong> 03/01/2006</p>
+            <p lang="vi"><strong>Email:</strong> <a href="mailto:kiennguyen0301@gmail.com">kiennguyen0301@gmail.com</a></p>
+            <p lang="vi"><strong>Số điện thoại:</strong> <a href="tel:0925344777">0925344777</a></p>
             <button onclick="closeContactModal()" aria-label="Đóng cửa sổ liên hệ">Đóng</button>
         </div>
     </div>
 
     <section class="hero" id="hero">
-        <h1>Hộp Công Cụ Đa Năng Cho Mọi Nhu Cầu</h1>
-        <p>Tóm tắt văn bản, chuyển đổi đơn vị, tính toán BMI và hơn thế nữa - tất cả tại một nơi.</p>
-        <img src="assets/icons/toolbox.png" alt="Hình minh họa hộp công cụ" class="hero-image" loading="lazy">
+        <h1 lang="vi">Hộp Công Cụ Đa Năng Cho Mọi Nhu Cầu</h1>
+        <p lang="vi">Tóm tắt văn bản, chuyển đổi đơn vị, tính toán BMI và hơn thế nữa - tất cả tại một nơi.</p>
+        <img src="assets/icons/toolbox.png" alt="Hộp công cụ đa năng minh họa cho ToolHub" class="hero-image" loading="lazy">
         <div class="search-bar">
             <i class="fas fa-search" aria-hidden="true"></i>
             <input type="text" id="searchInput" placeholder="Tìm kiếm công cụ..." aria-label="Tìm kiếm công cụ">
@@ -72,8 +72,8 @@
     <main>
         <section class="tools-section" id="summarize">
             <div class="tool-card">
-                <h3><img src="assets/icons/brain.png" alt="Biểu tượng tóm tắt văn bản" class="tool-icon" loading="lazy"> Tóm tắt văn bản</h3>
-                <p>Rút gọn nội dung dài thành đoạn tóm tắt ngắn gọn.</p>
+                <h3 lang="vi"><img src="assets/icons/brain.png" alt="Biểu tượng trí tuệ cho công cụ tóm tắt văn bản" class="tool-icon" loading="lazy"> Tóm tắt văn bản</h3>
+                <p lang="vi">Rút gọn nội dung dài thành đoạn tóm tắt ngắn gọn.</p>
                 <textarea id="textInput" rows="4" placeholder="Nhập văn bản cần tóm tắt..." aria-label="Văn bản cần tóm tắt"></textarea>
                 <select id="summaryLength" aria-label="Chọn độ dài tóm tắt">
                     <option value="short">Ngắn (~20%)</option>
@@ -84,7 +84,7 @@
                 <div class="button-group">
                     <button onclick="summarizeText(this)" aria-label="Tóm tắt văn bản">Tóm tắt</button>
                 </div>
-                <div class="loading" id="textLoading"><i class="fas fa-spinner"></i></div>
+                <div class="loading" id="textLoading"><i class="fas fa-spinner"></i> <span lang="vi">Đang xử lý...</span></div>
                 <div class="result" id="textResult">
                     <p id="summaryOutput"></p>
                 </div>
@@ -93,8 +93,8 @@
 
         <section class="tools-section" id="length-converter">
             <div class="tool-card">
-                <h3><img src="assets/icons/ruler.png" alt="Biểu tượng thước kẻ" class="tool-icon" loading="lazy"> Chuyển đơn vị (Độ dài)</h3>
-                <p>Đổi độ dài giữa mét, kilomet, centimet, inch, foot, yard nhanh chóng.</p>
+                <h3 lang="vi"><img src="assets/icons/ruler.png" alt="Biểu tượng thước đo cho công cụ chuyển đổi độ dài" class="tool-icon" loading="lazy"> Chuyển đơn vị (Độ dài)</h3>
+                <p lang="vi">Đổi độ dài giữa mét, kilomet, centimet, inch, foot, yard nhanh chóng.</p>
                 <input type="number" id="lengthValue" placeholder="Nhập giá trị" aria-label="Giá trị độ dài">
                 <select id="lengthFrom" aria-label="Đơn vị nguồn">
                     <option value="m">Mét (m)</option>
@@ -116,7 +116,7 @@
                 <div class="button-group">
                     <button onclick="convertLength(this)" aria-label="Chuyển đổi độ dài">Chuyển đổi</button>
                 </div>
-                <div class="loading" id="lengthLoading"><i class="fas fa-spinner"></i></div>
+                <div class="loading" id="lengthLoading"><i class="fas fa-spinner"></i> <span lang="vi">Đang xử lý...</span></div>
                 <div class="result" id="lengthResult">
                     <table class="result-table" id="lengthOutput">
                         <thead>
@@ -135,8 +135,8 @@
 
         <section class="tools-section" id="calculator">
             <div class="tool-card">
-                <h3><img src="assets/icons/calculator.png" alt="Biểu tượng máy tính" class="tool-icon" loading="lazy"> Máy tính cơ bản</h3>
-                <p>Thực hiện các phép tính cơ bản: cộng, trừ, nhân, chia.</p>
+                <h3 lang="vi"><img src="assets/icons/calculator.png" alt="Biểu tượng máy tính cho công cụ tính toán cơ bản" class="tool-icon" loading="lazy"> Máy tính cơ bản</h3>
+                <p lang="vi">Thực hiện các phép tính cơ bản: cộng, trừ, nhân, chia.</p>
                 <input type="number" id="num1" placeholder="Số thứ nhất" aria-label="Số thứ nhất">
                 <select id="operator" aria-label="Phép toán">
                     <option value="+">Cộng (+)</option>
@@ -149,7 +149,7 @@
                 <div class="button-group">
                     <button onclick="calculate(this)" aria-label="Thực hiện phép tính">Tính</button>
                 </div>
-                <div class="loading" id="calcLoading"><i class="fas fa-spinner"></i></div>
+                <div class="loading" id="calcLoading"><i class="fas fa-spinner"></i> <span lang="vi">Đang xử lý...</span></div>
                 <div class="result" id="calcResult">
                     <p id="calcOutput"></p>
                 </div>
@@ -158,8 +158,8 @@
 
         <section class="tools-section" id="password-generator">
             <div class="tool-card">
-                <h3><img src="assets/icons/key.png" alt="Biểu tượng khóa" class="tool-icon" loading="lazy"> Tạo mật khẩu</h3>
-                <p>Tạo mật khẩu ngẫu nhiên, an toàn với độ dài và tùy chọn ký tự.</p>
+                <h3 lang="vi"><img src="assets/icons/key.png" alt="Biểu tượng khóa cho công cụ tạo mật khẩu" class="tool-icon" loading="lazy"> Tạo mật khẩu</h3>
+                <p lang="vi">Tạo mật khẩu ngẫu nhiên, an toàn với độ dài và tùy chọn ký tự.</p>
                 <input type="number" id="passLength" placeholder="Độ dài mật khẩu (8-32)" min="8" max="32" aria-label="Độ dài mật khẩu">
                 <div class="checkbox-group">
                     <label><input type="checkbox" id="includeUppercase" checked aria-label="Ký tự hoa"> Chữ hoa (A-Z)</label>
@@ -171,7 +171,7 @@
                 <div class="button-group">
                     <button onclick="generatePassword(this)" aria-label="Tạo mật khẩu">Tạo</button>
                 </div>
-                <div class="loading" id="passLoading"><i class="fas fa-spinner"></i></div>
+                <div class="loading" id="passLoading"><i class="fas fa-spinner"></i> <span lang="vi">Đang xử lý...</span></div>
                 <div class="result" id="passResult">
                     <p id="passOutput"></p>
                     <button class="copy-btn" onclick="copyPassword()" aria-label="Sao chép mật khẩu">Sao chép</button>
@@ -181,14 +181,14 @@
 
         <section class="tools-section" id="char-counter">
             <div class="tool-card">
-                <h3><img src="assets/icons/text-width.png" alt="Biểu tượng độ rộng văn bản" class="tool-icon" loading="lazy"> Đếm ký tự & từ</h3>
-                <p>Đếm số ký tự và từ trong đoạn văn bản của bạn.</p>
+                <h3 lang="vi"><img src="assets/icons/text-width.png" alt="Biểu tượng đo độ dài văn bản cho công cụ đếm ký tự" class="tool-icon" loading="lazy"> Đếm ký tự & từ</h3>
+                <p lang="vi">Đếm số ký tự và từ trong đoạn văn bản của bạn.</p>
                 <textarea id="charInput" rows="4" placeholder="Nhập văn bản..." aria-label="Văn bản cần đếm"></textarea>
                 <p class="error-message" id="charError"></p>
                 <div class="button-group">
                     <button onclick="countChars(this)" aria-label="Đếm ký tự và từ">Đếm</button>
                 </div>
-                <div class="loading" id="charLoading"><i class="fas fa-spinner"></i></div>
+                <div class="loading" id="charLoading"><i class="fas fa-spinner"></i> <span lang="vi">Đang xử lý...</span></div>
                 <div class="result" id="charResult">
                     <p id="charOutput"></p>
                 </div>
@@ -197,14 +197,14 @@
 
         <section class="tools-section" id="url-checker">
             <div class="tool-card">
-                <h3><img src="assets/icons/globe.png" alt="Biểu tượng quả địa cầu" class="tool-icon" loading="lazy"> Kiểm tra URL</h3>
-                <p>Kiểm tra xem URL có hợp lệ và an toàn hay không.</p>
+                <h3 lang="vi"><img src="assets/icons/globe.png" alt="Biểu tượng quả địa cầu cho công cụ kiểm tra URL" class="tool-icon" loading="lazy"> Kiểm tra URL</h3>
+                <p lang="vi">Kiểm tra xem URL có hợp lệ và an toàn hay không.</p>
                 <input type="text" id="urlInput" placeholder="Nhập URL..." aria-label="URL cần kiểm tra">
                 <p class="error-message" id="urlError"></p>
                 <div class="button-group">
                     <button onclick="checkURL(this)" aria-label="Kiểm tra URL">Kiểm tra</button>
                 </div>
-                <div class="loading" id="urlLoading"><i class="fas fa-spinner"></i></div>
+                <div class="loading" id="urlLoading"><i class="fas fa-spinner"></i> <span lang="vi">Đang xử lý...</span></div>
                 <div class="result" id="urlResult">
                     <p id="urlOutput"></p>
                 </div>
@@ -213,8 +213,8 @@
 
         <section class="tools-section" id="temp-converter">
             <div class="tool-card">
-                <h3><img src="assets/icons/thermometer.png" alt="Biểu tượng nhiệt kế" class="tool-icon" loading="lazy"> Chuyển đổi nhiệt độ</h3>
-                <p>Chuyển đổi giữa Celsius, Fahrenheit, Kelvin.</p>
+                <h3 lang="vi"><img src="assets/icons/thermometer.png" alt="Biểu tượng nhiệt kế cho công cụ chuyển đổi nhiệt độ" class="tool-icon" loading="lazy"> Chuyển đổi nhiệt độ</h3>
+                <p lang="vi">Chuyển đổi giữa Celsius, Fahrenheit, Kelvin.</p>
                 <input type="number" id="tempValue" placeholder="Nhập giá trị" aria-label="Giá trị nhiệt độ">
                 <select id="tempFrom" aria-label="Đơn vị nhiệt độ nguồn">
                     <option value="C">Celsius (C)</option>
@@ -230,7 +230,7 @@
                 <div class="button-group">
                     <button onclick="convertTemp(this)" aria-label="Chuyển đổi nhiệt độ">Chuyển đổi</button>
                 </div>
-                <div class="loading" id="tempLoading"><i class="fas fa-spinner"></i></div>
+                <div class="loading" id="tempLoading"><i class="fas fa-spinner"></i> <span lang="vi">Đang xử lý...</span></div>
                 <div class="result" id="tempResult">
                     <p id="tempOutput"></p>
                 </div>
@@ -239,8 +239,8 @@
 
         <section class="tools-section" id="currency-converter">
             <div class="tool-card">
-                <h3><img src="assets/icons/money.png" alt="Biểu tượng tiền tệ" class="tool-icon" loading="lazy"> Chuyển đổi tiền tệ</h3>
-                <p>Chuyển đổi giữa các loại tiền tệ phổ biến với tỷ giá thực tế.</p>
+                <h3 lang="vi"><img src="assets/icons/money.png" alt="Biểu tượng tiền tệ cho công cụ chuyển đổi tiền tệ" class="tool-icon" loading="lazy"> Chuyển đổi tiền tệ</h3>
+                <p lang="vi">Chuyển đổi giữa các loại tiền tệ phổ biến với tỷ giá thực tế.</p>
                 <input type="number" id="currencyValue" placeholder="Nhập giá trị" aria-label="Giá trị tiền tệ">
                 <select id="currencyFrom" aria-label="Loại tiền tệ nguồn">
                     <option value="USD">USD</option>
@@ -262,7 +262,7 @@
                 <div class="button-group">
                     <button onclick="convertCurrency(this)" aria-label="Chuyển đổi tiền tệ">Chuyển đổi</button>
                 </div>
-                <div class="loading" id="currencyLoading"><i class="fas fa-spinner"></i></div>
+                <div class="loading" id="currencyLoading"><i class="fas fa-spinner"></i> <span lang="vi">Đang xử lý...</span></div>
                 <div class="result" id="currencyResult">
                     <table class="result-table" id="currencyOutput">
                         <thead>
@@ -281,45 +281,45 @@
 
         <section class="tools-section" id="qr-generator">
             <div class="tool-card">
-                <h3><img src="assets/icons/qr-code.png" alt="Biểu tượng mã QR" class="tool-icon" loading="lazy"> Tạo QR Code</h3>
-                <p>Tạo mã QR từ văn bản hoặc URL.</p>
+                <h3 lang="vi"><img src="assets/icons/qr-code.png" alt="Biểu tượng mã QR cho công cụ tạo mã QR" class="tool-icon" loading="lazy"> Tạo QR Code</h3>
+                <p lang="vi">Tạo mã QR từ văn bản hoặc URL.</p>
                 <input type="text" id="qrInput" placeholder="Nhập văn bản hoặc URL..." aria-label="Văn bản hoặc URL cho mã QR">
                 <p class="error-message" id="qrError"></p>
                 <div class="button-group">
                     <button onclick="generateQR(this)" aria-label="Tạo mã QR">Tạo QR</button>
                 </div>
-                <div class="loading" id="qrLoading"><i class="fas fa-spinner"></i></div>
+                <div class="loading" id="qrLoading"><i class="fas fa-spinner"></i> <span lang="vi">Đang xử lý...</span></div>
                 <div class="result" id="qrResult">
-                    <img id="qrOutput" alt="Mã QR" loading="lazy">
+                    <img id="qrOutput" alt="Mã QR được tạo từ văn bản hoặc URL" loading="lazy">
                 </div>
             </div>
         </section>
 
         <section class="tools-section" id="image-compressor">
             <div class="tool-card">
-                <h3><img src="assets/icons/image.png" alt="Biểu tượng ảnh" class="tool-icon" loading="lazy"> Nén ảnh</h3>
-                <p>Giảm dung lượng ảnh mà vẫn giữ chất lượng.</p>
+                <h3 lang="vi"><img src="assets/icons/image.png" alt="Biểu tượng ảnh cho công cụ nén ảnh" class="tool-icon" loading="lazy"> Nén ảnh</h3>
+                <p lang="vi">Giảm dung lượng ảnh mà vẫn giữ chất lượng.</p>
                 <input type="file" id="imageInput" accept="image/*" aria-label="Chọn ảnh để nén">
                 <p class="error-message" id="imageError"></p>
                 <div class="button-group">
                     <button onclick="compressImage(this)" aria-label="Nén ảnh">Nén ảnh</button>
                 </div>
-                <div class="loading" id="imageLoading"><i class="fas fa-spinner"></i></div>
+                <div class="loading" id="imageLoading"><i class="fas fa-spinner"></i> <span lang="vi">Đang xử lý...</span></div>
                 <div class="result" id="imageResult"></div>
             </div>
         </section>
 
         <section class="tools-section" id="bmi-calculator">
             <div class="tool-card">
-                <h3><img src="assets/icons/weight.png" alt="Biểu tượng cân nặng" class="tool-icon" loading="lazy"> Tính chỉ số BMI</h3>
-                <p>Tính chỉ số khối cơ thể (BMI) dựa trên cân nặng và chiều cao.</p>
+                <h3 lang="vi"><img src="assets/icons/weight.png" alt="Biểu tượng cân nặng cho công cụ tính BMI" class="tool-icon" loading="lazy"> Tính chỉ số BMI</h3>
+                <p lang="vi">Tính chỉ số khối cơ thể (BMI) dựa trên cân nặng và chiều cao.</p>
                 <input type="number" id="weight" placeholder="Cân nặng (kg)" aria-label="Cân nặng (kg)">
                 <input type="number" id="height" placeholder="Chiều cao (m)" step="0.01" aria-label="Chiều cao (m)">
                 <p class="error-message" id="bmiError"></p>
                 <div class="button-group">
                     <button onclick="calculateBMI(this)" aria-label="Tính BMI">Tính BMI</button>
                 </div>
-                <div class="loading" id="bmiLoading"><i class="fas fa-spinner"></i></div>
+                <div class="loading" id="bmiLoading"><i class="fas fa-spinner"></i> <span lang="vi">Đang xử lý...</span></div>
                 <div class="result" id="bmiResult">
                     <p id="bmiOutput"></p>
                 </div>
@@ -328,8 +328,8 @@
 
         <section class="tools-section" id="area-converter">
             <div class="tool-card">
-                <h3><img src="assets/icons/square.png" alt="Biểu tượng hình vuông" class="tool-icon" loading="lazy"> Chuyển đơn vị (Diện tích)</h3>
-                <p>Chuyển đổi diện tích giữa m², km², ha, ft².</p>
+                <h3 lang="vi"><img src="assets/icons/square.png" alt="Biểu tượng hình vuông cho công cụ chuyển đổi diện tích" class="tool-icon" loading="lazy"> Chuyển đơn vị (Diện tích)</h3>
+                <p lang="vi">Chuyển đổi diện tích giữa m², km², ha, ft².</p>
                 <input type="number" id="areaValue" placeholder="Nhập giá trị" aria-label="Giá trị diện tích">
                 <select id="areaFrom" aria-label="Đơn vị nguồn">
                     <option value="m2">Mét vuông (m²)</option>
@@ -347,7 +347,7 @@
                 <div class="button-group">
                     <button onclick="convertArea(this)" aria-label="Chuyển đổi diện tích">Chuyển đổi</button>
                 </div>
-                <div class="loading" id="areaLoading"><i class="fas fa-spinner"></i></div>
+                <div class="loading" id="areaLoading"><i class="fas fa-spinner"></i> <span lang="vi">Đang xử lý...</span></div>
                 <div class="result" id="areaResult">
                     <table class="result-table" id="areaOutput">
                         <thead>
@@ -366,18 +366,17 @@
 
         <section class="tools-section" id="history">
             <div class="tool-card">
-                <h3><i class="fas fa-history"></i> Lịch sử kết quả</h3>
-                <p>Xem lại các kết quả từ các công cụ bạn đã sử dụng.</p>
+                <h3 lang="vi"><i class="fas fa-history"></i> Lịch sử kết quả</h3>
+                <p lang="vi">Xem lại các kết quả từ các công cụ bạn đã sử dụng.</p>
                 <div id="historyResult"></div>
             </div>
         </section>
     </main>
 
     <footer>
-        <p>© 2025 ToolHub. Made with 💙 for tiện ích lovers.</p>
+        <p lang="vi">© 2025 ToolHub. Made with 💙 for tiện ích lovers.</p>
     </footer>
 
-    <!-- <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script> -->
     <script defer src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/compressorjs@1.2.1/dist/compressor.min.js"></script>
     <script defer src="script.js"></script>
