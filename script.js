@@ -5,7 +5,6 @@ function escapeHTML(str) {
         '<': '<',
         '>': '>',
         '"': '"',
-        "'": '''
     }[match]));
 }
 
