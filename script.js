@@ -538,3 +538,118 @@ document.addEventListener('DOMContentLoaded', () => {
                 return { isValid: true, input: weightInput, errorId: 'bmiError' };
             },
             () => {
+                const weight = parseFloat(document.getElementById('weight').value);
+                const height = parseFloat(document.getElementById('height').value);
+                const bmi = weight / (height * height);
+                let status;
+                if (bmi < 18.5) status = 'Thiếu cân';
+                else if (bmi < 25) status = 'Bình thường';
+                else if (bmi < 30) status = 'Thừa cân';
+                else status = 'Béo phì';
+                const output = { weight, height, bmi: bmi.toFixed(2), status };
+                document.getElementById('bmiOutput').querySelector('tbody').innerHTML = `
+                    <tr>
+                        <td>${output.weight}</td>
+                        <td>${output.height}</td>
+                        <td>${output.bmi}</td>
+                        <td>${output.status}</td>
+                    </tr>
+                `;
+                saveToHistory('bmi-calculator', output);
+                saveToolState('bmi-calculator', { weight, height });
+                showToast('Đã tính BMI!', 'success');
+            }
+        );
+    }
+
+    function convertArea(button) {
+        processTool(button, 'areaLoading', 'areaResult',
+            () => {
+                const areaInput = document.getElementById('areaValue');
+                const value = parseFloat(areaInput.value);
+                return {
+                    isValid: !isNaN(value) && value >= 0,
+                    input: areaInput,
+                    errorId: 'areaError',
+                    message: 'Vui lòng nhập giá trị hợp lệ!'
+                };
+            },
+            () => {
+                const value = parseFloat(document.getElementById('areaValue').value);
+                const fromUnit = document.getElementById('areaFrom').value;
+                const toUnit = document.getElementById('areaTo').value;
+                const conversions = { m2: 1, km2: 1000000, ha: 10000, ft2: 0.092903 };
+                const result = (value * conversions[fromUnit]) / conversions[toUnit];
+                const output = {
+                    original: value.toFixed(2),
+                    fromUnit,
+                    converted: result.toFixed(2),
+                    toUnit
+                };
+                document.getElementById('areaOutput').querySelector('tbody').innerHTML = `
+                    <tr>
+                        <td>${output.original}</td>
+                        <td>${output.fromUnit.toUpperCase()}</td>
+                        <td>${output.converted}</td>
+                        <td>${output.toUnit.toUpperCase()}</td>
+                    </tr>
+                `;
+                saveToHistory('area-converter', output);
+                saveToolState('area-converter', { areaValue: value, areaFrom: fromUnit, areaTo: toUnit });
+                showToast('Đã chuyển đổi diện tích!', 'success');
+            }
+        );
+    }
+
+    // Search Functionality
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(() => {
+            const query = searchInput.value.trim().toLowerCase();
+            const toolsSections = document.querySelectorAll('.tools-section');
+            toolsSections.forEach(section => {
+                const toolName = section.dataset.toolName.toLowerCase();
+                section.style.display = query && toolName.includes(query) ? 'block' : 'none';
+                section.classList.toggle('active', query && toolName.includes(query));
+            });
+            document.getElementById('hero').style.display = query ? 'none' : 'block';
+        }, 300));
+    }
+
+    // Event Listeners
+    document.addEventListener('click', e => {
+        const action = e.target.dataset.action;
+        const tool = e.target.dataset.tool;
+        if (action === 'showHome') showHome();
+        else if (action === 'showHistory') showHistory();
+        else if (action === 'openContactModal') openContactModal();
+        else if (action === 'closeContactModal') closeContactModal();
+        else if (action === 'summarizeText') summarizeText(e.target);
+        else if (action === 'convertLength') convertLength(e.target);
+        else if (action === 'calculate') calculate(e.target);
+        else if (action === 'generatePassword') generatePassword(e.target);
+        else if (action === 'copyPassword') copyPassword();
+        else if (action === 'countChars') countChars(e.target);
+        else if (action === 'checkURL') checkURL(e.target);
+        else if (action === 'convertTemp') convertTemp(e.target);
+        else if (action === 'convertCurrency') convertCurrency(e.target);
+        else if (action === 'generateQR') generateQR(e.target);
+        else if (action === 'compressImage') compressImage(e.target);
+        else if (action === 'calculateBMI') calculateBMI(e.target);
+        else if (action === 'convertArea') convertArea(e.target);
+        else if (action === 'clearHistory') clearHistory();
+        else if (tool) showTool(tool);
+    });
+
+    document.getElementById('darkModeToggle').addEventListener('change', toggleDarkMode);
+
+    // Initialize
+    const darkMode = localStorage.getItem('darkMode') === 'true';
+    if (darkMode) {
+        document.getElementById('darkModeToggle').checked = true;
+        document.body.classList.add('dark-mode');
+        document.querySelectorAll('pre').forEach(pre => pre.style.background = '#3a3a4e');
+    }
+
+    showHome();
+});
