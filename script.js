@@ -1,11 +1,11 @@
 // Utility Functions
 function escapeHTML(str) {
     return str.replace(/[&<>"']/g, match => ({
-        '&': '&',
-        '<': '<',
-        '>': '>',
-        '"': '"',
-        "'": '''
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
     }[match]));
 }
 
@@ -14,6 +14,7 @@ function showError(inputElement, errorElementId, message) {
     inputElement.classList.add('error');
     errorElement.textContent = message;
     errorElement.classList.add('active');
+    showToast(message, 'error');
     return false;
 }
 
@@ -23,6 +24,15 @@ function clearError(inputElement, errorElementId) {
     errorElement.textContent = '';
     errorElement.classList.remove('active');
     return true;
+}
+
+function showToast(message, type) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = `toast ${type} active`;
+    setTimeout(() => {
+        toast.className = 'toast';
+    }, 3000);
 }
 
 function showLoading(button, loadingId, resultId, callback) {
@@ -35,7 +45,7 @@ function showLoading(button, loadingId, resultId, callback) {
         loading.classList.remove('active');
         button.disabled = false;
         callback();
-    }, 500);
+    }, 300);
 }
 
 function processTool(button, loadingId, resultId, validateFn, processFn) {
@@ -51,13 +61,35 @@ function processTool(button, loadingId, resultId, validateFn, processFn) {
 }
 
 function saveToHistory(toolId, result) {
-    const history = JSON.parse(localStorage.getItem('toolHistory') || '[]');
+    let history = JSON.parse(localStorage.getItem('toolHistory') || '[]');
     history.push({
         toolId,
         result,
-        timestamp: new Date().toLocaleString()
+        timestamp: new Date().toLocaleString('vi-VN')
     });
+    // Giới hạn lịch sử để tránh vượt dung lượng
+    if (history.length > 100) history = history.slice(-100);
     localStorage.setItem('toolHistory', JSON.stringify(history));
+}
+
+function saveToolState(toolId, inputData) {
+    localStorage.setItem(`toolState_${toolId}`, JSON.stringify(inputData));
+}
+
+function loadToolState(toolId) {
+    return JSON.parse(localStorage.getItem(`toolState_${toolId}`) || '{}');
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
 }
 
 // UI Functions
@@ -101,7 +133,24 @@ function showTool(toolId) {
         targetSection.style.display = 'block';
         targetSection.scrollIntoView({ behavior: 'smooth' });
         document.title = `${toolId.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())} - ToolHub`;
+        restoreToolState(toolId);
+        document.querySelectorAll('.tool-nav a').forEach(link => {
+            link.classList.toggle('active', link.dataset.tool === toolId);
+        });
     }
+}
+
+function restoreToolState(toolId) {
+    const state = loadToolState(toolId);
+    const section = document.getElementById(toolId);
+    if (!section) return;
+    Object.keys(state).forEach(id => {
+        const element = section.querySelector(`#${id}`);
+        if (element) {
+            if (element.type === 'checkbox') element.checked = state[id];
+            else element.value = state[id];
+        }
+    });
 }
 
 function showHistory() {
@@ -113,11 +162,22 @@ function showHistory() {
             ${history.map(item => `
                 <li style="margin-bottom: 15px;">
                     <strong>${item.toolId.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</strong> (${item.timestamp}): 
-                    <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px;">${escapeHTML(JSON.stringify(item.result, null, 2))}</pre>
+                    <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto;">
+                        ${escapeHTML(JSON.stringify(item.result, null, 2))}
+                    </pre>
                 </li>
             `).join('')}
         </ul>
     ` : '<p>Chưa có lịch sử.</p>';
+    if (document.body.classList.contains('dark-mode')) {
+        historyResult.querySelectorAll('pre').forEach(pre => pre.style.background = '#3a3a4e');
+    }
+}
+
+function clearHistory() {
+    localStorage.removeItem('toolHistory');
+    showHistory();
+    showToast('Đã xóa lịch sử!', 'success');
 }
 
 // Tool Functions
@@ -125,7 +185,7 @@ function summarizeText(button) {
     processTool(button, 'textLoading', 'textResult',
         () => {
             const textInput = document.getElementById('textInput');
-            const text = escapeHTML(textInput.value.trim());
+            const text = textInput.value.trim();
             return {
                 isValid: text && text.length <= 10000,
                 input: textInput,
@@ -134,26 +194,16 @@ function summarizeText(button) {
             };
         },
         () => {
-            const text = escapeHTML(document.getElementById('textInput').value.trim());
+            const text = document.getElementById('textInput').value.trim();
             const summaryLength = document.getElementById('summaryLength').value;
             const sentences = text.split(/[.!?]+/).filter(s => s.trim());
-            const wordFreq = {};
-            text.toLowerCase().split(/\s+/).forEach(word => {
-                if (word.length > 3) wordFreq[word] = (wordFreq[word] || 0) + 1;
-            });
-            const sentenceScores = sentences.map(s => {
-                let score = 0;
-                s.toLowerCase().split(/\s+/).forEach(word => {
-                    if (wordFreq[word]) score += wordFreq[word];
-                });
-                return { sentence: s, score };
-            });
-            sentenceScores.sort((a, b) => b.score - a.score);
             const ratio = { short: 0.2, medium: 0.3, long: 0.4 }[summaryLength];
-            const summarySentences = sentenceScores.slice(0, Math.ceil(sentences.length * ratio)).map(s => s.sentence);
-            const summary = summarySentences.join('. ') + (summarySentences.length ? '.' : '');
+            const count = Math.max(1, Math.ceil(sentences.length * ratio));
+            const summary = sentences.slice(0, count).join('. ') + (count ? '.' : '');
             document.getElementById('summaryOutput').textContent = summary;
             saveToHistory('summarize', { input: text.slice(0, 50) + '...', summary });
+            saveToolState('summarize', { textInput: text, summaryLength });
+            showToast('Đã tóm tắt văn bản!', 'success');
         }
     );
 }
@@ -164,7 +214,7 @@ function convertLength(button) {
             const lengthInput = document.getElementById('lengthValue');
             const value = parseFloat(lengthInput.value);
             return {
-                isValid: !isNaN(value) && value > 0,
+                isValid: !isNaN(value) && value >= 0,
                 input: lengthInput,
                 errorId: 'lengthError',
                 message: 'Vui lòng nhập giá trị hợp lệ!'
@@ -185,12 +235,14 @@ function convertLength(button) {
             document.getElementById('lengthOutput').querySelector('tbody').innerHTML = `
                 <tr>
                     <td>${output.original}</td>
-                    <td>${output.fromUnit}</td>
+                    <td>${output.fromUnit.toUpperCase()}</td>
                     <td>${output.converted}</td>
-                    <td>${output.toUnit}</td>
+                    <td>${output.toUnit.toUpperCase()}</td>
                 </tr>
             `;
             saveToHistory('length-converter', output);
+            saveToolState('length-converter', { lengthValue: value, lengthFrom: fromUnit, lengthTo: toUnit });
+            showToast('Đã chuyển đổi độ dài!', 'success');
         }
     );
 }
@@ -222,6 +274,8 @@ function calculate(button) {
             const output = { num1, operator, num2, result: result.toFixed(2) };
             document.getElementById('calcOutput').textContent = `Kết quả: ${output.result}`;
             saveToHistory('calculator', output);
+            saveToolState('calculator', { num1, num2, operator });
+            showToast('Đã tính toán!', 'success');
         }
     );
 }
@@ -258,17 +312,26 @@ function generatePassword(button) {
             for (let i = 0; i < passLength; i++) {
                 password += chars.charAt(Math.floor(Math.random() * chars.length));
             }
-            document.getElementById('passOutput').textContent = `Mật khẩu: ${password}`;
+            document.getElementById('passOutput').textContent = password;
             saveToHistory('password-generator', { length: passLength, password });
+            saveToolState('password-generator', {
+                passLength,
+                includeUppercase,
+                includeLowercase,
+                includeNumbers,
+                includeSymbols
+            });
+            showToast('Đã tạo mật khẩu!', 'success');
         }
     );
 }
 
 function copyPassword() {
-    const passOutput = document.getElementById('passOutput').textContent.replace('Mật khẩu: ', '');
+    const passOutput = document.getElementById('passOutput').textContent;
     navigator.clipboard.writeText(passOutput).then(() => {
         const copyBtn = document.querySelector('#passResult .copy-btn');
         copyBtn.textContent = 'Đã sao chép!';
+        showToast('Đã sao chép mật khẩu!', 'success');
         setTimeout(() => { copyBtn.textContent = 'Sao chép'; }, 2000);
     }).catch(err => {
         showError(document.getElementById('passLength'), 'passError', 'Không thể sao chép: ' + err);
@@ -279,7 +342,7 @@ function countChars(button) {
     processTool(button, 'charLoading', 'charResult',
         () => {
             const charInput = document.getElementById('charInput');
-            const text = escapeHTML(charInput.value.trim());
+            const text = charInput.value.trim();
             return {
                 isValid: !!text,
                 input: charInput,
@@ -288,12 +351,14 @@ function countChars(button) {
             };
         },
         () => {
-            const text = escapeHTML(document.getElementById('charInput').value.trim());
+            const text = document.getElementById('charInput').value.trim();
             const charCount = text.length;
             const wordCount = text.split(/\s+/).filter(word => word.length > 0).length;
             const output = { charCount, wordCount };
             document.getElementById('charOutput').textContent = `Số ký tự: ${charCount}, Số từ: ${wordCount}`;
             saveToHistory('char-counter', output);
+            saveToolState('char-counter', { charInput: text });
+            showToast('Đã đếm ký tự và từ!', 'success');
         }
     );
 }
@@ -302,7 +367,7 @@ function checkURL(button) {
     processTool(button, 'urlLoading', 'urlResult',
         () => {
             const urlInput = document.getElementById('urlInput');
-            const url = escapeHTML(urlInput.value.trim());
+            const url = urlInput.value.trim();
             const urlPattern = /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)(\/[\w-]*)*(\?\S*)?(#.*)?$/;
             return {
                 isValid: url && urlPattern.test(url),
@@ -312,9 +377,11 @@ function checkURL(button) {
             };
         },
         () => {
-            const url = escapeHTML(document.getElementById('urlInput').value.trim());
+            const url = document.getElementById('urlInput').value.trim();
             document.getElementById('urlOutput').textContent = 'URL hợp lệ!';
             saveToHistory('url-checker', { url, status: 'Valid' });
+            saveToolState('url-checker', { urlInput: url });
+            showToast('URL hợp lệ!', 'success');
         }
     );
 }
@@ -343,64 +410,35 @@ function convertTemp(button) {
             if (toUnit === 'C') result = celsius;
             else if (toUnit === 'F') result = (celsius * 9 / 5) + 32;
             else result = celsius + 273.15;
-            const output = { original: value, fromUnit, converted: result.toFixed(2), toUnit };
-            document.getElementById('tempOutput').textContent = `${value} °${fromUnit} = ${result.toFixed(2)} °${toUnit}`;
+            const output = { original: value.toFixed(2), fromUnit, converted: result.toFixed(2), toUnit };
+            document.getElementById('tempOutput').querySelector('tbody').innerHTML = `
+                <tr>
+                    <td>${output.original}</td>
+                    <td>${output.fromUnit}</td>
+                    <td>${output.converted}</td>
+                    <td>${output.toUnit}</td>
+                </tr>
+            `;
             saveToHistory('temp-converter', output);
+            saveToolState('temp-converter', { tempValue: value, tempFrom: fromUnit, tempTo: toUnit });
+            showToast('Đã chuyển đổi nhiệt độ!', 'success');
         }
     );
 }
 
-async function convertCurrency(button) {
-    processTool(button, 'currencyLoading', 'currencyResult',
-        () => {
-            const currencyInput = document.getElementById('currencyValue');
-            const value = parseFloat(currencyInput.value);
-            return {
-                isValid: !isNaN(value) && value > 0,
-                input: currencyInput,
-                errorId: 'currencyError',
-                message: 'Vui lòng nhập giá trị hợp lệ!'
-            };
-        },
-        async () => {
-            const value = parseFloat(document.getElementById('currencyValue').value);
-            const fromCurrency = document.getElementById('currencyFrom').value;
-            const toCurrency = document.getElementById('currencyTo').value;
-            try {
-                const response = await fetch(`https://v6.exchangerate-api.com/v6/YOUR_API_KEY/latest/${fromCurrency}`);
-                const data = await response.json();
-                if (data.result !== 'success') {
-                    throw new Error('Không thể lấy tỷ giá!');
-                }
-                const rate = data.conversion_rates[toCurrency];
-                const result = value * rate;
-                const output = {
-                    original: value.toFixed(2),
-                    fromCurrency,
-                    converted: result.toFixed(2),
-                    toCurrency
-                };
-                document.getElementById('currencyOutput').querySelector('tbody').innerHTML = `
-                    <tr>
-                        <td>${output.original}</td>
-                        <td>${output.fromCurrency}</td>
-                        <td>${output.converted}</td>
-                        <td>${output.toCurrency}</td>
-                    </tr>
-                `;
-                saveToHistory('currency-converter', output);
-            } catch (err) {
-                showError(document.getElementById('currencyValue'), 'currencyError', 'Lỗi khi chuyển đổi: ' + err.message);
-            }
-        }
-    );
+function convertCurrency(button) {
+    showError(document.getElementById('currencyValue'), 'currencyError', 'Tính năng này yêu cầu API key. Vui lòng liên hệ tác giả!');
 }
 
 function generateQR(button) {
+    if (!window.QRCode) {
+        showError(document.getElementById('qrInput'), 'qrError', 'Thư viện QRCode chưa tải!');
+        return;
+    }
     processTool(button, 'qrLoading', 'qrResult',
         () => {
             const qrInput = document.getElementById('qrInput');
-            const text = escapeHTML(qrInput.value.trim());
+            const text = qrInput.value.trim();
             return {
                 isValid: !!text,
                 input: qrInput,
@@ -409,60 +447,70 @@ function generateQR(button) {
             };
         },
         () => {
-            const text = escapeHTML(document.getElementById('qrInput').value.trim());
+            const text = document.getElementById('qrInput').value.trim();
             const qrOutput = document.getElementById('qrOutput');
-            qrOutput.innerHTML = '';
+            qrOutput.src = '';
             QRCode.toDataURL(text, { width: 200, margin: 1 }, (err, url) => {
                 if (err) {
-                    return showError(document.getElementById('qrInput'), 'qrError', 'Không thể tạo mã QR!');
+                    showError(document.getElementById('qrInput'), 'qrError', 'Không thể tạo mã QR!');
+                    return;
                 }
                 qrOutput.src = url;
-                saveToHistory('qr-generator', { input: text });
+                saveToHistory('qr-generator', { input: text.slice(0, 50) + '...' });
+                saveToolState('qr-generator', { qrInput: text });
+                showToast('Đã tạo mã QR!', 'success');
             });
         }
     );
 }
 
 function compressImage(button) {
+    if (!window.Compressor) {
+        showError(document.getElementById('imageInput'), 'imageError', 'Thư viện Compressor chưa tải!');
+        return;
+    }
     processTool(button, 'imageLoading', 'imageResult',
         () => {
             const imageInput = document.getElementById('imageInput');
             const file = imageInput.files[0];
             return {
-                isValid: file && file.size <= 5 * 1024 * 1024 && ['image/jpeg', 'image/png', 'image/webp'].includes(file.type),
+                isValid: file && file.type.startsWith('image/'),
                 input: imageInput,
                 errorId: 'imageError',
-                message: file ? 'Ảnh không hợp lệ hoặc quá lớn (tối đa 5MB)!' : 'Vui lòng chọn một ảnh!'
+                message: file ? 'Vui lòng chọn file ảnh hợp lệ!' : 'Vui lòng chọn một ảnh!'
             };
         },
         () => {
-            const imageInput = document.getElementById('imageInput');
-            const file = imageInput.files[0];
+            const file = document.getElementById('imageInput').files[0];
             new Compressor(file, {
                 quality: 0.6,
                 maxWidth: 1920,
                 maxHeight: 1920,
-                mimeType: file.type,
                 success(result) {
-                    const compressedFileName = `compressed_${file.name}`;
-                    const fileSizeBefore = (file.size / 1024).toFixed(2);
-                    const fileSizeAfter = (result.size / 1024).toFixed(2);
+                    const url = URL.createObjectURL(result);
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.alt = 'Ảnh đã nén';
+                    img.style.maxWidth = '200px';
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `compressed_${file.name}`;
+                    link.textContent = 'Tải ảnh đã nén';
+                    link.style.display = 'block';
+                    link.style.marginTop = '10px';
+                    link.style.color = '#1a73e8';
                     const imageResult = document.getElementById('imageResult');
-                    imageResult.innerHTML = `
-                        <p>Kích thước trước: ${fileSizeBefore} KB</p>
-                        <p>Kích thước sau: ${fileSizeAfter} KB</p>
-                        <a href="${URL.createObjectURL(result)}" download="${compressedFileName}">Tải xuống</a>
-                    `;
-                    saveToHistory('image-compressor', {
-                        fileName: file.name,
-                        sizeBefore: fileSizeBefore,
-                        sizeAfter: fileSizeAfter
-                    });
+                    imageResult.innerHTML = '';
+                    imageResult.appendChild(img);
+                    imageResult.appendChild(link);
+                    saveToHistory('image-compressor', { originalSize: (file.size / 1024).toFixed(2) + ' KB', compressedSize: (result.size / 1024).toFixed(2) + ' KB' });
+                    showToast('Đã nén ảnh!', 'success');
                 },
                 error(err) {
-                    showError(imageInput, 'imageError', 'Lỗi khi nén ảnh: ' + err.message);
+                    showError(document.getElementById('imageInput'), 'imageError', 'Không thể nén ảnh: ' + err.message);
                 }
             });
+            saveToolState('image-compressor', {});
         }
     );
 }
@@ -486,14 +534,23 @@ function calculateBMI(button) {
             const weight = parseFloat(document.getElementById('weight').value);
             const height = parseFloat(document.getElementById('height').value);
             const bmi = weight / (height * height);
-            let status = '';
-            if (bmi < 18.5) status = 'Gầy';
+            let status;
+            if (bmi < 18.5) status = 'Thiếu cân';
             else if (bmi < 25) status = 'Bình thường';
             else if (bmi < 30) status = 'Thừa cân';
             else status = 'Béo phì';
-            const output = { weight, height, bmi: bmi.toFixed(2), status };
-            document.getElementById('bmiOutput').textContent = `BMI: ${output.bmi} - Trạng thái: ${status}`;
+            const output = { weight, height, bmi: bmi.toFixed(1), status };
+            document.getElementById('bmiOutput').querySelector('tbody').innerHTML = `
+                <tr>
+                    <td>${output.weight}</td>
+                    <td>${output.height}</td>
+                    <td>${output.bmi}</td>
+                    <td>${output.status}</td>
+                </tr>
+            `;
             saveToHistory('bmi-calculator', output);
+            saveToolState('bmi-calculator', { weight, height });
+            showToast('Đã tính BMI!', 'success');
         }
     );
 }
@@ -504,7 +561,7 @@ function convertArea(button) {
             const areaInput = document.getElementById('areaValue');
             const value = parseFloat(areaInput.value);
             return {
-                isValid: !isNaN(value) && value > 0,
+                isValid: !isNaN(value) && value >= 0,
                 input: areaInput,
                 errorId: 'areaError',
                 message: 'Vui lòng nhập giá trị hợp lệ!'
@@ -525,51 +582,55 @@ function convertArea(button) {
             document.getElementById('areaOutput').querySelector('tbody').innerHTML = `
                 <tr>
                     <td>${output.original}</td>
-                    <td>${output.fromUnit}</td>
+                    <td>${output.fromUnit.toUpperCase()}</td>
                     <td>${output.converted}</td>
-                    <td>${output.toUnit}</td>
+                    <td>${output.toUnit.toUpperCase()}</td>
                 </tr>
             `;
             saveToHistory('area-converter', output);
+            saveToolState('area-converter', { areaValue: value, areaFrom: fromUnit, areaTo: toUnit });
+            showToast('Đã chuyển đổi diện tích!', 'success');
         }
     );
 }
 
-// Event Listeners
+// Initialize
 document.addEventListener('DOMContentLoaded', () => {
     // Dark Mode
+    const darkModeToggle = document.getElementById('darkModeToggle');
     if (localStorage.getItem('darkMode') === 'true') {
         document.body.classList.add('dark-mode');
-        document.getElementById('darkModeToggle').checked = true;
+        darkModeToggle.checked = true;
     }
-    document.getElementById('darkModeToggle').addEventListener('change', toggleDarkMode);
+    darkModeToggle.addEventListener('change', toggleDarkMode);
 
     // Tool Navigation
-    const toolLinks = document.querySelectorAll('.tool-nav a');
-    toolLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
+    document.querySelectorAll('.tool-nav a').forEach(link => {
+        link.addEventListener('click', e => {
             e.preventDefault();
-            const toolId = link.getAttribute('data-tool');
-            showTool(toolId);
-            toolLinks.forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
+            showTool(link.dataset.tool);
         });
     });
 
     // Search Functionality
     const searchInput = document.getElementById('searchInput');
-    let searchTimeout;
-    searchInput.addEventListener('input', () => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            const searchTerm = escapeHTML(searchInput.value.toLowerCase());
-            toolLinks.forEach(link => {
-                const toolTitle = link.getAttribute('title').toLowerCase();
-                link.style.display = toolTitle.includes(searchTerm) ? 'inline-block' : 'none';
-            });
-        }, 300);
-    });
+    const searchHandler = debounce(() => {
+        const query = searchInput.value.trim().toLowerCase();
+        const toolsSections = document.querySelectorAll('.tools-section:not(#history)');
+        if (!query) {
+            showHome();
+            return;
+        }
+        document.getElementById('hero').style.display = 'none';
+        toolsSections.forEach(section => {
+            const toolName = section.dataset.toolName.toLowerCase();
+            section.style.display = toolName.includes(query) ? 'block' : 'none';
+            section.classList.toggle('active', toolName.includes(query));
+        });
+        document.title = `Tìm kiếm: ${query} - ToolHub`;
+    }, 300);
+    searchInput.addEventListener('input', searchHandler);
 
-    // Initialize Home
+    // Restore initial state
     showHome();
 });
