@@ -363,7 +363,12 @@ async function convertCurrency(button) {
             };
         },
         async () => {
-            const value = parseFloat(document.getElementById('currencyValue').value);
+            const currencyInput = document.getElementById('currencyValue');
+            showError(currencyInput, 'currencyError', 'Tính năng chuyển đổi tiền tệ chưa được kích hoạt. Vui lòng liên hệ tác giả để biết thêm chi tiết.');
+            return;
+            // Để kích hoạt, thay đoạn dưới bằng API Key thực và bỏ comment
+            /*
+            const value = parseFloat(currencyInput.value);
             const fromCurrency = document.getElementById('currencyFrom').value;
             const toCurrency = document.getElementById('currencyTo').value;
             try {
@@ -390,13 +395,18 @@ async function convertCurrency(button) {
                 `;
                 saveToHistory('currency-converter', output);
             } catch (err) {
-                showError(document.getElementById('currencyValue'), 'currencyError', 'Lỗi khi chuyển đổi: ' + err.message);
+                showError(currencyInput, 'currencyError', 'Lỗi khi chuyển đổi: ' + err.message);
             }
+            */
         }
     );
 }
 
 function generateQR(button) {
+    if (!window.QRCode) {
+        showError(document.getElementById('qrInput'), 'qrError', 'Thư viện QRCode chưa tải. Vui lòng kiểm tra kết nối!');
+        return;
+    }
     processTool(button, 'qrLoading', 'qrResult',
         () => {
             const qrInput = document.getElementById('qrInput');
@@ -411,7 +421,7 @@ function generateQR(button) {
         () => {
             const text = escapeHTML(document.getElementById('qrInput').value.trim());
             const qrOutput = document.getElementById('qrOutput');
-            qrOutput.innerHTML = '';
+            qrOutput.src = ''; // Xóa QR cũ
             QRCode.toDataURL(text, { width: 200, margin: 1 }, (err, url) => {
                 if (err) {
                     return showError(document.getElementById('qrInput'), 'qrError', 'Không thể tạo mã QR!');
@@ -424,6 +434,10 @@ function generateQR(button) {
 }
 
 function compressImage(button) {
+    if (!window.Compressor) {
+        showError(document.getElementById('imageInput'), 'imageError', 'Thư viện Compressor chưa tải. Vui lòng kiểm tra kết nối!');
+        return;
+    }
     processTool(button, 'imageLoading', 'imageResult',
         () => {
             const imageInput = document.getElementById('imageInput');
@@ -537,39 +551,43 @@ function convertArea(button) {
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
-    // Dark Mode
-    if (localStorage.getItem('darkMode') === 'true') {
-        document.body.classList.add('dark-mode');
-        document.getElementById('darkModeToggle').checked = true;
-    }
-    document.getElementById('darkModeToggle').addEventListener('change', toggleDarkMode);
+    try {
+        // Dark Mode
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('darkModeToggle').checked = true;
+        }
+        document.getElementById('darkModeToggle').addEventListener('change', toggleDarkMode);
 
-    // Tool Navigation
-    const toolLinks = document.querySelectorAll('.tool-nav a');
-    toolLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const toolId = link.getAttribute('data-tool');
-            showTool(toolId);
-            toolLinks.forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-        });
-    });
-
-    // Search Functionality
-    const searchInput = document.getElementById('searchInput');
-    let searchTimeout;
-    searchInput.addEventListener('input', () => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            const searchTerm = escapeHTML(searchInput.value.toLowerCase());
-            toolLinks.forEach(link => {
-                const toolTitle = link.getAttribute('title').toLowerCase();
-                link.style.display = toolTitle.includes(searchTerm) ? 'inline-block' : 'none';
+        // Tool Navigation
+        const toolLinks = Array.from(document.querySelectorAll('.tool-nav a'));
+        toolLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const toolId = link.getAttribute('data-tool');
+                showTool(toolId);
+                toolLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
             });
-        }, 300);
-    });
+        });
 
-    // Initialize Home
-    showHome();
+        // Search Functionality
+        const searchInput = document.getElementById('searchInput');
+        let searchTimeout;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const searchTerm = escapeHTML(searchInput.value.toLowerCase().trim());
+                toolLinks.forEach(link => {
+                    const toolTitle = link.getAttribute('title').toLowerCase();
+                    link.style.display = searchTerm === '' || toolTitle.includes(searchTerm) ? 'inline-block' : 'none';
+                });
+            }, 300);
+        });
+
+        // Initialize Home
+        showHome();
+    } catch (err) {
+        console.error('Lỗi khi khởi tạo trang:', err);
+    }
 });
