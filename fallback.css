@@ -1,0 +1,7 @@
+/* Fallback CSS khi FontAwesome không tải */
+.fas, .fa {
+    font-family: sans-serif;
+    font-weight: bold;
+    content: "*";
+    color: #6495ed;
+}
