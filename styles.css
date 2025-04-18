@@ -164,6 +164,7 @@ body.dark-mode header {
     top: 80px;
     z-index: 40;
     justify-items: center;
+    overflow: auto;
 }
 
 body.dark-mode .tool-nav {
@@ -262,7 +263,13 @@ body.dark-mode .search-bar i { color: #e0e0e0; }
     box-shadow: 0 4px 15px var(--shadow);
     transition: all 0.3s ease;
     max-width: 600px;
+    min-height: 300px;
     margin: 0 auto;
+}
+
+.tool-card:hover {
+    box-shadow: 0 0 30px rgba(26, 115, 232, 0.5);
+    transform: translateY(-5px) rotate(2deg);
 }
 
 .tool-card h3 {
@@ -532,80 +539,4 @@ body.dark-mode .modal-content p { color: #e0e0e0; }
     text-align: center;
     padding: 100px 5%;
     animation: fadeIn 1s ease-out;
-    position: relative;
-}
-
-.hero h1 {
-    font-size: 48px;
-    font-weight: 700;
-    margin-bottom: 20px;
-    color: var(--text-color);
-}
-
-.hero p {
-    font-size: 18px;
-    color: #4a4a6a;
-    margin-bottom: 30px;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-body.dark-mode .hero p { color: #e0e0e0; }
-
-.hero-image {
-    max-width: 300px;
-    margin: 20px auto;
-    display: block;
-    animation: bounce 2s infinite;
-}
-
-@keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-}
-
-footer {
-    text-align: center;
-    padding: 30px;
-    background: rgba(245, 245, 245, 0.95);
-    color: #4a4a6a;
-    font-size: 14px;
-    margin-top: auto;
-    backdrop-filter: blur(10px);
-}
-
-body.dark-mode footer {
-    background: rgba(20, 20, 36, 0.95);
-    color: #e0e0e0;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@media (max-width: 768px) {
-    .hero h1 { font-size: 36px; }
-    .hero p { font-size: 16px; }
-    .nav a { margin-left: 15px; font-size: 14px; }
-    .logo { font-size: 24px; }
-    .tool-nav { gap: 10px; }
-    .hero-image { max-width: 200px; }
-}
-
-@media (max-width: 480px) {
-    .hero { padding: 60px 5%; }
-    .hero h1 { font-size: 28px; }
-    .hero p { font-size: 14px; }
-    header { flex-direction: column; gap: 10px; }
-    .nav a { margin-left: 10px; font-size: 12px; }
-    .logo { font-size: 20px; }
-    .modal-content { padding: 20px; }
-    .modal-content h2 { font-size: 20px; }
-    .modal-content p { font-size: 12px; }
-    .button-group button { flex: 1 1 100%; padding: 10px; font-size: 12px; }
-    .tool-nav { grid-template-columns: repeat(auto-fit, minmax(40px, 1fr)); }
-    .tool-nav a { font-size: 20px; }
-    .hero-image { max-width: 150px; }
 }
