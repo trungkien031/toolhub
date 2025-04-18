@@ -2,11 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Utility Functions
     function escapeHTML(str) {
         return str.replace(/[&<>"']/g, match => ({
-            '&': '&',
-            '<': '<',
-            '>': '>',
-            '"': '"',
-            "'": '''
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
         }[match]));
     }
 
@@ -96,6 +96,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function toggleDarkMode() {
         document.body.classList.toggle('dark-mode');
         localStorage.setItem('darkMode', document.getElementById('darkModeToggle').checked);
+        if (document.body.classList.contains('dark-mode')) {
+            document.querySelectorAll('pre').forEach(pre => pre.style.background = '#3a3a4e');
+        } else {
+            document.querySelectorAll('pre').forEach(pre => pre.style.background = '#f5f5f5');
+        }
     }
 
     function openContactModal() {
@@ -506,4 +511,30 @@ document.addEventListener('DOMContentLoaded', () => {
                         const img = document.createElement('img');
                         img.src = url;
                         img.alt = 'Ảnh đã nén';
-                        img.style.maxWidth = '
+                        img.style.maxWidth = '100%';
+                        const imageResult = document.getElementById('imageResult');
+                        imageResult.innerHTML = '';
+                        imageResult.appendChild(img);
+                        saveToHistory('image-compressor', { originalSize: file.size, compressedSize: result.size });
+                        showToast('Đã nén ảnh!', 'success');
+                    },
+                    error(err) {
+                        showError(document.getElementById('imageInput'), 'imageError', 'Không thể nén ảnh: ' + err.message);
+                    }
+                });
+            }
+        );
+    }
+
+    function calculateBMI(button) {
+        processTool(button, 'bmiLoading', 'bmiResult',
+            () => {
+                const weightInput = document.getElementById('weight');
+                const heightInput = document.getElementById('height');
+                const weight = parseFloat(weightInput.value);
+                const height = parseFloat(heightInput.value);
+                if (isNaN(weight) || weight <= 0) return { isValid: false, input: weightInput, errorId: 'bmiError', message: 'Cân nặng không hợp lệ!' };
+                if (isNaN(height) || height <= 0) return { isValid: false, input: heightInput, errorId: 'bmiError', message: 'Chiều cao không hợp lệ!' };
+                return { isValid: true, input: weightInput, errorId: 'bmiError' };
+            },
+            () => {
