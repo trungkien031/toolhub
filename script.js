@@ -532,21 +532,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 const weightInput = document.getElementById('weight');
                 const heightInput = document.getElementById('height');
                 const weight = parseFloat(weightInput.value);
-                const height = parseFloat(heightInput.value);
+                const height = parseFloat(heightInput.value) / 100; // Convert cm to meters
                 if (isNaN(weight) || weight <= 0) return { isValid: false, input: weightInput, errorId: 'bmiError', message: 'Cân nặng không hợp lệ!' };
                 if (isNaN(height) || height <= 0) return { isValid: false, input: heightInput, errorId: 'bmiError', message: 'Chiều cao không hợp lệ!' };
                 return { isValid: true, input: weightInput, errorId: 'bmiError' };
             },
             () => {
                 const weight = parseFloat(document.getElementById('weight').value);
-                const height = parseFloat(document.getElementById('height').value);
+                const height = parseFloat(document.getElementById('height').value) / 100; // Convert cm to meters
                 const bmi = weight / (height * height);
                 let status;
                 if (bmi < 18.5) status = 'Thiếu cân';
                 else if (bmi < 25) status = 'Bình thường';
                 else if (bmi < 30) status = 'Thừa cân';
                 else status = 'Béo phì';
-                const output = { weight, height, bmi: bmi.toFixed(2), status };
+                const output = { weight, height: height * 100, bmi: bmi.toFixed(2), status };
                 document.getElementById('bmiOutput').querySelector('tbody').innerHTML = `
                     <tr>
                         <td>${output.weight}</td>
@@ -556,7 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </tr>
                 `;
                 saveToHistory('bmi-calculator', output);
-                saveToolState('bmi-calculator', { weight, height });
+                saveToolState('bmi-calculator', { weight, height: height * 100 });
                 showToast('Đã tính BMI!', 'success');
             }
         );
