@@ -1,17 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM fully loaded and parsed");
+
     // Utility Functions
     function escapeHTML(str) {
         return str.replace(/[&<>"']/g, match => ({
-            '&': '&',
-            '<': '<',
-            '>': '>',
-            '"': '"',
-            "'": '''
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
         }[match]));
     }
 
     function showError(inputElement, errorElementId, message) {
         const errorElement = document.getElementById(errorElementId);
+        if (!errorElement) {
+            console.error(`Error element with ID ${errorElementId} not found`);
+            return false;
+        }
         inputElement.classList.add('error');
         errorElement.textContent = message;
         errorElement.classList.add('active');
@@ -21,6 +27,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function clearError(inputElement, errorElementId) {
         const errorElement = document.getElementById(errorElementId);
+        if (!errorElement) {
+            console.error(`Error element with ID ${errorElementId} not found`);
+            return false;
+        }
         inputElement.classList.remove('error');
         errorElement.textContent = '';
         errorElement.classList.remove('active');
@@ -29,6 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showToast(message, type) {
         const toast = document.getElementById('toast');
+        if (!toast) {
+            console.error("Toast element not found");
+            return;
+        }
         toast.textContent = message;
         toast.className = `toast ${type} active animate__animated animate__slideInRight`;
         setTimeout(() => {
@@ -39,6 +53,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function showLoading(button, loadingId, resultId, callback) {
         const loading = document.getElementById(loadingId);
         const result = document.getElementById(resultId);
+        if (!loading || !result) {
+            console.error(`Loading or result element not found: ${loadingId}, ${resultId}`);
+            return;
+        }
         loading.classList.add('active');
         result.classList.remove('active');
         button.disabled = true;
@@ -92,16 +110,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openContactModal() {
-        document.getElementById('contactModal').classList.add('active', 'animate__animated', 'animate__fadeIn');
+        const modal = document.getElementById('contactModal');
+        if (!modal) {
+            console.error("Contact modal not found");
+            return;
+        }
+        modal.classList.add('active', 'animate__animated', 'animate__fadeIn');
     }
 
     function closeContactModal() {
-        document.getElementById('contactModal').classList.remove('active');
+        const modal = document.getElementById('contactModal');
+        if (!modal) {
+            console.error("Contact modal not found");
+            return;
+        }
+        modal.classList.remove('active');
     }
 
     function showHome() {
         const toolsSections = document.querySelectorAll('.tools-section');
         const heroSection = document.getElementById('hero');
+        if (!heroSection) {
+            console.error("Hero section not found");
+            return;
+        }
         toolsSections.forEach(section => {
             section.classList.remove('active');
             section.style.display = 'none';
@@ -116,6 +148,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function showTool(toolId) {
         const heroSection = document.getElementById('hero');
         const toolsSections = document.querySelectorAll('.tools-section');
+        if (!heroSection) {
+            console.error("Hero section not found");
+            return;
+        }
         heroSection.style.display = 'none';
         toolsSections.forEach(section => {
             section.classList.remove('active');
@@ -131,18 +167,25 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.tool-nav a').forEach(link => {
                 link.classList.toggle('active', link.dataset.tool === toolId);
             });
+        } else {
+            console.error(`Tool section with ID ${toolId} not found`);
         }
     }
 
     function restoreToolState(toolId) {
         const state = loadToolState(toolId);
         const section = document.getElementById(toolId);
-        if (!section) return;
+        if (!section) {
+            console.error(`Tool section with ID ${toolId} not found for state restoration`);
+            return;
+        }
         Object.keys(state).forEach(id => {
             const element = section.querySelector(`#${id}`);
             if (element) {
                 if (element.type === 'checkbox') element.checked = state[id];
                 else element.value = state[id];
+            } else {
+                console.warn(`Element with ID ${id} not found in section ${toolId}`);
             }
         });
     }
@@ -150,6 +193,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function showHistory() {
         showTool('history');
         const historyResult = document.getElementById('historyResult');
+        if (!historyResult) {
+            console.error("History result element not found");
+            return;
+        }
         const history = JSON.parse(localStorage.getItem('toolHistory') || '[]');
         historyResult.innerHTML = history.length ? `
             <ul style="list-style: none; padding: 0;">
@@ -174,13 +221,21 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('Đã xóa lịch sử!', 'success');
     }
 
-    // Search Function
     function searchTools() {
-        const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
+        const searchInput = document.getElementById('searchInput');
+        if (!searchInput) {
+            console.error("Search input not found");
+            return;
+        }
+        const searchValue = searchInput.value.trim().toLowerCase();
         const toolsSections = document.querySelectorAll('.tools-section');
         const heroSection = document.getElementById('hero');
+        if (!heroSection) {
+            console.error("Hero section not found");
+            return;
+        }
 
-        if (!searchInput) {
+        if (!searchValue) {
             showHome();
             return;
         }
@@ -188,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let found = false;
         toolsSections.forEach(section => {
             const toolName = section.dataset.toolName.toLowerCase();
-            if (toolName.includes(searchInput)) {
+            if (toolName.includes(searchValue)) {
                 heroSection.style.display = 'none';
                 section.style.display = 'block';
                 section.classList.add('active', 'animate__animated', 'animate__fadeInUp');
@@ -212,6 +267,11 @@ document.addEventListener('DOMContentLoaded', () => {
         processTool(button, 'textLoading', 'textResult',
             () => {
                 const textInput = document.getElementById('textInput');
+                if (!textInput) {
+                    console.error("Text input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập văn bản!", 'error');
+                    return { isValid: false };
+                }
                 const text = textInput.value.trim();
                 return {
                     isValid: text && text.length <= 10000,
@@ -239,6 +299,11 @@ document.addEventListener('DOMContentLoaded', () => {
         processTool(button, 'lengthLoading', 'lengthResult',
             () => {
                 const lengthInput = document.getElementById('lengthValue');
+                if (!lengthInput) {
+                    console.error("Length input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập giá trị độ dài!", 'error');
+                    return { isValid: false };
+                }
                 const value = parseFloat(lengthInput.value);
                 return {
                     isValid: !isNaN(value) && value >= 0,
@@ -279,6 +344,11 @@ document.addEventListener('DOMContentLoaded', () => {
             () => {
                 const num1Input = document.getElementById('num1');
                 const num2Input = document.getElementById('num2');
+                if (!num1Input || !num2Input) {
+                    console.error("Calculator inputs not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập số!", 'error');
+                    return { isValid: false };
+                }
                 const num1 = parseFloat(num1Input.value);
                 const num2 = parseFloat(num2Input.value);
                 const operator = document.getElementById('operator').value;
@@ -311,6 +381,11 @@ document.addEventListener('DOMContentLoaded', () => {
         processTool(button, 'passLoading', 'passResult',
             () => {
                 const passLengthInput = document.getElementById('passLength');
+                if (!passLengthInput) {
+                    console.error("Password length input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập độ dài mật khẩu!", 'error');
+                    return { isValid: false };
+                }
                 const passLength = parseInt(passLengthInput.value);
                 const includeUppercase = document.getElementById('includeUppercase').checked;
                 const includeLowercase = document.getElementById('includeLowercase').checked;
@@ -354,13 +429,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function copyPassword() {
-        const passOutput = document.getElementById('passOutput').textContent;
-        navigator.clipboard.writeText(passOutput).then(() => {
+        const passOutput = document.getElementById('passOutput');
+        if (!passOutput) {
+            console.error("Password output not found");
+            showToast("Lỗi: Không tìm thấy mật khẩu để sao chép!", 'error');
+            return;
+        }
+        const text = passOutput.textContent;
+        if (!navigator.clipboard) {
+            console.error("Clipboard API not supported");
+            showToast("Lỗi: Trình duyệt không hỗ trợ sao chép!", 'error');
+            return;
+        }
+        navigator.clipboard.writeText(text).then(() => {
             const copyBtn = document.querySelector('#passResult .copy-btn');
-            copyBtn.textContent = 'Đã sao chép!';
-            showToast('Đã sao chép mật khẩu!', 'success');
-            setTimeout(() => { copyBtn.textContent = 'Sao chép'; }, 2000);
+            if (copyBtn) {
+                copyBtn.textContent = 'Đã sao chép!';
+                showToast('Đã sao chép mật khẩu!', 'success');
+                setTimeout(() => { copyBtn.textContent = 'Sao chép'; }, 2000);
+            }
         }).catch(err => {
+            console.error("Failed to copy password:", err);
             showError(document.getElementById('passLength'), 'passError', 'Không thể sao chép mật khẩu!');
         });
     }
@@ -369,6 +458,11 @@ document.addEventListener('DOMContentLoaded', () => {
         processTool(button, 'charLoading', 'charResult',
             () => {
                 const charInput = document.getElementById('charInput');
+                if (!charInput) {
+                    console.error("Char input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập văn bản để đếm!", 'error');
+                    return { isValid: false };
+                }
                 const text = charInput.value.trim();
                 return {
                     isValid: !!text,
@@ -393,6 +487,11 @@ document.addEventListener('DOMContentLoaded', () => {
         processTool(button, 'urlLoading', 'urlResult',
             () => {
                 const urlInput = document.getElementById('urlInput');
+                if (!urlInput) {
+                    console.error("URL input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập URL!", 'error');
+                    return { isValid: false };
+                }
                 const url = urlInput.value.trim();
                 const urlPattern = /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)(\/[\w-./?%&=]*)?$/i;
                 return {
@@ -416,6 +515,11 @@ document.addEventListener('DOMContentLoaded', () => {
         processTool(button, 'tempLoading', 'tempResult',
             () => {
                 const tempInput = document.getElementById('tempValue');
+                if (!tempInput) {
+                    console.error("Temperature input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập giá trị nhiệt độ!", 'error');
+                    return { isValid: false };
+                }
                 const value = parseFloat(tempInput.value);
                 return {
                     isValid: !isNaN(value),
@@ -463,6 +567,11 @@ document.addEventListener('DOMContentLoaded', () => {
         processTool(button, 'currencyLoading', 'currencyResult',
             () => {
                 const currencyInput = document.getElementById('currencyValue');
+                if (!currencyInput) {
+                    console.error("Currency input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập giá trị tiền tệ!", 'error');
+                    return { isValid: false };
+                }
                 const value = parseFloat(currencyInput.value);
                 return {
                     isValid: !isNaN(value) && value >= 0,
@@ -514,10 +623,16 @@ document.addEventListener('DOMContentLoaded', () => {
         processTool(button, 'qrLoading', 'qrResult',
             () => {
                 const qrInput = document.getElementById('qrInput');
+                if (!qrInput) {
+                    console.error("QR input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập văn bản QR!", 'error');
+                    return { isValid: false };
+                }
                 const text = qrInput.value.trim();
                 if (!window.QRCode) {
-                    showToast('Thư viện QRCode không tải được!', 'error');
-                    return { isValid: false, input: qrInput, errorId: 'qrError', message: 'Không thể tạo mã QR!' };
+                    console.error("QRCode library not loaded");
+                    showToast('Lỗi: Thư viện tạo QR Code không tải được. Vui lòng kiểm tra kết nối hoặc thử lại sau!', 'error');
+                    return { isValid: false, input: qrInput, errorId: 'qrError', message: 'Không thể tạo mã QR do lỗi thư viện!' };
                 }
                 return {
                     isValid: !!text,
@@ -529,9 +644,15 @@ document.addEventListener('DOMContentLoaded', () => {
             () => {
                 const text = document.getElementById('qrInput').value.trim();
                 const qrOutput = document.getElementById('qrOutput');
+                if (!qrOutput) {
+                    console.error("QR output not found");
+                    showToast("Lỗi: Không tìm thấy phần hiển thị mã QR!", 'error');
+                    return;
+                }
                 qrOutput.src = '';
                 window.QRCode.toDataURL(text, { width: 200, margin: 1 }, (err, url) => {
                     if (err) {
+                        console.error("Failed to generate QR code:", err);
                         showError(document.getElementById('qrInput'), 'qrError', 'Không thể tạo mã QR!');
                         return;
                     }
@@ -548,10 +669,16 @@ document.addEventListener('DOMContentLoaded', () => {
         processTool(button, 'imageLoading', 'imageResult',
             () => {
                 const imageInput = document.getElementById('imageInput');
+                if (!imageInput) {
+                    console.error("Image input not found");
+                    showToast("Lỗi: Không tìm thấy trường chọn ảnh!", 'error');
+                    return { isValid: false };
+                }
                 const file = imageInput.files[0];
                 if (!window.Compressor) {
-                    showToast('Thư viện Compressor không tải được!', 'error');
-                    return { isValid: false, input: imageInput, errorId: 'imageError', message: 'Không thể nén ảnh!' };
+                    console.error("Compressor library not loaded");
+                    showToast('Lỗi: Thư viện nén ảnh không tải được. Vui lòng kiểm tra kết nối hoặc thử lại sau!', 'error');
+                    return { isValid: false, input: imageInput, errorId: 'imageError', message: 'Không thể nén ảnh do lỗi thư viện!' };
                 }
                 return {
                     isValid: file && /\.(jpe?g|png|gif|bmp)$/i.test(file.name),
@@ -563,6 +690,11 @@ document.addEventListener('DOMContentLoaded', () => {
             () => {
                 const file = document.getElementById('imageInput').files[0];
                 const imageResult = document.getElementById('imageResult');
+                if (!imageResult) {
+                    console.error("Image result not found");
+                    showToast("Lỗi: Không tìm thấy phần hiển thị ảnh đã nén!", 'error');
+                    return;
+                }
                 new window.Compressor(file, {
                     quality: 0.6,
                     maxWidth: 800,
@@ -578,6 +710,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         showToast('Đã nén ảnh!', 'success');
                     },
                     error(err) {
+                        console.error("Failed to compress image:", err);
                         showError(document.getElementById('imageInput'), 'imageError', 'Không thể nén ảnh!');
                     }
                 });
@@ -590,6 +723,11 @@ document.addEventListener('DOMContentLoaded', () => {
             () => {
                 const weightInput = document.getElementById('weight');
                 const heightInput = document.getElementById('height');
+                if (!weightInput || !heightInput) {
+                    console.error("BMI inputs not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập cân nặng hoặc chiều cao!", 'error');
+                    return { isValid: false };
+                }
                 const weight = parseFloat(weightInput.value);
                 const height = parseFloat(heightInput.value);
                 if (isNaN(weight) || weight <= 0) return { isValid: false, input: weightInput, errorId: 'bmiError', message: 'Cân nặng không hợp lệ!' };
@@ -630,6 +768,11 @@ document.addEventListener('DOMContentLoaded', () => {
         processTool(button, 'areaLoading', 'areaResult',
             () => {
                 const areaInput = document.getElementById('areaValue');
+                if (!areaInput) {
+                    console.error("Area input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập giá trị diện tích!", 'error');
+                    return { isValid: false };
+                }
                 const value = parseFloat(areaInput.value);
                 return {
                     isValid: !isNaN(value) && value >= 0,
@@ -666,46 +809,78 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Event Listeners
-    document.querySelectorAll('[data-action]').forEach(element => {
-        element.addEventListener('click', () => {
-            const action = element.dataset.action;
-            const actions = {
-                showHome: showHome,
-                showHistory: showHistory,
-                clearHistory: clearHistory,
-                openContactModal: openContactModal,
-                closeContactModal: closeContactModal,
-                summarizeText: () => summarizeText(element),
-                convertLength: () => convertLength(element),
-                calculate: () => calculate(element),
-                generatePassword: () => generatePassword(element),
-                copyPassword: copyPassword,
-                countChars: () => countChars(element),
-                checkURL: () => checkURL(element),
-                convertTemp: () => convertTemp(element),
-                convertCurrency: () => convertCurrency(element),
-                generateQR: () => generateQR(element),
-                compressImage: () => compressImage(element),
-                calculateBMI: () => calculateBMI(element),
-                convertArea: () => convertArea(element),
-                searchTools: searchTools
-            };
-            if (actions[action]) actions[action]();
-            else if (element.dataset.tool) showTool(element.dataset.tool);
-        });
-    });
-
-    document.getElementById('darkModeToggle').addEventListener('change', toggleDarkMode);
-
-    document.getElementById('searchInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            searchTools();
+    function setupEventListeners() {
+        const elements = document.querySelectorAll('[data-action], [data-tool]');
+        if (elements.length === 0) {
+            console.error("No elements with data-action or data-tool found");
+            showToast("Lỗi: Không tìm thấy các nút hoặc công cụ!", 'error');
+            return;
         }
-    });
+        elements.forEach(element => {
+            element.addEventListener('click', () => {
+                console.log(`Clicked element with data-action: ${element.dataset.action}, data-tool: ${element.dataset.tool}`);
+                const action = element.dataset.action;
+                const tool = element.dataset.tool;
+                const actions = {
+                    showHome: showHome,
+                    showHistory: showHistory,
+                    clearHistory: clearHistory,
+                    openContactModal: openContactModal,
+                    closeContactModal: closeContactModal,
+                    summarizeText: () => summarizeText(element),
+                    convertLength: () => convertLength(element),
+                    calculate: () => calculate(element),
+                    generatePassword: () => generatePassword(element),
+                    copyPassword: copyPassword,
+                    countChars: () => countChars(element),
+                    checkURL: () => checkURL(element),
+                    convertTemp: () => convertTemp(element),
+                    convertCurrency: () => convertCurrency(element),
+                    generateQR: () => generateQR(element),
+                    compressImage: () => compressImage(element),
+                    calculateBMI: () => calculateBMI(element),
+                    convertArea: () => convertArea(element),
+                    searchTools: searchTools
+                };
+                if (action && actions[action]) {
+                    actions[action]();
+                } else if (tool) {
+                    showTool(tool);
+                } else {
+                    console.warn(`No action or tool defined for element:`, element);
+                }
+            });
+        });
+
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('change', toggleDarkMode);
+        } else {
+            console.error("Dark mode toggle not found");
+        }
+
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchTools();
+                }
+            });
+        } else {
+            console.error("Search input not found");
+        }
+    }
+
+    // Initialize
+    setupEventListeners();
 
     // Restore dark mode state
-    if (localStorage.getItem('darkMode') === 'true') {
-        document.getElementById('darkModeToggle').checked = true;
-        toggleDarkMode();
+    const darkMode = localStorage.getItem('darkMode');
+    if (darkMode === 'true') {
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        if (darkModeToggle) {
+            darkModeToggle.checked = true;
+            toggleDarkMode();
+        }
     }
 });
