@@ -1,53 +1,187 @@
+/* Reset default styles */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* Đảm bảo body và html chiếm toàn bộ chiều cao */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Poppins', sans-serif;
     line-height: 1.6;
-    background: #f0f4f8;
     color: #333;
-    transition: background 0.3s, color 0.3s;
+    background: #f0f2f5;
+    position: relative;
+    overflow-x: hidden;
+}
+
+body.dark-mode {
+    background: #1a1a2e;
+    color: #e0e0e0;
+}
+
+.bg-decor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.circle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(100, 149, 237, 0.2);
+}
+
+.circle:nth-child(1) {
+    width: 300px;
+    height: 300px;
+    top: 10%;
+    left: 10%;
+}
+
+.circle:nth-child(2) {
+    width: 200px;
+    height: 200px;
+    top: 60%;
+    right: 15%;
+}
+
+.circle:nth-child(3) {
+    width: 150px;
+    height: 150px;
+    bottom: 20%;
+    left: 30%;
+}
+
+.dark-mode .circle {
+    background: rgba(100, 149, 237, 0.1);
 }
 
 header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
     background: #fff;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    padding: 10px 20px;
     position: sticky;
     top: 0;
     z-index: 1000;
 }
 
-.logo h1 {
-    font-size: 1.5em;
+.dark-mode header {
+    background: #16213e;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.logo {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #007bff;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.logo:hover {
+    color: #0056b3;
+}
+
+.dark-mode .logo {
+    color: #6495ed;
+}
+
+.nav a {
+    margin-left: 20px;
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.nav a:hover {
     color: #007bff;
 }
 
-.logo .icon {
-    vertical-align: middle;
+.dark-mode .nav a {
+    color: #e0e0e0;
+}
+
+.dark-mode .nav a:hover {
+    color: #6495ed;
+}
+
+.dark-mode-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.dark-mode-toggle input {
+    display: none;
+}
+
+.dark-mode-toggle label {
+    font-size: 1.5rem;
+    color: #007bff;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.dark-mode-toggle input:checked + label {
+    color: #6495ed;
 }
 
 .tool-nav {
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 10px 0;
     justify-content: center;
+    gap: 15px;
+    padding: 15px;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 70px;
+    z-index: 900;
+}
+
+.dark-mode .tool-nav {
+    background: #16213e;
 }
 
 .tool-nav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     text-decoration: none;
     color: #333;
-    padding: 8px 15px;
-    border-radius: 5px;
+    font-size: 1.2rem;
+    padding: 10px;
+    border-radius: 8px;
     transition: background 0.3s, color 0.3s;
+    position: relative;
 }
 
 .tool-nav a:hover {
     background: #e9ecef;
+    color: #007bff;
+}
+
+.dark-mode .tool-nav a {
+    color: #e0e0e0;
+}
+
+.dark-mode .tool-nav a:hover {
+    background: #2a2a4e;
+    color: #6495ed;
 }
 
 .tool-nav a.active {
@@ -55,147 +189,332 @@ header {
     color: #fff;
 }
 
-.actions {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px;
+.dark-mode .tool-nav a.active {
+    background: #6495ed;
 }
 
-.actions a {
-    text-decoration: none;
-    color: #007bff;
-    font-weight: bold;
+.tool-nav .tooltip {
+    visibility: hidden;
+    background: #333;
+    color: #fff;
+    text-align: center;
+    padding: 5px 10px;
+    border-radius: 5px;
+    position: absolute;
+    top: -40px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    z-index: 10;
 }
 
-.dark-mode-toggle {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+.dark-mode .tool-nav .tooltip {
+    background: #2a2a4e;
 }
 
-#hero {
+.tool-nav a:hover .tooltip {
+    visibility: visible;
+}
+
+.hero {
     text-align: center;
     padding: 50px 20px;
-    background: url('hero-bg.jpg') no-repeat center/cover;
-    color: #333;
+    background: linear-gradient(to bottom, #e9ecef, #f0f2f5);
 }
 
-#hero h2 {
-    font-size: 2em;
-    margin-bottom: 10px;
+.dark-mode .hero {
+    background: linear-gradient(to bottom, #2a2a4e, #1a1a2e);
 }
 
-#hero p {
-    font-size: 1.1em;
+.hero h1 {
+    font-size: 2.5rem;
     margin-bottom: 20px;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    color: #555;
+}
+
+.dark-mode .hero p {
+    color: #b0b0b0;
+}
+
+.hero-image {
+    max-width: 300px;
+    margin: 20px auto;
+    display: block;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    max-width: 500px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.search-bar i {
+    position: absolute;
+    left: 15px;
+    color: #777;
+}
+
+.search-bar input {
+    flex: 1;
+    padding: 12px 40px;
+    border: 1px solid #ccc;
+    border-radius: 25px 0 0 25px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.search-bar button {
+    padding: 12px 15px;
+    border: none;
+    background: #007bff;
+    color: #fff;
+    border-radius: 0 25px 25px 0;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.search-bar button:hover {
+    background: #0056b3;
+}
+
+.dark-mode .search-bar button {
+    background: #6495ed;
+}
+
+.dark-mode .search-bar button:hover {
+    background: #4169e1;
+}
+
+.search-bar input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.dark-mode .search-bar input {
+    background: #2a2a4e;
+    border-color: #444;
+    color: #e0e0e0;
 }
 
 .tools-section {
     display: none;
     padding: 20px;
-    margin: 20px;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+    max-width: 800px;
 }
 
 .tools-section.active {
     display: block;
 }
 
-.tools-section h2 {
-    font-size: 1.5em;
+.tool-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
+}
+
+.dark-mode .tool-card {
+    background: #16213e;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.tool-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tool-card p {
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.dark-mode .tool-card p {
+    color: #b0b0b0;
+}
+
+.tool-card input,
+.tool-card textarea,
+.tool-card select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.tool-card input:focus,
+.tool-card textarea:focus,
+.tool-card select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.dark-mode .tool-card input,
+.dark-mode .tool-card textarea,
+.dark-mode .tool-card select {
+    background: #2a2a4e;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+.tool-card textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    color: #333;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.dark-mode .checkbox-group label {
+    color: #e0e0e0;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #007bff;
+    cursor: pointer;
+}
+
+.checkbox-group label:hover {
     color: #007bff;
 }
 
-input, textarea, select, button {
-    display: block;
-    width: 100%;
-    max-width: 500px;
-    margin: 10px auto;
-    padding: 10px;
-    border: 1px solid #ccc;
+.dark-mode .checkbox-group label:hover {
+    color: #6495ed;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.tool-card button {
+    padding: 10px 20px;
+    border: none;
     border-radius: 5px;
-    font-size: 1em;
-}
-
-textarea {
-    height: 150px;
-    resize: vertical;
-}
-
-button {
     background: #007bff;
     color: #fff;
-    border: none;
+    font-size: 1rem;
     cursor: pointer;
     transition: background 0.3s;
 }
 
-button:hover {
+.tool-card button:hover {
     background: #0056b3;
 }
 
-button:disabled {
+.dark-mode .tool-card button {
+    background: #6495ed;
+}
+
+.dark-mode .tool-card button:hover {
+    background: #4169e1;
+}
+
+.tool-card button:disabled {
     background: #ccc;
     cursor: not-allowed;
 }
 
-.error {
-    color: #ff4d4d;
-    text-align: center;
-    margin: 10px 0;
-    display: none;
-}
-
-.error.active {
-    display: block;
-}
-
 .loading {
-    text-align: center;
-    margin: 20px 0;
-    color: #007bff;
     display: none;
+    text-align: center;
 }
 
 .loading.active {
     display: block;
 }
 
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #007bff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .result {
-    text-align: center;
-    margin: 20px 0;
     display: none;
+    margin-top: 15px;
 }
 
 .result.active {
     display: block;
 }
 
-.result h3 {
-    margin-bottom: 10px;
-}
-
-.result table {
+.result-table {
     width: 100%;
-    max-width: 500px;
-    margin: 0 auto;
     border-collapse: collapse;
+    margin-top: 10px;
 }
 
-.result table th, .result table td {
+.result-table th,
+.result-table td {
     padding: 10px;
     border: 1px solid #ccc;
     text-align: center;
 }
 
-.result table th {
+.result-table th {
     background: #007bff;
     color: #fff;
+}
+
+.dark-mode .result-table th {
+    background: #6495ed;
+}
+
+.dark-mode .result-table td {
+    border-color: #444;
+    background: #2a2a4e;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    display: none;
+}
+
+.error-message.active {
+    display: block;
 }
 
 .copy-btn {
@@ -206,17 +525,12 @@ button:disabled {
     background: #218838;
 }
 
-#qrResult img {
-    display: block;
-    margin: 0 auto;
+.dark-mode .copy-btn {
+    background: #2ecc71;
 }
 
-#history button {
-    background: #ff4d4d;
-}
-
-#history button:hover {
-    background: #cc0000;
+.dark-mode .copy-btn:hover {
+    background: #27ae60;
 }
 
 .modal {
@@ -228,12 +542,12 @@ button:disabled {
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
     z-index: 2000;
+    align-items: center;
+    justify-content: center;
 }
 
 .modal.active {
     display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 .modal-content {
@@ -245,40 +559,30 @@ button:disabled {
     text-align: center;
 }
 
+.dark-mode .modal-content {
+    background: #16213e;
+}
+
 .modal-content h2 {
     margin-bottom: 15px;
 }
 
 .modal-content p {
-    margin: 10px 0;
+    margin-bottom: 10px;
+    color: #555;
+}
+
+.dark-mode .modal-content p {
+    color: #b0b0b0;
 }
 
 .modal-content button {
-    margin-top: 10px;
+    margin-top: 15px;
 }
 
-.toast {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 10px 20px;
-    border-radius: 5px;
-    color: #fff;
-    display: none;
-    z-index: 3000;
-}
-
-.toast.success {
-    background: #28a745;
-}
-
-.toast.error {
-    background: #ff4d4d;
-}
-
-.toast.active {
-    display: block;
+/* Cố định footer */
+main {
+    padding-bottom: 60px; /* Chiều cao của footer */
 }
 
 footer {
@@ -286,174 +590,70 @@ footer {
     padding: 20px;
     background: #fff;
     box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-}
-
-footer .heart {
-    color: #ff4d4d;
-}
-
-body.dark-mode {
-    background: #2c3e50;
-    color: #ecf0f1;
-}
-
-body.dark-mode header,
-body.dark-mode footer,
-body.dark-mode .tools-section,
-body.dark-mode .modal-content {
-    background: #34495e;
-}
-
-body.dark-mode .tool-nav a {
-    color: #ecf0f1;
-}
-
-body.dark-mode .tool-nav a:hover {
-    background: #3a5e7a;
-}
-
-body.dark-mode .tool-nav a.active {
-    background: #3498db;
-}
-
-body.dark-mode .actions a {
-    color: #3498db;
-}
-
-body.dark-mode .loading {
-    color: #3498db;
-}
-
-body.dark-mode .tools-section h2 {
-    color: #3498db;
-}
-
-body.dark-mode input,
-body.dark-mode textarea,
-body.dark-mode select {
-    background: #3a5e7a;
-    color: #ecf0f1;
-    border-color: #3a5e7a;
-}
-
-body.dark-mode .result table th {
-    background: #3498db;
-}
-
-body.dark-mode .result table td {
-    border-color: #3a5e7a;
-}
-
-/* Đảm bảo biểu tượng công cụ hiển thị */
-.tool-nav img {
-    width: 24px;
-    height: 24px;
-    vertical-align: middle;
-    margin-right: 5px;
-    transition: transform 0.3s ease;
-}
-
-.tool-nav a:hover img {
-    transform: scale(1.2);
-}
-
-/* Cải thiện ô tìm kiếm và hiển thị icon */
-.search-bar {
-    display: flex;
-    align-items: center;
-    max-width: 500px;
-    margin: 20px auto;
-    position: relative;
-}
-
-#searchInput {
+    position: fixed;
+    bottom: 0;
+    left: 0;
     width: 100%;
-    padding: 10px 40px 10px 15px; /* Thêm padding bên phải để chừa chỗ cho icon */
-    border: 2px solid #007bff;
-    border-radius: 25px;
-    font-size: 16px;
-    outline: none;
-    transition: border-color 0.3s ease;
+    z-index: 1000;
 }
 
-#searchInput:focus {
-    border-color: #0056b3;
+.dark-mode footer {
+    background: #16213e;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.3);
 }
 
-.search-bar button {
-    position: absolute;
-    right: 5px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px;
+footer p {
+    color: #555;
 }
 
-.search-bar button i {
-    color: #007bff;
-    font-size: 18px;
-    transition: color 0.3s ease;
+.dark-mode footer p {
+    color: #b0b0b0;
 }
 
-.search-bar button:hover i {
-    color: #0056b3;
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 0.9rem;
+    z-index: 3000;
+    display: none;
 }
 
-/* Cải thiện nút Đóng trong modal liên hệ */
-#contactModal .close-btn {
-    background: linear-gradient(45deg, #ff6b6b, #ff8787);
-    color: white;
-    padding: 10px 25px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-    margin-top: 15px;
+.toast.active {
+    display: block;
 }
 
-#contactModal .close-btn:hover {
-    background: linear-gradient(45deg, #ff8787, #ff6b6b);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+.toast.success {
+    background: #28a745;
 }
 
-#contactModal .close-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+.toast.error {
+    background: #dc3545;
 }
 
-/* Cải thiện giao diện modal liên hệ */
-#contactModal .modal-content {
-    padding: 25px;
-    border-radius: 12px;
-    text-align: center;
-}
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 2rem;
+    }
 
-#contactModal .modal-content h2 {
-    margin-bottom: 20px;
-    color: #2c3e50;
-    font-size: 1.8em;
-}
+    .hero p {
+        font-size: 1rem;
+    }
 
-#contactModal .modal-content p {
-    margin: 10px 0;
-    font-size: 1.1em;
-    color: #34495e;
-}
+    .tool-nav {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
 
-/* Đảm bảo lịch sử hiển thị đẹp trong dark mode */
-.dark-mode .history-container li {
-    background: #34495e !important;
-}
+    .tool-nav a {
+        font-size: 1rem;
+        padding: 8px;
+    }
 
-.dark-mode .history-container h2 {
-    color: #ecf0f1 !important;
-}
-
-.dark-mode .history-container pre {
-    background: #2c3e50 !important;
-    color: #ecf0f1;
+    .checkbox-group {
+        grid-template-columns: 1fr;
+    }
 }
