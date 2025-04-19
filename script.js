@@ -2,11 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Utility Functions
     function escapeHTML(str) {
         return str.replace(/[&<>"']/g, match => ({
-            '&': '&',
-            '<': '<',
-            '>': '>',
-            '"': '"',
-            "'": '''
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
         }[match]));
     }
 
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         history.push({
             toolId,
             result,
-            timestamp: new Date().toLocaleString('vi-VN', { hour12: false })
+            timestamp: new Date().toLocaleString('vi-VN')
         });
         if (history.length > 100) history = history.slice(-100);
         localStorage.setItem('toolHistory', JSON.stringify(history));
@@ -151,29 +151,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const historyResult = document.getElementById('historyResult');
         const history = JSON.parse(localStorage.getItem('toolHistory') || '[]');
         historyResult.innerHTML = history.length ? `
-            <div class="history-container" style="padding: 20px; font-family: Arial, sans-serif;">
-                <h2 style="font-size: 1.5em; margin-bottom: 20px; color: #333;">Lịch Sử Sử Dụng Công Cụ</h2>
-                <ul style="list-style: none; padding: 0;">
-                    ${history.map(item => `
-                        <li style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <strong style="font-size: 1.2em; color: #2c3e50;">
-                                    ${item.toolId.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                                </strong>
-                                <span style="font-size: 0.9em; color: #7f8c8d;">${item.timestamp}</span>
-                            </div>
-                            <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto; margin-top: 10px; font-size: 0.95em;">
-                                ${escapeHTML(JSON.stringify(item.result, null, 2))}
-                            </pre>
-                        </li>
-                    `).join('')}
-                </ul>
-            </div>
-        ` : '<p style="text-align: center; color: #7f8c8d;">Chưa có lịch sử sử dụng công cụ.</p>';
+            <ul style="list-style: none; padding: 0;">
+                ${history.map(item => `
+                    <li style="margin-bottom: 15px;">
+                        <strong>${item.toolId.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</strong> (${item.timestamp}): 
+                        <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto;">
+                            ${escapeHTML(JSON.stringify(item.result, null, 2))}
+                        </pre>
+                    </li>
+                `).join('')}
+            </ul>
+        ` : '<p>Chưa có lịch sử.</p>';
         if (document.body.classList.contains('dark-mode')) {
-            historyResult.querySelectorAll('pre').forEach(pre => pre.style.background = '#2c3e50');
-            historyResult.querySelectorAll('.history-container li').forEach(li => li.style.background = '#34495e');
-            historyResult.querySelectorAll('.history-container h2').forEach(h2 => h2.style.color = '#ecf0f1');
+            historyResult.querySelectorAll('pre').forEach(pre => pre.style.background = '#3a3a4e');
         }
     }
 
@@ -186,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Search Functionality
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
+        // Tìm kiếm khi nhấn Enter
         searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -201,6 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Thêm sự kiện cho nút tìm kiếm
     function searchTools() {
         const query = document.getElementById('searchInput').value.trim().toLowerCase();
         const toolsSections = document.querySelectorAll('.tools-section');
@@ -434,10 +426,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const fromUnit = document.getElementById('tempFrom').value;
                 const toUnit = document.getElementById('tempTo').value;
                 let result;
+                // Chuyển tất cả về Celsius trước
                 let celsius;
                 if (fromUnit === 'C') celsius = value;
                 else if (fromUnit === 'F') celsius = (value - 32) * 5 / 9;
                 else celsius = value - 273.15;
+                // Chuyển từ Celsius sang đơn vị đích
                 if (toUnit === 'C') result = celsius;
                 else if (toUnit === 'F') result = (celsius * 9 / 5) + 32;
                 else result = celsius + 273.15;
@@ -478,22 +472,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 const value = parseFloat(document.getElementById('currencyValue').value);
                 const fromUnit = document.getElementById('currencyFrom').value;
                 const toUnit = document.getElementById('currencyTo').value;
-                const apiKey = 'your_api_key_here';
+
+                // Thay YOUR_API_KEY bằng API key của bạn
+                const apiKey = 'your_api_key_here'; // Thay bằng API key từ ExchangeRate-API
                 const url = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${fromUnit}`;
+
                 try {
                     const response = await fetch(url);
                     const data = await response.json();
+
                     if (data.result !== 'success') {
                         throw new Error(data['error-type'] || 'Lỗi khi gọi API');
                     }
+
                     const rate = data.conversion_rates[toUnit];
                     const convertedValue = value * rate;
+
                     const output = {
                         original: value.toFixed(2),
                         fromUnit,
                         converted: convertedValue.toFixed(2),
                         toUnit
                     };
+
                     document.getElementById('currencyOutput').querySelector('tbody').innerHTML = `
                         <tr>
                             <td>${output.original}</td>
@@ -502,10 +503,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td>${output.toUnit}</td>
                         </tr>
                     `;
+
                     saveToHistory('currency-converter', output);
                     saveToolState('currency-converter', { currencyValue: value, currencyFrom: fromUnit, currencyTo: toUnit });
                     showToast('Đã chuyển đổi tiền tệ!', 'success');
                 } catch (error) {
+                    // Dùng tỷ giá tĩnh nếu API không hoạt động
                     const rates = {
                         USD: { USD: 1, VND: 25000, EUR: 0.92, JPY: 150, GBP: 0.78, CNY: 7.1 },
                         VND: { USD: 0.00004, VND: 1, EUR: 0.000037, JPY: 0.006, GBP: 0.000031, CNY: 0.00028 },
@@ -514,14 +517,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         GBP: { USD: 1.28, VND: 32000, EUR: 1.18, JPY: 192, GBP: 1, CNY: 9.1 },
                         CNY: { USD: 0.14, VND: 3500, EUR: 0.13, JPY: 21.28, GBP: 0.11, CNY: 1 }
                     };
+
                     const rate = rates[fromUnit][toUnit];
                     const convertedValue = value * rate;
+
                     const output = {
                         original: value.toFixed(2),
                         fromUnit,
                         converted: convertedValue.toFixed(2),
                         toUnit
                     };
+
                     document.getElementById('currencyOutput').querySelector('tbody').innerHTML = `
                         <tr>
                             <td>${output.original}</td>
@@ -530,6 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td>${output.toUnit}</td>
                         </tr>
                     `;
+
                     saveToHistory('currency-converter', output);
                     saveToolState('currency-converter', { currencyValue: value, currencyFrom: fromUnit, currencyTo: toUnit });
                     showToast('Đã chuyển đổi tiền tệ (dùng tỷ giá tĩnh)!', 'success');
