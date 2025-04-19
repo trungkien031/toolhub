@@ -1,61 +1,51 @@
-<script type="text/javascript">
-    var gk_isXlsx = false;
-    var gk_xlsxFileLookup = {};
-    var gk_fileData = {};
-    function filledCell(cell) {
-        return cell !== '' && cell != null;
-    }
-    function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                    row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                    headerRowIndex = 0;
-                }
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error("Error loading file data:", e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-    }
-</script>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="ToolHub - Bộ công cụ đa năng miễn phí: tóm tắt văn bản, chuyển đổi đơn vị, tạo mã QR, nén ảnh và hơn thế nữa.">
-    <meta name="keywords" content="ToolHub, công cụ đa năng, tóm tắt văn bản, chuyển đổi đơn vị, tạo QR, nén ảnh, tính BMI">
+    <meta name="description" content="ToolHub - Bộ công cụ đa năng miễn phí: tóm tắt văn bản, chuyển đổi đơn vị, tạo mã QR, nén ảnh, tính BMI và hơn thế nữa.">
+    <meta name="keywords" content="ToolHub, công cụ đa năng, tóm tắt văn bản, chuyển đổi đơn vị, tạo mã QR, nén ảnh, tính BMI, chuyển đổi tiền tệ, tạo mật khẩu">
     <meta name="author" content="Nguyễn Trung Kiên">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="vi">
     <meta property="og:title" content="ToolHub - Hộp Công Cụ Đa Năng">
     <meta property="og:description" content="Khám phá bộ công cụ miễn phí: tóm tắt văn bản, chuyển đổi đơn vị, tạo mã QR, và hơn thế nữa.">
     <meta property="og:image" content="/toolhub/assets/icons/toolbox.png">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://your-toolhub-domain.com">
     <meta name="twitter:card" content="summary_large_image">
-    <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self';
-        script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'unsafe-inline';
-        style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com 'unsafe-inline';
-        font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
-        img-src 'self' data:;
-        connect-src 'self' https://v6.exchangerate-api.com;
-    ">
-    <title>ToolHub - Hộp Công Cụ Đa Năng</title>
+    <meta name="twitter:title" content="ToolHub - Hộp Công Cụ Đa Năng">
+    <meta name="twitter:description" content="Khám phá bộ công cụ miễn phí: tóm tắt văn bản, chuyển đổi đơn vị, tạo mã QR, và hơn thế nữa.">
+    <meta name="twitter:image" content="/toolhub/assets/icons/toolbox.png">
+    <title data-lang="hero_title">ToolHub - Hộp Công Cụ Đa Năng</title>
     <link rel="icon" href="/toolhub/assets/icons/favicon.ico" type="image/x-icon">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" as="style">
+    <link rel="preload" href="/toolhub/assets/icons/toolbox.png" as="image">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" crossorigin="anonymous">
     <link rel="stylesheet" href="/toolhub/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+    <script src="/toolhub/script.js" defer></script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "ToolHub",
+      "applicationCategory": "Utilities",
+      "operatingSystem": "Web",
+      "description": "ToolHub là bộ công cụ đa năng miễn phí: tóm tắt văn bản, chuyển đổi đơn vị, tạo mã QR, nén ảnh, tính BMI và hơn thế nữa.",
+      "author": {
+        "@type": "Person",
+        "name": "Nguyễn Trung Kiên"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "VND"
+      }
+    }
+    </script>
 </head>
 <body>
     <div class="bg-decor">
@@ -65,8 +55,8 @@
     </div>
 
     <div class="dark-mode-toggle">
-        <input type="checkbox" id="darkModeToggle" aria-label="Bật/tắt chế độ tối">
-        <label for="darkModeToggle"><i class="fas fa-moon"></i></label>
+        <input type="checkbox" id="darkModeToggle" aria-label="Chuyển đổi chế độ tối">
+        <label for="darkModeToggle"><i class="fas fa-moon" aria-hidden="true"></i></label>
     </div>
 
     <header>
@@ -75,60 +65,53 @@
             <a href="#" data-action="showHome" data-lang="home">Trang chủ</a>
             <a href="#" data-action="showHistory" data-lang="history">Lịch sử</a>
             <a href="#" data-action="openContactModal" data-lang="contact">Liên hệ</a>
+            <select id="languageSwitch" aria-label="Chọn ngôn ngữ">
+                <option value="vi" data-lang="language_vi">Tiếng Việt10</option>
+                <option value="en" data-lang="language_en">English</option>
+            </select>
         </nav>
     </header>
 
-    <nav class="tool-nav" role="navigation" aria-label="Điều hướng công cụ">
-        <a href="#" data-tool="summarize" title="Tóm tắt văn bản" aria-label="Tóm tắt văn bản"><i class="fas fa-brain"></i><span class="tooltip">Tóm tắt văn bản</span></a>
-        <a href="#" data-tool="length-converter" title="Chuyển đơn vị (Độ dài)" aria-label="Chuyển đổi độ dài"><i class="fas fa-ruler"></i><span class="tooltip">Chuyển đơn vị (Độ dài)</span></a>
-        <a href="#" data-tool="calculator" title="Máy tính cơ bản" aria-label="Máy tính cơ bản"><i class="fas fa-calculator"></i><span class="tooltip">Máy tính cơ bản</span></a>
-        <a href="#" data-tool="password-generator" title="Tạo mật khẩu" aria-label="Tạo mật khẩu"><i class="fas fa-key"></i><span class="tooltip">Tạo mật khẩu</span></a>
-        <a href="#" data-tool="char-counter" title="Đếm ký tự & từ" aria-label="Đếm ký tự và từ"><i class="fas fa-text-width"></i><span class="tooltip">Đếm ký tự & từ</span></a>
-        <a href="#" data-tool="url-checker" title="Kiểm tra URL" aria-label="Kiểm tra URL"><i class="fas fa-globe"></i><span class="tooltip">Kiểm tra URL</span></a>
-        <a href="#" data-tool="temp-converter" title="Chuyển đổi nhiệt độ" aria-label="Chuyển đổi nhiệt độ"><i class="fas fa-thermometer-half"></i><span class="tooltip">Chuyển đổi nhiệt độ</span></a>
-        <a href="#" data-tool="currency-converter" title="Chuyển đổi tiền tệ" aria-label="Chuyển đổi tiền tệ"><i class="fas fa-money-bill-wave"></i><span class="tooltip">Chuyển đổi tiền tệ</span></a>
-        <a href="#" data-tool="qr-generator" title="Tạo QR Code" aria-label="Tạo mã QR"><i class="fas fa-qrcode"></i><span class="tooltip">Tạo QR Code</span></a>
-        <a href="#" data-tool="image-compressor" title="Nén ảnh" aria-label="Nén ảnh"><i class="fas fa-image"></i><span class="tooltip">Nén ảnh</span></a>
-        <a href="#" data-tool="bmi-calculator" title="Tính BMI" aria-label="Tính chỉ số BMI"><i class="fas fa-weight-scale"></i><span class="tooltip">Tính BMI</span></a>
-        <a href="#" data-tool="area-converter" title="Chuyển đơn vị (Diện tích)" aria-label="Chuyển đổi diện tích"><i class="fas fa-square"></i><span class="tooltip">Chuyển đơn vị (Diện tích)</span></a>
+    <nav class="tool-nav">
+        <a href="#" data-tool="summarize" data-action="showTool" title="Tóm tắt văn bản" class="active"><i class="fas fa-brain"></i> <span class="tooltip" data-lang="summarize">Tóm tắt văn bản</span></a>
+        <a href="#" data-tool="length-converter" data-action="showTool" title="Chuyển đơn vị (Độ dài)"><i class="fas fa-ruler"></i> <span class="tooltip" data-lang="length_converter">Chuyển đơn vị (Độ dài)</span></a>
+        <a href="#" data-tool="calculator" data-action="showTool" title="Máy tính cơ bản"><i class="fas fa-calculator"></i> <span class="tooltip" data-lang="calculator">Máy tính cơ bản</span></a>
+        <a href="#" data-tool="password-generator" data-action="showTool" title="Tạo mật khẩu"><i class="fas fa-lock"></i> <span class="tooltip" data-lang="password_generator">Tạo mật khẩu</span></a>
+        <a href="#" data-tool="char-counter" data-action="showTool" title="Đếm ký tự & từ"><i class="fas fa-text-width"></i> <span class="tooltip" data-lang="char_counter">Đếm ký tự & từ</span></a>
+        <a href="#" data-tool="url-checker" data-action="showTool" title="Kiểm tra URL"><i class="fas fa-link"></i> <span class="tooltip" data-lang="url_checker">Kiểm tra URL</span></a>
+        <a href="#" data-tool="temp-converter" data-action="showTool" title="Chuyển đổi nhiệt độ"><i class="fas fa-thermometer-half"></i> <span class="tooltip" data-lang="temp_converter">Chuyển đổi nhiệt độ</span></a>
+        <a href="#" data-tool="currency-converter" data-action="showTool" title="Chuyển đổi tiền tệ"><i class="fas fa-money-bill-wave"></i> <span class="tooltip" data-lang="currency_converter">Chuyển đổi tiền tệ</span></a>
+        <a href="#" data-tool="qr-generator" data-action="showTool" title="Tạo QR Code"><i class="fas fa-qrcode"></i> <span class="tooltip" data-lang="qr_generator">Tạo QR Code</span></a>
+        <a href="#" data-tool="image-compressor" data-action="showTool" title="Nén ảnh"><i class="fas fa-image"></i> <span class="tooltip" data-lang="image_compressor">Nén ảnh</span></a>
+        <a href="#" data-tool="bmi-calculator" data-action="showTool" title="Tính BMI"><i class="fas fa-weight"></i> <span class="tooltip" data-lang="bmi_calculator">Tính BMI</span></a>
+        <a href="#" data-tool="area-converter" data-action="showTool" title="Chuyển đơn vị (Diện tích)"><i class="fas fa-square"></i> <span class="tooltip" data-lang="area_converter">Chuyển đơn vị (Diện tích)</span></a>
     </nav>
 
-    <div class="modal" id="contactModal">
-        <div class="modal-content">
-            <h2>Thông Tin Liên Hệ</h2>
-            <p><strong>Người tạo:</strong> Nguyễn Trung Kiên</p>
-            <p><strong>Ngày sinh:</strong> 03/01/2006</p>
-            <p><strong>Email:</strong> <a href="/cdn-cgi/l/email-protection#c5b1b7b0aba2aeaca0abf5f6f485a2a8a4aca9eba6aaa8"><span class="__cf_email__" data-cfemail="6b1f191e050c00020e055b585a2b0c060a020745080406">[email&#160;protected]</span></a></p>
-            <p><strong>Số điện thoại:</strong> <a href="tel:0925344777">0925344777</a></p>
-            <button data-action="closeContactModal" aria-label="Đóng cửa sổ liên hệ">Đóng</button>
-        </div>
-    </div>
-
-    <section class="hero" id="hero">
-        <h1>Hộp Công Cụ Đa Năng Cho Mọi Nhu Cầu</h1>
-        <p>Tóm tắt văn bản, chuyển đổi đơn vị, tạo mã QR và hơn thế nữa - tất cả miễn phí và dễ dùng.</p>
-        <img src="/toolhub/assets/icons/toolbox.png" alt="Hình minh họa hộp công cụ" class="hero-image" loading="lazy">
-        <div class="search-bar">
-            <i class="fas fa-search" aria-hidden="true"></i>
-            <input type="text" id="searchInput" placeholder="Tìm kiếm công cụ..." aria-label="Tìm kiếm công cụ">
-            <button data-action="searchTools" aria-label="Tìm kiếm"><i class="fas fa-search"></i></button>
-        </div>
-    </section>
-
     <main>
-        <section class="tools-section" id="summarize" data-tool-name="summarize">
+        <section class="hero" id="hero">
+            <h1 data-lang="hero_title">Hộp Công Cụ Đa Năng Cho Mọi Nhu Cầu</h1>
+            <p data-lang="hero_description">Tóm tắt văn bản, chuyển đổi đơn vị, tạo mã QR và hơn thế nữa - tất cả miễn phí và dễ dùng.</p>
+            <img src="/toolhub/assets/icons/toolbox.png" alt="Hình minh họa hộp công cụ đa năng ToolHub" class="hero-image" loading="lazy">
+            <div class="search-bar">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input type="text" id="searchInput" placeholder="Tìm kiếm công cụ..." data-lang-placeholder="search_placeholder" aria-label="Tìm kiếm công cụ">
+                <button data-action="searchTools" aria-label="Tìm kiếm"><i class="fas fa-search"></i></button>
+            </div>
+        </section>
+
+        <section class="tools-section active" id="summarize" data-tool-name="summarize">
             <div class="tool-card">
-                <h3><i class="fas fa-brain"></i> Tóm tắt văn bản</h3>
-                <p>Rút gọn nội dung dài thành đoạn tóm tắt ngắn gọn.</p>
-                <textarea id="textInput" rows="4" placeholder="Nhập văn bản cần tóm tắt..." aria-label="Văn bản cần tóm tắt" aria-describedby="textError"></textarea>
+                <h3><i class="fas fa-brain"></i> <span data-lang="summarize">Tóm tắt văn bản</span></h3>
+                <p data-lang="summarize_description">Rút gọn nội dung dài thành đoạn tóm tắt ngắn gọn.</p>
+                <textarea id="textInput" rows="4" placeholder="Nhập văn bản cần tóm tắt..." data-lang-placeholder="summarize_placeholder" aria-label="Văn bản cần tóm tắt" aria-describedby="textError"></textarea>
                 <select id="summaryLength" aria-label="Chọn độ dài tóm tắt">
-                    <option value="short">Ngắn (~20%)</option>
-                    <option value="medium">Trung bình (~30%)</option>
-                    <option value="long">Dài (~40%)</option>
+                    <option value="short" data-lang="summarize_length_short">Ngắn (~20%)</option>
+                    <option value="medium" data-lang="summarize_length_medium">Trung bình (~30%)</option>
+                    <option value="long" data-lang="summarize_length_long">Dài (~40%)</option>
                 </select>
                 <p class="error-message" id="textError"></p>
                 <div class="button-group">
-                    <button data-action="summarizeText" aria-label="Tóm tắt văn bản">Tóm tắt</button>
+                    <button data-action="summarizeText" data-lang="summarize_button" aria-label="Tóm tắt văn bản">Tóm tắt</button>
                 </div>
                 <div class="loading" id="textLoading"><span class="spinner"></span></div>
                 <div class="result" id="textResult">
@@ -139,61 +122,51 @@
 
         <section class="tools-section" id="length-converter" data-tool-name="length-converter">
             <div class="tool-card">
-                <h3><i class="fas fa-ruler"></i> Chuyển đơn vị (Độ dài)</h3>
-                <p>Đổi độ dài giữa mét, kilomet, centimet, inch, foot, yard nhanh chóng.</p>
-                <input type="number" id="lengthValue" placeholder="Nhập giá trị" aria-label="Giá trị độ dài" aria-describedby="lengthError">
-                <select id="lengthFrom" aria-label="Đơn vị nguồn">
-                    <option value="m">Mét (m)</option>
-                    <option value="km">Kilomet (km)</option>
-                    <option value="cm">Centimet (cm)</option>
-                    <option value="inch">Inch (in)</option>
-                    <option value="foot">Foot (ft)</option>
-                    <option value="yard">Yard (yd)</option>
+                <h3><i class="fas fa-ruler"></i> <span data-lang="length_converter">Chuyển đơn vị (Độ dài)</span></h3>
+                <p data-lang="length_converter_description">Đổi độ dài giữa mét, kilomet, centimet, inch, foot, yard nhanh chóng.</p>
+                <input type="number" id="lengthInput" placeholder="Nhập giá trị..." data-lang-placeholder="length_input_placeholder" aria-label="Giá trị độ dài" aria-describedby="lengthError">
+                <select id="lengthFromUnit" aria-label="Đơn vị nguồn">
+                    <option value="m" data-lang="length_unit_m">m (mét)</option>
+                    <option value="km" data-lang="length_unit_km">km (kilômét)</option>
+                    <option value="cm" data-lang="length_unit_cm">cm (centimet)</option>
+                    <option value="in" data-lang="length_unit_in">inch</option>
+                    <option value="ft" data-lang="length_unit_ft">foot</option>
+                    <option value="yd" data-lang="length_unit_yd">yard</option>
                 </select>
-                <select id="lengthTo" aria-label="Đơn vị đích">
-                    <option value="m">Mét (m)</option>
-                    <option value="km">Kilomet (km)</option>
-                    <option value="cm">Centimet (cm)</option>
-                    <option value="inch">Inch (in)</option>
-                    <option value="foot">Foot (ft)</option>
-                    <option value="yard">Yard (yd)</option>
+                <select id="lengthToUnit" aria-label="Đơn vị đích">
+                    <option value="m" data-lang="length_unit_m">m (mét)</option>
+                    <option value="km" data-lang="length_unit_km">km (kilômét)</option>
+                    <option value="cm" data-lang="length_unit_cm">cm (centimet)</option>
+                    <option value="in" data-lang="length_unit_in">inch</option>
+                    <option value="ft" data-lang="length_unit_ft">foot</option>
+                    <option value="yd" data-lang="length_unit_yd">yard</option>
                 </select>
                 <p class="error-message" id="lengthError"></p>
                 <div class="button-group">
-                    <button data-action="convertLength" aria-label="Chuyển đổi độ dài">Chuyển đổi</button>
+                    <button data-action="convertLength" data-lang="length_converter_button" aria-label="Chuyển đổi độ dài">Chuyển đổi</button>
                 </div>
                 <div class="loading" id="lengthLoading"><span class="spinner"></span></div>
                 <div class="result" id="lengthResult">
-                    <table class="result-table" id="lengthOutput" aria-live="polite">
-                        <thead>
-                            <tr>
-                                <th>Giá trị gốc</th>
-                                <th>Đơn vị gốc</th>
-                                <th>Giá trị chuyển đổi</th>
-                                <th>Đơn vị đích</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                    <p id="lengthOutput" aria-live="polite"></p>
                 </div>
             </div>
         </section>
 
         <section class="tools-section" id="calculator" data-tool-name="calculator">
             <div class="tool-card">
-                <h3><i class="fas fa-calculator"></i> Máy tính cơ bản</h3>
-                <p>Thực hiện các phép tính cơ bản: cộng, trừ, nhân, chia.</p>
-                <input type="number" id="num1" placeholder="Số thứ nhất" aria-label="Số thứ nhất" aria-describedby="calcError">
-                <select id="operator" aria-label="Phép toán">
-                    <option value="+">Cộng (+)</option>
-                    <option value="-">Trừ (-)</option>
-                    <option value="*">Nhân (*)</option>
-                    <option value="/">Chia (/)</option>
+                <h3><i class="fas fa-calculator"></i> <span data-lang="calculator">Máy tính cơ bản</span></h3>
+                <p data-lang="calculator_description">Thực hiện các phép tính cơ bản: cộng, trừ, nhân, chia.</p>
+                <input type="number" id="calcInput1" placeholder="Số thứ nhất..." data-lang-placeholder="calc_input1_placeholder" aria-label="Số thứ nhất" aria-describedby="calcError">
+                <select id="calcOperation" aria-label="Phép tính">
+                    <option value="add" data-lang="calc_operation_add">+</option>
+                    <option value="subtract" data-lang="calc_operation_subtract">-</option>
+                    <option value="multiply" data-lang="calc_operation_multiply">×</option>
+                    <option value="divide" data-lang="calc_operation_divide">÷</option>
                 </select>
-                <input type="number" id="num2" placeholder="Số thứ hai" aria-label="Số thứ hai" aria-describedby="calcError">
+                <input type="number" id="calcInput2" placeholder="Số thứ hai..." data-lang-placeholder="calc_input2_placeholder" aria-label="Số thứ hai">
                 <p class="error-message" id="calcError"></p>
                 <div class="button-group">
-                    <button data-action="calculate" aria-label="Thực hiện phép tính">Tính</button>
+                    <button data-action="calculate" data-lang="calculator_button" aria-label="Tính toán">Tính</button>
                 </div>
                 <div class="loading" id="calcLoading"><span class="spinner"></span></div>
                 <div class="result" id="calcResult">
@@ -204,35 +177,35 @@
 
         <section class="tools-section" id="password-generator" data-tool-name="password-generator">
             <div class="tool-card">
-                <h3><i class="fas fa-key"></i> Tạo mật khẩu</h3>
-                <p>Tạo mật khẩu ngẫu nhiên, an toàn với độ dài và tùy chọn ký tự.</p>
-                <input type="number" id="passLength" placeholder="Độ dài mật khẩu (8-32)" min="8" max="32" aria-label="Độ dài mật khẩu" aria-describedby="passError">
+                <h3><i class="fas fa-lock"></i> <span data-lang="password_generator">Tạo mật khẩu</span></h3>
+                <p data-lang="password_generator_description">Tạo mật khẩu ngẫu nhiên, an toàn với độ dài và tùy chọn ký tự.</p>
+                <input type="number" id="passwordLength" value="12" min="4" max="50" aria-label="Độ dài mật khẩu">
                 <div class="checkbox-group">
-                    <label><input type="checkbox" id="includeUppercase" checked aria-label="Ký tự hoa"> Chữ hoa (A-Z)</label>
-                    <label><input type="checkbox" id="includeLowercase" checked aria-label="Ký tự thường"> Chữ thường (a-z)</label>
-                    <label><input type="checkbox" id="includeNumbers" checked aria-label="Số"> Số (0-9)</label>
-                    <label><input type="checkbox" id="includeSymbols" checked aria-label="Ký tự đặc biệt"> Ký tự đặc biệt (!@#$%)</label>
+                    <label><input type="checkbox" id="includeUppercase" checked> <span data-lang="password_uppercase">Chữ hoa</span></label>
+                    <label><input type="checkbox" id="includeLowercase" checked> <span data-lang="password_lowercase">Chữ thường</span></label>
+                    <label><input type="checkbox" id="includeNumbers" checked> <span data-lang="password_numbers">Số</span></label>
+                    <label><input type="checkbox" id="includeSymbols" checked> <span data-lang="password_symbols">Ký hiệu</span></label>
                 </div>
-                <p class="error-message" id="passError"></p>
+                <p class="error-message" id="passwordError"></p>
                 <div class="button-group">
-                    <button data-action="generatePassword" aria-label="Tạo mật khẩu">Tạo</button>
+                    <button data-action="generatePassword" data-lang="password_generator_button" aria-label="Tạo mật khẩu">Tạo</button>
                 </div>
-                <div class="loading" id="passLoading"><span class="spinner"></span></div>
-                <div class="result" id="passResult">
-                    <p id="passOutput" aria-live="polite"></p>
-                    <button class="copy-btn" data-action="copyPassword" aria-label="Sao chép mật khẩu">Sao chép</button>
+                <div class="loading" id="passwordLoading"><span class="spinner"></span></div>
+                <div class="result" id="passwordResult">
+                    <p id="passwordOutput" aria-live="polite"></p>
+                    <button class="copy-btn" data-action="copyPassword" data-lang="copy_button" aria-label="Sao chép mật khẩu">Sao chép</button>
                 </div>
             </div>
         </section>
 
         <section class="tools-section" id="char-counter" data-tool-name="char-counter">
             <div class="tool-card">
-                <h3><i class="fas fa-text-width"></i> Đếm ký tự & từ</h3>
-                <p>Đếm số ký tự và từ trong đoạn văn bản của bạn.</p>
-                <textarea id="charInput" rows="4" placeholder="Nhập văn bản..." aria-label="Văn bản cần đếm" aria-describedby="charError"></textarea>
+                <h3><i class="fas fa-text-width"></i> <span data-lang="char_counter">Đếm ký tự & từ</span></h3>
+                <p data-lang="char_counter_description">Đếm số ký tự và từ trong đoạn văn bản của bạn.</p>
+                <textarea id="charInput" rows="4" placeholder="Nhập văn bản..." data-lang-placeholder="char_input_placeholder" aria-label="Văn bản để đếm ký tự" aria-describedby="charError"></textarea>
                 <p class="error-message" id="charError"></p>
                 <div class="button-group">
-                    <button data-action="countChars" aria-label="Đếm ký tự và từ">Đếm</button>
+                    <button data-action="countChars" data-lang="char_counter_button" aria-label="Đếm ký tự">Đếm</button>
                 </div>
                 <div class="loading" id="charLoading"><span class="spinner"></span></div>
                 <div class="result" id="charResult">
@@ -243,12 +216,12 @@
 
         <section class="tools-section" id="url-checker" data-tool-name="url-checker">
             <div class="tool-card">
-                <h3><i class="fas fa-globe"></i> Kiểm tra URL</h3>
-                <p>Kiểm tra xem URL có hợp lệ và an toàn hay không.</p>
-                <input type="text" id="urlInput" placeholder="Nhập URL..." aria-label="URL cần kiểm tra" aria-describedby="urlError">
+                <h3><i class="fas fa-link"></i> <span data-lang="url_checker">Kiểm tra URL</span></h3>
+                <p data-lang="url_checker_description">Kiểm tra xem URL có hợp lệ và an toàn hay không.</p>
+                <input type="url" id="urlInput" placeholder="Nhập URL..." data-lang-placeholder="url_input_placeholder" aria-label="URL để kiểm tra" aria-describedby="urlError">
                 <p class="error-message" id="urlError"></p>
                 <div class="button-group">
-                    <button data-action="checkURL" aria-label="Kiểm tra URL">Kiểm tra</button>
+                    <button data-action="checkURL" data-lang="url_checker_button" aria-label="Kiểm tra URL">Kiểm tra</button>
                 </div>
                 <div class="loading" id="urlLoading"><span class="spinner"></span></div>
                 <div class="result" id="urlResult">
@@ -259,198 +232,174 @@
 
         <section class="tools-section" id="temp-converter" data-tool-name="temp-converter">
             <div class="tool-card">
-                <h3><i class="fas fa-thermometer-half"></i> Chuyển đổi nhiệt độ</h3>
-                <p>Chuyển đổi giữa Celsius, Fahrenheit, Kelvin.</p>
-                <input type="number" id="tempValue" placeholder="Nhập giá trị" aria-label="Giá trị nhiệt độ" aria-describedby="tempError">
-                <select id="tempFrom" aria-label="Đơn vị nhiệt độ nguồn">
-                    <option value="C">Celsius (C)</option>
-                    <option value="F South Africa">Fahrenheit (F)</option>
-                    <option value="K">Kelvin (K)</option>
+                <h3><i class="fas fa-thermometer-half"></i> <span data-lang="temp_converter">Chuyển đổi nhiệt độ</span></h3>
+                <p data-lang="temp_converter_description">Chuyển đổi giữa Celsius, Fahrenheit, Kelvin.</p>
+                <input type="number" id="tempInput" placeholder="Nhập nhiệt độ..." data-lang-placeholder="temp_input_placeholder" aria-label="Giá trị nhiệt độ" aria-describedby="tempError">
+                <select id="tempFromUnit" aria-label="Đơn vị nguồn">
+                    <option value="C" data-lang="temp_unit_c">°C (Celsius)</option>
+                    <option value="F" data-lang="temp_unit_f">°F (Fahrenheit)</option>
+                    <option value="K" data-lang="temp_unit_k">K (Kelvin)</option>
                 </select>
-                <select id="tempTo" aria-label="Đơn vị nhiệt độ đích">
-                    <option value="C">Celsius (C)</option>
-                    <option value="F">Fahrenheit (F)</option>
-                    <option value="K">Kelvin (K)</option>
+                <select id="tempToUnit" aria-label="Đơn vị đích">
+                    <option value="C" data-lang="temp_unit_c">°C (Celsius)</option>
+                    <option value="F" data-lang="temp_unit_f">°F (Fahrenheit)</option>
+                    <option value="K" data-lang="temp_unit_k">K (Kelvin)</option>
                 </select>
                 <p class="error-message" id="tempError"></p>
                 <div class="button-group">
-                    <button data-action="convertTemp" aria-label="Chuyển đổi nhiệt độ">Chuyển đổi</button>
+                    <button data-action="convertTemp" data-lang="temp_converter_button" aria-label="Chuyển đổi nhiệt độ">Chuyển đổi</button>
                 </div>
                 <div class="loading" id="tempLoading"><span class="spinner"></span></div>
                 <div class="result" id="tempResult">
-                    <table class="result-table" id="tempOutput" aria-live="polite">
-                        <thead>
-                            <tr>
-                                <th>Giá trị gốc</th>
-                                <th>Đơn vị gốc</th>
-                                <th>Giá trị chuyển đổi</th>
-                                <th>Đơn vị đích</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                    <p id="tempOutput" aria-live="polite"></p>
                 </div>
             </div>
         </section>
 
         <section class="tools-section" id="currency-converter" data-tool-name="currency-converter">
             <div class="tool-card">
-                <h3><i class="fas fa-money-bill-wave"></i> Chuyển đổi tiền tệ</h3>
-                <p>Chuyển đổi giữa các loại tiền tệ phổ biến.</p>
-                <input type="number" id="currencyValue" placeholder="Nhập giá trị" aria-label="Giá trị tiền tệ" aria-describedby="currencyError">
-                <select id="currencyFrom" aria-label="Loại tiền tệ nguồn">
-                    <option value="USD">USD</option>
-                    <option value="VND">VND</option>
-                    <option value="EUR">EUR</option>
-                    <option value="JPY">JPY</option>
-                    <option value="GBP">GBP</option>
-                    <option value="CNY">CNY</option>
+                <h3><i class="fas fa-money-bill-wave"></i> <span data-lang="currency_converter">Chuyển đổi tiền tệ</span></h3>
+                <p data-lang="currency_converter_description">Chuyển đổi giữa các loại tiền tệ phổ biến.</p>
+                <input type="number" id="currencyInput" placeholder="Nhập số tiền..." data-lang-placeholder="currency_input_placeholder" aria-label="Số tiền" aria-describedby="currencyError">
+                <select id="currencyFromUnit" aria-label="Tiền tệ nguồn">
+                    <option value="USD" data-lang="currency_unit_usd">USD</option>
+                    <option value="EUR" data-lang="currency_unit_eur">EUR</option>
+                    <option value="JPY" data-lang="currency_unit_jpy">JPY</option>
+                    <option value="VND" data-lang="currency_unit_vnd">VND</option>
                 </select>
-                <select id="currencyTo" aria-label="Loại tiền tệ đích">
-                    <option value="USD">USD</option>
-                    <option value="VND">VND</option>
-                    <option value="EUR">EUR</option>
-                    <option value="JPY">JPY</option>
-                    <option value="GBP">GBP</option>
-                    <option value="CNY">CNY</option>
+                <select id="currencyToUnit" aria-label="Tiền tệ đích">
+                    <option value="USD" data-lang="currency_unit_usd">USD</option>
+                    <option value="EUR" data-lang="currency_unit_eur">EUR</option>
+                    <option value="JPY" data-lang="currency_unit_jpy">JPY</option>
+                    <option value="VND" data-lang="currency_unit_vnd">VND</option>
                 </select>
                 <p class="error-message" id="currencyError"></p>
                 <div class="button-group">
-                    <button data-action="convertCurrency" aria-label="Chuyển đổi tiền tệ">Chuyển đổi</button>
+                    <button data-action="convertCurrency" data-lang="currency_converter_button" aria-label="Chuyển đổi tiền tệ">Chuyển đổi</button>
                 </div>
                 <div class="loading" id="currencyLoading"><span class="spinner"></span></div>
                 <div class="result" id="currencyResult">
-                    <table class="result-table" id="currencyOutput" aria-live="polite">
-                        <thead>
-                            <tr>
-                                <th>Giá trị gốc</th>
-                                <th>Loại tiền gốc</th>
-                                <th>Giá trị chuyển đổi</th>
-                                <th>Loại tiền đích</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                    <p id="currencyOutput" aria-live="polite"></p>
                 </div>
             </div>
         </section>
 
         <section class="tools-section" id="qr-generator" data-tool-name="qr-generator">
             <div class="tool-card">
-                <h3><i class="fas fa-qrcode"></i> Tạo QR Code</h3>
-                <p>Tạo mã QR từ văn bản hoặc URL.</p>
-                <input type="text" id="qrInput" placeholder="Nhập văn bản hoặc URL..." aria-label="Văn bản hoặc URL cho mã QR" aria-describedby="qrError">
+                <h3><i class="fas fa-qrcode"></i> <span data-lang="qr_generator">Tạo QR Code</span></h3>
+                <p data-lang="qr_generator_description">Tạo mã QR từ văn bản hoặc URL.</p>
+                <input type="text" id="qrInput" placeholder="Nhập văn bản hoặc URL..." data-lang-placeholder="qr_input_placeholder" aria-label="Văn bản để tạo mã QR" aria-describedby="qrError">
                 <p class="error-message" id="qrError"></p>
                 <div class="button-group">
-                    <button data-action="generateQR" aria-label="Tạo mã QR">Tạo QR</button>
+                    <button data-action="generateQR" data-lang="qr_generator_button" aria-label="Tạo mã QR">Tạo QR</button>
                 </div>
                 <div class="loading" id="qrLoading"><span class="spinner"></span></div>
                 <div class="result" id="qrResult">
-                    <img id="qrOutput" alt="Mã QR" loading="lazy" aria-live="polite">
+                    <div id="qrOutput" aria-live="polite"></div>
                 </div>
             </div>
         </section>
 
         <section class="tools-section" id="image-compressor" data-tool-name="image-compressor">
             <div class="tool-card">
-                <h3><i class="fas fa-image"></i> Nén ảnh</h3>
-                <p>Giảm dung lượng ảnh mà vẫn giữ chất lượng.</p>
-                <input type="file" id="imageInput" accept="image/*" aria-label="Chọn ảnh để nén" aria-describedby="imageError">
+                <h3><i class="fas fa-image"></i> <span data-lang="image_compressor">Nén ảnh</span></h3>
+                <p data-lang="image_compressor_description">Giảm dung lượng ảnh mà vẫn giữ chất lượng.</p>
+                <input type="file" id="imageInput" accept="image/*" aria-label="Tải ảnh lên" aria-describedby="imageError">
                 <p class="error-message" id="imageError"></p>
                 <div class="button-group">
-                    <button data-action="compressImage" aria-label="Nén ảnh">Nén ảnh</button>
+                    <button data-action="compressImage" data-lang="image_compressor_button" aria-label="Nén ảnh">Nén ảnh</button>
                 </div>
                 <div class="loading" id="imageLoading"><span class="spinner"></span></div>
-                <div class="result" id="imageResult" aria-live="polite"></div>
+                <div class="result" id="imageResult">
+                    <p id="imageOutput" aria-live="polite"></p>
+                </div>
             </div>
         </section>
 
         <section class="tools-section" id="bmi-calculator" data-tool-name="bmi-calculator">
             <div class="tool-card">
-                <h3><i class="fas fa-weight-scale"></i> Tính chỉ số BMI</h3>
-                <p>Tính chỉ số khối cơ thể (BMI) dựa trên cân nặng và chiều cao.</p>
-                <input type="number" id="weight" placeholder="Cân nặng (kg)" aria-label="Cân nặng (kg)" aria-describedby="bmiError">
-                <input type="number" id="height" placeholder="Chiều cao (cm)" aria-label="Chiều cao (cm)" aria-describedby="bmiError">
+                <h3><i class="fas fa-weight"></i> <span data-lang="bmi_calculator">Tính BMI</span></h3>
+                <p data-lang="bmi_calculator_description">Tính chỉ số khối cơ thể (BMI) dựa trên cân nặng và chiều cao.</p>
+                <input type="number" id="weightInput" placeholder="Cân nặng (kg)..." data-lang-placeholder="bmi_weight_placeholder" aria-label="Cân nặng" aria-describedby="bmiError">
+                <input type="number" id="heightInput" placeholder="Chiều cao (cm)..." data-lang-placeholder="bmi_height_placeholder" aria-label="Chiều cao">
                 <p class="error-message" id="bmiError"></p>
                 <div class="button-group">
-                    <button data-action="calculateBMI" aria-label="Tính BMI">Tính BMI</button>
+                    <button data-action="calculateBMI" data-lang="bmi_calculator_button" aria-label="Tính BMI">Tính BMI</button>
                 </div>
                 <div class="loading" id="bmiLoading"><span class="spinner"></span></div>
                 <div class="result" id="bmiResult">
-                    <table class="result-table" id="bmiOutput" aria-live="polite">
-                        <thead>
-                            <tr>
-                                <th>Cân nặng (kg)</th>
-                                <th>Chiều cao (cm)</th>
-                                <th>BMI</th>
-                                <th>Trạng thái</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                    <p id="bmiOutput" aria-live="polite"></p>
                 </div>
             </div>
         </section>
 
         <section class="tools-section" id="area-converter" data-tool-name="area-converter">
             <div class="tool-card">
-                <h3><i class="fas fa-square"></i> Chuyển đơn vị (Diện tích)</h3>
-                <p>Chuyển đổi diện tích giữa m², km², ha, ft².</p>
-                <input type="number" id="areaValue" placeholder="Nhập giá trị" aria-label="Giá trị diện tích" aria-describedby="areaError">
-                <select id="areaFrom" aria-label="Đơn vị nguồn">
-                    <option value="m2">Mét vuông (m²)</option>
-                    <option value="km2">Kilomet vuông (km²)</option>
-                    <option value="ha">Hecta (ha)</option>
-                    <option value="ft2">Foot vuông (ft²)</option>
+                <h3><i class="fas fa-square"></i> <span data-lang="area_converter">Chuyển đơn vị (Diện tích)</span></h3>
+                <p data-lang="area_converter_description">Chuyển đổi diện tích giữa m², km², ha, ft².</p>
+                <input type="number" id="areaInput" placeholder="Nhập giá trị..." data-lang-placeholder="area_input_placeholder" aria-label="Giá trị diện tích" aria-describedby="areaError">
+                <select id="areaFromUnit" aria-label="Đơn vị nguồn">
+                    <option value="m2" data-lang="area_unit_m2">m²</option>
+                    <option value="km2" data-lang="area_unit_km2">km²</option>
+                    <option value="ha" data-lang="area_unit_ha">ha</option>
+                    <option value="ft2" data-lang="area_unit_ft2">ft²</option>
                 </select>
-                <select id="areaTo" aria-label="Đơn vị đích">
-                    <option value="m2">Mét vuông (m²)</option>
-                    <option value="km2">Kilomet vuông (km²)</option>
-                    <option value="ha">Hecta (ha)</option>
-                    <option value="ft2">Foot vuông (ft²)</option>
+                <select id="areaToUnit" aria-label="Đơn vị đích">
+                    <option value="m2" data-lang="area_unit_m2">m²</option>
+                    <option value="km2" data-lang="area_unit_km2">km²</option>
+                    <option value="ha" data-lang="area_unit_ha">ha</option>
+                    <option value="ft2" data-lang="area_unit_ft2">ft²</option>
                 </select>
                 <p class="error-message" id="areaError"></p>
                 <div class="button-group">
-                    <button data-action="convertArea" aria-label="Chuyển đổi diện tích">Chuyển đổi</button>
+                    <button data-action="convertArea" data-lang="area_converter_button" aria-label="Chuyển đổi diện tích">Chuyển đổi</button>
                 </div>
                 <div class="loading" id="areaLoading"><span class="spinner"></span></div>
                 <div class="result" id="areaResult">
-                    <table class="result-table" id="areaOutput" aria-live="polite">
-                        <thead>
-                            <tr>
-                                <th>Giá trị gốc</th>
-                                <th>Đơn vị gốc</th>
-                                <th>Giá trị chuyển đổi</th>
-                                <th>Đơn vị đích</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                    <p id="areaOutput" aria-live="polite"></p>
                 </div>
             </div>
         </section>
 
         <section class="tools-section" id="history" data-tool-name="history">
             <div class="tool-card">
-                <h3><i class="fas fa-history"></i> Lịch sử kết quả</h3>
-                <p>Xem lại các kết quả từ các công cụ bạn đã sử dụng.</p>
+                <h3><i class="fas fa-history"></i> <span data-lang="history">Lịch sử</span></h3>
+                <p data-lang="history_description">Xem lại các kết quả từ các công cụ bạn đã sử dụng.</p>
                 <div class="button-group">
-                    <button data-action="clearHistory" aria-label="Xóa lịch sử">Xóa lịch sử</button>
+                    <button data-action="clearHistory" data-lang="clear_history_button" aria-label="Xóa lịch sử">Xóa lịch sử</button>
                 </div>
-                <div id="historyResult" aria-live="polite"></div>
+                <div class="result active" id="historyResult">
+                    <table class="result-table">
+                        <thead>
+                            <tr>
+                                <th data-lang="history_tool">Công cụ</th>
+                                <th data-lang="history_input">Đầu vào</th>
+                                <th data-lang="history_output">Đầu ra</th>
+                                <th data-lang="history_timestamp">Thời gian</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTable"></tbody>
+                    </table>
+                </div>
             </div>
         </section>
     </main>
 
+    <div class="modal" id="contactModal">
+        <div class="modal-content">
+            <h2 data-lang="contact_title">Thông Tin Liên Hệ</h2>
+            <p><strong data-lang="contact_creator">Người tạo:</strong> Nguyễn Trung Kiên</p>
+            <p><strong data-lang="contact_dob">Ngày sinh:</strong> 03/01/2006</p>
+            <p><strong data-lang="contact_email">Email:</strong> <a href="mailto:kienntgcs210505@fpt.edu.vn">kienntgcs210505@fpt.edu.vn</a></p>
+            <p><strong data-lang="contact_phone">Số điện thoại:</strong> <a href="tel:+84325938957">+84 325 938 957</a></p>
+            <button data-action="closeModal" data-lang="close_button" aria-label="Đóng modal">Đóng</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
     <footer>
-        <p>© 2025 ToolHub. Made with 💙 by Nguyễn Trung Kiên.</p>
+        <p data-lang="footer">© 2025 ToolHub. Made with 💙 by Nguyễn Trung Kiên.</p>
     </footer>
-
-    <div id="toast" class="toast"></div>
-
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js" crossorigin="anonymous"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/compressorjs@1.2.1/dist/compressor.min.js" crossorigin="anonymous"></script>
-    <script defer src="/toolhub/script.js"></script>
 </body>
 </html>
