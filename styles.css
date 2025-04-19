@@ -269,6 +269,10 @@ header {
     transition: border-color 0.3s;
 }
 
+.search-bar input:invalid:not(:placeholder-shown) {
+    border-color: #dc3545;
+}
+
 .search-bar button {
     padding: 12px 15px;
     border: none;
