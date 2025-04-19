@@ -2,11 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Utility Functions
     function escapeHTML(str) {
         return str.replace(/[&<>"']/g, match => ({
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#39;'
+            '&': '&',
+            '<': '<',
+            '>': '>',
+            '"': '"',
+            "'": '''
         }[match]));
     }
 
@@ -171,8 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         ` : '<p style="text-align: center; color: #7f8c8d;">Chưa có lịch sử sử dụng công cụ.</p>';
         if (document.body.classList.contains('dark-mode')) {
-            historyResult.querySelectorAll('pre').forEach(pre => pre.style.background = '#3a3a4e');
-            historyResult.querySelectorAll('.history-container li').forEach(li => li.style.background = '#2c3e50');
+            historyResult.querySelectorAll('pre').forEach(pre => pre.style.background = '#2c3e50');
+            historyResult.querySelectorAll('.history-container li').forEach(li => li.style.background = '#34495e');
             historyResult.querySelectorAll('.history-container h2').forEach(h2 => h2.style.color = '#ecf0f1');
         }
     }
@@ -682,14 +682,6 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
-    // Ensure tool icons are visible by adding a class to toggle visibility
-    function initializeToolIcons() {
-        const toolIcons = document.querySelectorAll('.tool-nav img');
-        toolIcons.forEach(icon => {
-            icon.classList.add('visible');
-        });
-    }
-
     // Event Listeners
     document.addEventListener('click', e => {
         const action = e.target.dataset.action;
@@ -722,7 +714,4 @@ document.addEventListener('DOMContentLoaded', () => {
         darkModeToggle.checked = localStorage.getItem('darkMode') === 'true';
         if (darkModeToggle.checked) document.body.classList.add('dark-mode');
     }
-
-    // Initialize tool icons visibility on load
-    initializeToolIcons();
 });
