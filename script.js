@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('hero').style.display = query ? 'none' : 'block';
     }
 
-    // Tool Functions (unchanged for brevity, assuming they are working as expected)
+    // Tool Functions
     function summarizeText(button) {
         processTool(button, 'textLoading', 'textResult',
             () => {
