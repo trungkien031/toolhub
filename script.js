@@ -2,11 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Utility Functions
     function escapeHTML(str) {
         return str.replace(/[&<>"']/g, match => ({
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#39;'
+            '&': '&',
+            '<': '<',
+            '>': '>',
+            '"': '"',
+            "'": '''
         }[match]));
     }
 
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function showToast(message, type) {
         const toast = document.getElementById('toast');
         toast.textContent = message;
-        toast.className = `toast ${type} active`;
+        toast.className = `toast ${type} active animate__animated animate__slideInRight`;
         setTimeout(() => {
             toast.className = 'toast';
         }, 3000);
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             clearError(validation.input, validation.errorId);
             processFn();
-            document.getElementById(resultId).classList.add('active');
+            document.getElementById(resultId).classList.add('active', 'animate__animated', 'animate__fadeIn');
         });
     }
 
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // UI Functions
     function toggleDarkMode() {
-        document.body.classList.toggle('dark-mode');
+        document.body.classList.toggle('dark-mode', 'animate__animated', 'animate__fadeIn');
         localStorage.setItem('darkMode', document.getElementById('darkModeToggle').checked);
         if (document.body.classList.contains('dark-mode')) {
             document.querySelectorAll('pre').forEach(pre => pre.style.background = '#3a3a4e');
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openContactModal() {
-        document.getElementById('contactModal').classList.add('active');
+        document.getElementById('contactModal').classList.add('active', 'animate__animated', 'animate__fadeIn');
     }
 
     function closeContactModal() {
@@ -107,6 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
             section.style.display = 'none';
         });
         heroSection.style.display = 'block';
+        heroSection.classList.add('animate__animated', 'animate__fadeIn');
         document.querySelectorAll('.tool-nav a').forEach(link => link.classList.remove('active'));
         window.scrollTo({ top: 0, behavior: 'smooth' });
         document.title = 'ToolHub - Hộp Công Cụ Đa Năng';
@@ -122,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const targetSection = document.getElementById(toolId);
         if (targetSection) {
-            targetSection.classList.add('active');
+            targetSection.classList.add('active', 'animate__animated', 'animate__fadeInUp');
             targetSection.style.display = 'block';
             targetSection.scrollIntoView({ behavior: 'smooth' });
             document.title = `${toolId.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())} - ToolHub`;
@@ -190,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (toolName.includes(searchInput)) {
                 heroSection.style.display = 'none';
                 section.style.display = 'block';
-                section.classList.add('active');
+                section.classList.add('active', 'animate__animated', 'animate__fadeInUp');
                 section.scrollIntoView({ behavior: 'smooth' });
                 found = true;
             } else {
@@ -514,6 +515,10 @@ document.addEventListener('DOMContentLoaded', () => {
             () => {
                 const qrInput = document.getElementById('qrInput');
                 const text = qrInput.value.trim();
+                if (!window.QRCode) {
+                    showToast('Thư viện QRCode không tải được!', 'error');
+                    return { isValid: false, input: qrInput, errorId: 'qrError', message: 'Không thể tạo mã QR!' };
+                }
                 return {
                     isValid: !!text,
                     input: qrInput,
@@ -525,7 +530,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const text = document.getElementById('qrInput').value.trim();
                 const qrOutput = document.getElementById('qrOutput');
                 qrOutput.src = '';
-                QRCode.toDataURL(text, { width: 200, margin: 1 }, (err, url) => {
+                window.QRCode.toDataURL(text, { width: 200, margin: 1 }, (err, url) => {
                     if (err) {
                         showError(document.getElementById('qrInput'), 'qrError', 'Không thể tạo mã QR!');
                         return;
@@ -544,6 +549,10 @@ document.addEventListener('DOMContentLoaded', () => {
             () => {
                 const imageInput = document.getElementById('imageInput');
                 const file = imageInput.files[0];
+                if (!window.Compressor) {
+                    showToast('Thư viện Compressor không tải được!', 'error');
+                    return { isValid: false, input: imageInput, errorId: 'imageError', message: 'Không thể nén ảnh!' };
+                }
                 return {
                     isValid: file && /\.(jpe?g|png|gif|bmp)$/i.test(file.name),
                     input: imageInput,
@@ -554,7 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
             () => {
                 const file = document.getElementById('imageInput').files[0];
                 const imageResult = document.getElementById('imageResult');
-                new Compressor(file, {
+                new window.Compressor(file, {
                     quality: 0.6,
                     maxWidth: 800,
                     maxHeight: 800,
