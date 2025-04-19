@@ -598,7 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const bmiOutput = document.getElementById('bmiOutput');
         
         const weight = parseFloat(weightInput.value);
-        const height = parseFloat(heightInput.value) / 100;
+        const height = parseFloat(heightInput.value) / 100; // Chuyển cm thành mét
         const lang = localStorage.getItem('language') || 'vi';
         if (isNaN(weight) || isNaN(height) || weight <= 0 || height <= 0) {
             bmiError.textContent = translations[lang]['error_invalid_weight_height'];
@@ -616,6 +616,7 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (bmi < 25) category = translations[lang]['bmi_normal'] || 'Normal';
             else if (bmi < 30) category = translations[lang]['bmi_overweight'] || 'Overweight';
             else category = translations[lang]['bmi_obese'] || 'Obese';
+
             bmiOutput.textContent = `BMI: ${bmi} (${category})`;
             bmiLoading.classList.remove('active');
             bmiResult.classList.add('active');
