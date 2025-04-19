@@ -1,4 +1,43 @@
-<!DOCTYPE html>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -12,8 +51,8 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
-        script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
-        style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
+        script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'unsafe-inline';
+        style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com 'unsafe-inline';
         font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
         img-src 'self' data:;
         connect-src 'self' https://v6.exchangerate-api.com;
@@ -22,6 +61,7 @@
     <link rel="icon" href="/toolhub/assets/icons/favicon.ico" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" crossorigin="anonymous">
     <link rel="stylesheet" href="/toolhub/styles.css">
 </head>
 <body>
@@ -65,7 +105,7 @@
             <h2>Thông Tin Liên Hệ</h2>
             <p><strong>Người tạo:</strong> Nguyễn Trung Kiên</p>
             <p><strong>Ngày sinh:</strong> 03/01/2006</p>
-            <p><strong>Email:</strong> <a href="mailto:trungkien031@gmail.com">trungkien031@gmail.com</a></p>
+            <p><strong>Email:</strong> <a href="/cdn-cgi/l/email-protection#c5b1b7b0aba2aeaca0abf5f6f485a2a8a4aca9eba6aaa8"><span class="__cf_email__" data-cfemail="6b1f191e050c00020e055b585a2b0c060a020745080406">[email&#160;protected]</span></a></p>
             <p><strong>Số điện thoại:</strong> <a href="tel:0925344777">0925344777</a></p>
             <button data-action="closeContactModal" aria-label="Đóng cửa sổ liên hệ">Đóng</button>
         </div>
@@ -401,7 +441,9 @@
             <div class="tool-card">
                 <h3><i class="fas fa-history"></i> Lịch sử kết quả</h3>
                 <p>Xem lại các kết quả từ các công cụ bạn đã sử dụng.</p>
-                <button data-action="clearHistory" aria-label="Xóa lịch sử">Xóa lịch sử</button>
+                <div class="button-group">
+                    <button data-action="clearHistory" aria-label="Xóa lịch sử">Xóa lịch sử</button>
+                </div>
                 <div id="historyResult" aria-live="polite"></div>
             </div>
         </section>
@@ -413,8 +455,9 @@
 
     <div id="toast" class="toast"></div>
 
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js" crossorigin="anonymous"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/compressorjs@1.2.1/dist/compressor.min.js" crossorigin="anonymous"></script>
     <script defer src="/toolhub/script.js"></script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'932e33476fecdd20',t:'MTc0NTA4NDU2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
