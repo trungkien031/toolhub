@@ -80,18 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return JSON.parse(localStorage.getItem(`toolState_${toolId}`) || '{}');
     }
 
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-
     // UI Functions
     function toggleDarkMode() {
         document.body.classList.toggle('dark-mode');
@@ -183,6 +171,37 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.removeItem('toolHistory');
         showHistory();
         showToast('Đã xóa lịch sử!', 'success');
+    }
+
+    // Search Functionality
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        // Tìm kiếm khi nhấn Enter
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const query = searchInput.value.trim().toLowerCase();
+                const toolsSections = document.querySelectorAll('.tools-section');
+                toolsSections.forEach(section => {
+                    const toolName = section.dataset.toolName.toLowerCase();
+                    section.style.display = query && toolName.includes(query) ? 'block' : 'none';
+                    section.classList.toggle('active', query && toolName.includes(query));
+                });
+                document.getElementById('hero').style.display = query ? 'none' : 'block';
+            }
+        });
+    }
+
+    // Thêm sự kiện cho nút tìm kiếm
+    function searchTools() {
+        const query = document.getElementById('searchInput').value.trim().toLowerCase();
+        const toolsSections = document.querySelectorAll('.tools-section');
+        toolsSections.forEach(section => {
+            const toolName = section.dataset.toolName.toLowerCase();
+            section.style.display = query && toolName.includes(query) ? 'block' : 'none';
+            section.classList.toggle('active', query && toolName.includes(query));
+        });
+        document.getElementById('hero').style.display = query ? 'none' : 'block';
     }
 
     // Tool Functions
@@ -339,7 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Đã sao chép mật khẩu!', 'success');
             setTimeout(() => { copyBtn.textContent = 'Sao chép'; }, 2000);
         }).catch(err => {
-            showError(document.getElementById('passLength'), 'passError', 'Không thể sao chép: ' + err);
+            showError(document.getElementById('passLength'), 'passError', 'Không thể sao chép!');
         });
     }
 
@@ -349,17 +368,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 const charInput = document.getElementById('charInput');
                 const text = charInput.value.trim();
                 return {
-                    isValid: !!text,
+                    isValid: text.length > 0,
                     input: charInput,
                     errorId: 'charError',
                     message: 'Vui lòng nhập văn bản!'
                 };
             },
             () => {
-                const text = document.getElementById('charInput').value.trim();
+                const text = document.getElementById('charInput').value;
                 const charCount = text.length;
-                const wordCount = text.split(/\s+/).filter(word => word.length > 0).length;
-                document.getElementById('charOutput').textContent = `Ký tự: ${charCount}, Từ: ${wordCount}`;
+                const wordCount = text.trim().split(/\s+/).filter(word => word).length;
+                document.getElementById('charOutput').textContent = `Số ký tự: ${charCount} | Số từ: ${wordCount}`;
                 saveToHistory('char-counter', { text: text.slice(0, 50) + '...', charCount, wordCount });
                 saveToolState('char-counter', { charInput: text });
                 showToast('Đã đếm ký tự và từ!', 'success');
@@ -374,16 +393,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const url = urlInput.value.trim();
                 const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
                 return {
-                    isValid: urlPattern.test(url),
+                    isValid: url && urlPattern.test(url),
                     input: urlInput,
                     errorId: 'urlError',
-                    message: 'Vui lòng nhập URL hợp lệ!'
+                    message: url ? 'URL không hợp lệ!' : 'Vui lòng nhập URL!'
                 };
             },
             () => {
                 const url = document.getElementById('urlInput').value.trim();
                 document.getElementById('urlOutput').textContent = `URL hợp lệ: ${url}`;
-                saveToHistory('url-checker', { url });
+                saveToHistory('url-checker', { url, status: 'Hợp lệ' });
                 saveToolState('url-checker', { urlInput: url });
                 showToast('Đã kiểm tra URL!', 'success');
             }
@@ -406,13 +425,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const value = parseFloat(document.getElementById('tempValue').value);
                 const fromUnit = document.getElementById('tempFrom').value;
                 const toUnit = document.getElementById('tempTo').value;
+                let result;
+                // Chuyển tất cả về Celsius trước
                 let celsius;
                 if (fromUnit === 'C') celsius = value;
                 else if (fromUnit === 'F') celsius = (value - 32) * 5 / 9;
                 else celsius = value - 273.15;
-                let result;
+                // Chuyển từ Celsius sang đơn vị đích
                 if (toUnit === 'C') result = celsius;
-                else if (toUnit === 'F') result = celsius * 9 / 5 + 32;
+                else if (toUnit === 'F') result = (celsius * 9 / 5) + 32;
                 else result = celsius + 273.15;
                 const output = {
                     original: value.toFixed(2),
@@ -447,13 +468,79 @@ document.addEventListener('DOMContentLoaded', () => {
                     message: 'Vui lòng nhập giá trị hợp lệ!'
                 };
             },
-            () => {
-                document.getElementById('currencyOutput').querySelector('tbody').innerHTML = `
-                    <tr>
-                        <td colspan="4">Chức năng này yêu cầu API key. Vui lòng liên hệ để tích hợp!</td>
-                    </tr>
-                `;
-                showToast('Chức năng chưa được kích hoạt!', 'error');
+            async () => {
+                const value = parseFloat(document.getElementById('currencyValue').value);
+                const fromUnit = document.getElementById('currencyFrom').value;
+                const toUnit = document.getElementById('currencyTo').value;
+
+                // Thay YOUR_API_KEY bằng API key của bạn
+                const apiKey = 'your_api_key_here'; // Thay bằng API key từ ExchangeRate-API
+                const url = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${fromUnit}`;
+
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+
+                    if (data.result !== 'success') {
+                        throw new Error(data['error-type'] || 'Lỗi khi gọi API');
+                    }
+
+                    const rate = data.conversion_rates[toUnit];
+                    const convertedValue = value * rate;
+
+                    const output = {
+                        original: value.toFixed(2),
+                        fromUnit,
+                        converted: convertedValue.toFixed(2),
+                        toUnit
+                    };
+
+                    document.getElementById('currencyOutput').querySelector('tbody').innerHTML = `
+                        <tr>
+                            <td>${output.original}</td>
+                            <td>${output.fromUnit}</td>
+                            <td>${output.converted}</td>
+                            <td>${output.toUnit}</td>
+                        </tr>
+                    `;
+
+                    saveToHistory('currency-converter', output);
+                    saveToolState('currency-converter', { currencyValue: value, currencyFrom: fromUnit, currencyTo: toUnit });
+                    showToast('Đã chuyển đổi tiền tệ!', 'success');
+                } catch (error) {
+                    // Dùng tỷ giá tĩnh nếu API không hoạt động
+                    const rates = {
+                        USD: { USD: 1, VND: 25000, EUR: 0.92, JPY: 150, GBP: 0.78, CNY: 7.1 },
+                        VND: { USD: 0.00004, VND: 1, EUR: 0.000037, JPY: 0.006, GBP: 0.000031, CNY: 0.00028 },
+                        EUR: { USD: 1.09, VND: 27000, EUR: 1, JPY: 163, GBP: 0.85, CNY: 7.7 },
+                        JPY: { USD: 0.0067, VND: 166.67, EUR: 0.0061, JPY: 1, GBP: 0.0052, CNY: 0.047 },
+                        GBP: { USD: 1.28, VND: 32000, EUR: 1.18, JPY: 192, GBP: 1, CNY: 9.1 },
+                        CNY: { USD: 0.14, VND: 3500, EUR: 0.13, JPY: 21.28, GBP: 0.11, CNY: 1 }
+                    };
+
+                    const rate = rates[fromUnit][toUnit];
+                    const convertedValue = value * rate;
+
+                    const output = {
+                        original: value.toFixed(2),
+                        fromUnit,
+                        converted: convertedValue.toFixed(2),
+                        toUnit
+                    };
+
+                    document.getElementById('currencyOutput').querySelector('tbody').innerHTML = `
+                        <tr>
+                            <td>${output.original}</td>
+                            <td>${output.fromUnit}</td>
+                            <td>${output.converted}</td>
+                            <td>${output.toUnit}</td>
+                        </tr>
+                    `;
+
+                    saveToHistory('currency-converter', output);
+                    saveToolState('currency-converter', { currencyValue: value, currencyFrom: fromUnit, currencyTo: toUnit });
+                    showToast('Đã chuyển đổi tiền tệ (dùng tỷ giá tĩnh)!', 'success');
+                }
             }
         );
     }
@@ -464,17 +551,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const qrInput = document.getElementById('qrInput');
                 const text = qrInput.value.trim();
                 return {
-                    isValid: !!text,
+                    isValid: text && text.length <= 1000,
                     input: qrInput,
                     errorId: 'qrError',
-                    message: 'Vui lòng nhập văn bản hoặc URL!'
+                    message: text ? 'Văn bản quá dài (tối đa 1,000 ký tự)!' : 'Vui lòng nhập văn bản hoặc URL!'
                 };
             },
             () => {
                 const text = document.getElementById('qrInput').value.trim();
                 const qrOutput = document.getElementById('qrOutput');
-                qrOutput.src = '';
-                QRCode.toDataURL(text, { width: 200, margin: 2 }, (err, url) => {
+                QRCode.toDataURL(text, { width: 200, margin: 1 }, (err, url) => {
                     if (err) {
                         showError(document.getElementById('qrInput'), 'qrError', 'Không thể tạo mã QR!');
                         return;
@@ -494,10 +580,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const imageInput = document.getElementById('imageInput');
                 const file = imageInput.files[0];
                 return {
-                    isValid: !!file && file.type.startsWith('image/'),
+                    isValid: file && file.size <= 5 * 1024 * 1024,
                     input: imageInput,
                     errorId: 'imageError',
-                    message: 'Vui lòng chọn file ảnh hợp lệ!'
+                    message: file ? 'Ảnh quá lớn (tối đa 5MB)!' : 'Vui lòng chọn ảnh!'
                 };
             },
             () => {
@@ -508,18 +594,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     maxHeight: 800,
                     success(result) {
                         const url = URL.createObjectURL(result);
-                        const img = document.createElement('img');
-                        img.src = url;
-                        img.alt = 'Ảnh đã nén';
-                        img.style.maxWidth = '100%';
+                        const originalSize = (file.size / 1024).toFixed(2);
+                        const compressedSize = (result.size / 1024).toFixed(2);
                         const imageResult = document.getElementById('imageResult');
-                        imageResult.innerHTML = '';
-                        imageResult.appendChild(img);
-                        saveToHistory('image-compressor', { originalSize: file.size, compressedSize: result.size });
+                        imageResult.innerHTML = `
+                            <p>Kích thước gốc: ${originalSize} KB</p>
+                            <p>Kích thước sau nén: ${compressedSize} KB</p>
+                            <img src="${url}" alt="Ảnh đã nén" style="max-width: 100%;">
+                            <a href="${url}" download="compressed-image.jpg">Tải ảnh đã nén</a>
+                        `;
+                        saveToHistory('image-compressor', { originalSize, compressedSize });
                         showToast('Đã nén ảnh!', 'success');
                     },
                     error(err) {
-                        showError(document.getElementById('imageInput'), 'imageError', 'Không thể nén ảnh: ' + err.message);
+                        showError(document.getElementById('imageInput'), 'imageError', 'Không thể nén ảnh!');
                     }
                 });
             }
@@ -532,21 +620,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 const weightInput = document.getElementById('weight');
                 const heightInput = document.getElementById('height');
                 const weight = parseFloat(weightInput.value);
-                const height = parseFloat(heightInput.value) / 100; // Convert cm to meters
+                const height = parseFloat(heightInput.value);
                 if (isNaN(weight) || weight <= 0) return { isValid: false, input: weightInput, errorId: 'bmiError', message: 'Cân nặng không hợp lệ!' };
                 if (isNaN(height) || height <= 0) return { isValid: false, input: heightInput, errorId: 'bmiError', message: 'Chiều cao không hợp lệ!' };
                 return { isValid: true, input: weightInput, errorId: 'bmiError' };
             },
             () => {
                 const weight = parseFloat(document.getElementById('weight').value);
-                const height = parseFloat(document.getElementById('height').value) / 100; // Convert cm to meters
-                const bmi = weight / (height * height);
+                const height = parseFloat(document.getElementById('height').value);
+                const bmi = (weight / ((height / 100) ** 2)).toFixed(1);
                 let status;
                 if (bmi < 18.5) status = 'Thiếu cân';
                 else if (bmi < 25) status = 'Bình thường';
                 else if (bmi < 30) status = 'Thừa cân';
                 else status = 'Béo phì';
-                const output = { weight, height: height * 100, bmi: bmi.toFixed(2), status };
+                const output = { weight, height, bmi, status };
                 document.getElementById('bmiOutput').querySelector('tbody').innerHTML = `
                     <tr>
                         <td>${output.weight}</td>
@@ -556,7 +644,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </tr>
                 `;
                 saveToHistory('bmi-calculator', output);
-                saveToolState('bmi-calculator', { weight, height: height * 100 });
+                saveToolState('bmi-calculator', { weight, height });
                 showToast('Đã tính BMI!', 'success');
             }
         );
@@ -601,21 +689,6 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
-    // Search Functionality
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', debounce(() => {
-            const query = searchInput.value.trim().toLowerCase();
-            const toolsSections = document.querySelectorAll('.tools-section');
-            toolsSections.forEach(section => {
-                const toolName = section.dataset.toolName.toLowerCase();
-                section.style.display = query && toolName.includes(query) ? 'block' : 'none';
-                section.classList.toggle('active', query && toolName.includes(query));
-            });
-            document.getElementById('hero').style.display = query ? 'none' : 'block';
-        }, 300));
-    }
-
     // Event Listeners
     document.addEventListener('click', e => {
         const action = e.target.dataset.action;
@@ -638,18 +711,14 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (action === 'calculateBMI') calculateBMI(e.target);
         else if (action === 'convertArea') convertArea(e.target);
         else if (action === 'clearHistory') clearHistory();
+        else if (action === 'searchTools') searchTools();
         else if (tool) showTool(tool);
     });
 
-    document.getElementById('darkModeToggle').addEventListener('change', toggleDarkMode);
-
-    // Initialize
-    const darkMode = localStorage.getItem('darkMode') === 'true';
-    if (darkMode) {
-        document.getElementById('darkModeToggle').checked = true;
-        document.body.classList.add('dark-mode');
-        document.querySelectorAll('pre').forEach(pre => pre.style.background = '#3a3a4e');
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('change', toggleDarkMode);
+        darkModeToggle.checked = localStorage.getItem('darkMode') === 'true';
+        if (darkModeToggle.checked) document.body.classList.add('dark-mode');
     }
-
-    showHome();
 });
