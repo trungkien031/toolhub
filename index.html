@@ -16,7 +16,7 @@
         style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
         font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
         img-src 'self' data:;
-        connect-src 'self';
+        connect-src 'self' https://v6.exchangerate-api.com;
     ">
     <title>ToolHub - Hộp Công Cụ Đa Năng</title>
     <link rel="icon" href="/toolhub/assets/icons/favicon.ico" type="image/x-icon">
@@ -37,7 +37,7 @@
     </div>
 
     <header>
-        <div class="logo" data-action="showHome" role="button" tabindex="0" aria-label="Về trang chủ">ToolHub <span>🔧</span></div>
+        <div class="logo" data-action="showHome" role="button" tabindex="0" aria-label="Về trang chủ">ToolHub <span>🛠️</span></div>
         <nav class="nav">
             <a href="#" data-action="showHome" data-lang="home">Trang chủ</a>
             <a href="#" data-action="showHistory" data-lang="history">Lịch sử</a>
@@ -78,6 +78,7 @@
         <div class="search-bar">
             <i class="fas fa-search" aria-hidden="true"></i>
             <input type="text" id="searchInput" placeholder="Tìm kiếm công cụ..." aria-label="Tìm kiếm công cụ">
+            <button data-action="searchTools" aria-label="Tìm kiếm"><i class="fas fa-search"></i></button>
         </div>
     </section>
 
@@ -262,7 +263,7 @@
         <section class="tools-section" id="currency-converter" data-tool-name="currency-converter">
             <div class="tool-card">
                 <h3><i class="fas fa-money-bill-wave"></i> Chuyển đổi tiền tệ</h3>
-                <p>Chuyển đổi giữa các loại tiền tệ phổ biến (yêu cầu API key).</p>
+                <p>Chuyển đổi giữa các loại tiền tệ phổ biến.</p>
                 <input type="number" id="currencyValue" placeholder="Nhập giá trị" aria-label="Giá trị tiền tệ" aria-describedby="currencyError">
                 <select id="currencyFrom" aria-label="Loại tiền tệ nguồn">
                     <option value="USD">USD</option>
