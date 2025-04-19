@@ -333,24 +333,28 @@ header:hover {
 .search-bar button {
     padding: 12px 15px;
     border: none;
-    background: #007bff;
+    background: linear-gradient(135deg, #007bff, #0056b3);
     color: #fff;
     border-radius: 0 25px 25px 0;
     cursor: pointer;
-    transition: background 0.3s, transform 0.3s;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
 }
 
 .search-bar button:hover {
-    background: #0056b3;
+    background: linear-gradient(135deg, #0056b3, #003d82);
     transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
 }
 
 .dark-mode .search-bar button {
-    background: #6495ed;
+    background: linear-gradient(135deg, #6495ed, #4169e1);
 }
 
 .dark-mode .search-bar button:hover {
-    background: #4169e1;
+    background: linear-gradient(135deg, #4169e1, #2a52be);
+    box-shadow: 0 5px 15px rgba(100, 149, 237, 0.4);
 }
 
 .tools-section {
@@ -488,31 +492,53 @@ header:hover {
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
-    background: #007bff;
+    background: linear-gradient(135deg, #007bff, #0056b3);
     color: #fff;
     font-size: 1rem;
     cursor: pointer;
-    transition: background 0.3s, transform 0.3s;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+
+.tool-card button::after {
+    content: '';
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: scale(0);
+    transition: transform 0.5s ease-out;
+    pointer-events: none;
+}
+
+.tool-card button:active::after {
+    transform: scale(2);
+    opacity: 0;
 }
 
 .tool-card button:hover {
-    background: #0056b3;
+    background: linear-gradient(135deg, #0056b3, #003d82);
     transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
     animation: pulse 0.5s ease-in-out;
 }
 
 .dark-mode .tool-card button {
-    background: #6495ed;
+    background: linear-gradient(135deg, #6495ed, #4169e1);
 }
 
 .dark-mode .tool-card button:hover {
-    background: #4169e1;
+    background: linear-gradient(135deg, #4169e1, #2a52be);
+    box-shadow: 0 5px 15px rgba(100, 149, 237, 0.4);
 }
 
 .tool-card button:disabled {
     background: #ccc;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
 }
 
 .loading {
@@ -588,20 +614,21 @@ header:hover {
 }
 
 .copy-btn {
-    background: #28a745;
+    background: linear-gradient(135deg, #28a745, #218838);
 }
 
 .copy-btn:hover {
-    background: #218838;
-    transform: scale(1.05);
+    background: linear-gradient(135deg, #218838, #1b6d2f);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
 }
 
 .dark-mode .copy-btn {
-    background: #2ecc71;
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
 }
 
 .dark-mode .copy-btn:hover {
-    background: #27ae60;
+    background: linear-gradient(135deg, #27ae60, #219653);
+    box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
 }
 
 .modal {
