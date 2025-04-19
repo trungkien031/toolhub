@@ -1,5 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM fully loaded and parsed");
+
     let translations = {};
+    var gk_isXlsx = false;
+    var gk_xlsxFileLookup = {};
+    var gk_fileData = {};
 
     // Tải file languages.json
     fetch('/toolhub/languages.json')
@@ -40,85 +45,153 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast(translations[selectedLang]['language_switch_success'], 'success');
     });
 
-    // Xử lý chế độ tối
-    const darkModeToggle = document.getElementById('darkModeToggle');
-    if (localStorage.getItem('darkMode') === 'enabled') {
-        document.body.classList.add('dark-mode');
-        darkModeToggle.checked = true;
+    // Utility Functions
+    function escapeHTML(str) {
+        return str.replace(/[&<>"']/g, match => ({
+            '&': '&',
+            '<': '<',
+            '>': '>',
+            '"': '"',
+            "'": '''
+        }[match]));
     }
-    darkModeToggle.addEventListener('change', () => {
-        document.body.classList.toggle('dark-mode');
-        localStorage.setItem('darkMode', darkModeToggle.checked ? 'enabled' : 'disabled');
-    });
 
-    // Xử lý sự kiện click
-    document.addEventListener('click', (e) => {
-        const action = e.target.closest('[data-action]')?.dataset.action;
-        if (!action) return;
-
-        const actions = {
-            showHome: showHome,
-            showTool: () => showTool(e.target.closest('[data-tool]').dataset.tool),
-            showHistory: showHistory,
-            openContactModal: openContactModal,
-            closeModal: closeModal,
-            searchTools: searchTools,
-            summarizeText: summarizeText,
-            convertLength: convertLength,
-            calculate: calculate,
-            generatePassword: generatePassword,
-            countChars: countChars,
-            checkURL: checkURL,
-            convertTemp: convertTemp,
-            convertCurrency: convertCurrency,
-            generateQR: generateQR,
-            compressImage: compressImage,
-            calculateBMI: calculateBMI,
-            convertArea: convertArea,
-            clearHistory: clearHistory,
-            copyPassword: copyPassword
-        };
-
-        actions[action]?.();
-    });
-
-    // Xử lý phím Enter
-    document.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            const focusedElement = document.activeElement;
-            const action = focusedElement.closest('[data-action]')?.dataset.action || focusedElement.dataset.action;
-            if (action) {
-                e.preventDefault();
-                const actions = {
-                    searchTools: searchTools,
-                    summarizeText: summarizeText,
-                    convertLength: convertLength,
-                    calculate: calculate,
-                    generatePassword: generatePassword,
-                    countChars: countChars,
-                    checkURL: checkURL,
-                    convertTemp: convertTemp,
-                    convertCurrency: convertCurrency,
-                    generateQR: generateQR,
-                    compressImage: compressImage,
-                    calculateBMI: calculateBMI,
-                    convertArea: convertArea,
-                    clearHistory: clearHistory,
-                    copyPassword: copyPassword
-                };
-                actions[action]?.();
-            }
+    function showError(inputElement, errorElementId, messageKey) {
+        const lang = localStorage.getItem('language') || 'vi';
+        const errorElement = document.getElementById(errorElementId);
+        if (!errorElement) {
+            console.error(`Error element with ID ${errorElementId} not found`);
+            return false;
         }
-    });
+        inputElement.classList.add('error');
+        errorElement.textContent = translations[lang][messageKey] || messageKey;
+        errorElement.classList.add('active');
+        showToast(translations[lang][messageKey] || messageKey, 'error');
+        return false;
+    }
+
+    function clearError(inputElement, errorElementId) {
+        const errorElement = document.getElementById(errorElementId);
+        if (!errorElement) {
+            console.error(`Error element with ID ${errorElementId} not found`);
+            return false;
+        }
+        inputElement.classList.remove('error');
+        errorElement.textContent = '';
+        errorElement.classList.remove('active');
+        return true;
+    }
+
+    function showToast(messageKey, type) {
+        const lang = localStorage.getItem('language') || 'vi';
+        const toast = document.getElementById('toast');
+        if (!toast) {
+            console.error("Toast element not found");
+            return;
+        }
+        toast.textContent = translations[lang][messageKey] || messageKey;
+        toast.className = `toast ${type} active animate__animated animate__slideInRight`;
+        setTimeout(() => {
+            toast.className = 'toast';
+        }, 3000);
+    }
+
+    function showLoading(button, loadingId, resultId, callback) {
+        const loading = document.getElementById(loadingId);
+        const result = document.getElementById(resultId);
+        if (!loading || !result) {
+            console.error(`Loading or result element not found: ${loadingId}, ${resultId}`);
+            return;
+        }
+        loading.classList.add('active');
+        result.classList.remove('active');
+        button.disabled = true;
+        setTimeout(() => {
+            loading.classList.remove('active');
+            button.disabled = false;
+            callback();
+        }, 300);
+    }
+
+    function processTool(button, loadingId, resultId, validateFn, processFn) {
+        showLoading(button, loadingId, resultId, () => {
+            const validation = validateFn();
+            if (!validation.isValid) {
+                return showError(validation.input, validation.errorId, validation.messageKey);
+            }
+            clearError(validation.input, validation.errorId);
+            processFn();
+            document.getElementById(resultId).classList.add('active', 'animate__animated', 'animate__fadeIn');
+        });
+    }
+
+    function saveToHistory(toolId, result) {
+        let history = JSON.parse(localStorage.getItem('toolHistory') || '[]');
+        const lang = localStorage.getItem('language') || 'vi';
+        history.push({
+            toolId,
+            toolName: translations[lang][`${toolId}_title`] || toolId,
+            result,
+            timestamp: new Date().toLocaleString(lang === 'vi' ? 'vi-VN' : 'en-US')
+        });
+        if (history.length > 100) history = history.slice(-100);
+        localStorage.setItem('toolHistory', JSON.stringify(history));
+    }
+
+    function saveToolState(toolId, inputData) {
+        localStorage.setItem(`toolState_${toolId}`, JSON.stringify(inputData));
+    }
+
+    function loadToolState(toolId) {
+        return JSON.parse(localStorage.getItem(`toolState_${toolId}`) || '{}');
+    }
+
+    // UI Functions
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode', 'animate__animated', 'animate__fadeIn');
+        localStorage.setItem('darkMode', document.getElementById('darkModeToggle').checked);
+        if (document.body.classList.contains('dark-mode')) {
+            document.querySelectorAll('pre').forEach(pre => pre.style.background = '#3a3a4e');
+        } else {
+            document.querySelectorAll('pre').forEach(pre => pre.style.background = '#f5f5f5');
+        }
+    }
+
+    function openContactModal() {
+        const modal = document.getElementById('contactModal');
+        if (!modal) {
+            console.error("Contact modal not found");
+            return;
+        }
+        modal.classList.add('active', 'animate__animated', 'animate__fadeIn');
+    }
+
+    function closeContactModal() {
+        const modal = document.getElementById('contactModal');
+        if (!modal) {
+            console.error("Contact modal not found");
+            return;
+        }
+        modal.classList.remove('active');
+    }
 
     function showHome() {
-        document.getElementById('hero').style.display = 'block';
-        document.querySelectorAll('.tools-section').forEach(section => {
+        const toolsSections = document.querySelectorAll('.tools-section');
+        const heroSection = document.getElementById('hero');
+        if (!heroSection) {
+            console.error("Hero section not found");
+            return;
+        }
+        toolsSections.forEach(section => {
             section.classList.remove('active');
             section.style.display = 'none';
         });
+        heroSection.style.display = 'block';
+        heroSection.classList.add('animate__animated', 'animate__fadeIn');
         document.querySelectorAll('.tool-nav a').forEach(link => link.classList.remove('active'));
-        document.querySelector('html').scrollTop = 0;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const lang = localStorage.getItem('language') || 'vi';
+        document.title = translations[lang]['hero_title'] || 'ToolHub - Hộp Công Cụ Đa Năng';
     }
 
     function showTool(toolId) {
@@ -138,6 +211,8 @@ document.addEventListener('DOMContentLoaded', () => {
             targetSection.classList.add('active', 'animate__animated', 'animate__fadeInUp');
             targetSection.style.display = 'block';
             targetSection.scrollIntoView({ behavior: 'smooth' });
+            const lang = localStorage.getItem('language') || 'vi';
+            document.title = `${translations[lang][`${toolId}_title`]} - ToolHub`;
             restoreToolState(toolId);
             document.querySelectorAll('.tool-nav a').forEach(link => {
                 link.classList.toggle('active', link.dataset.tool === toolId);
@@ -147,567 +222,683 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function showHistory() {
-        const heroSection = document.getElementById('hero');
-        const toolsSections = document.querySelectorAll('.tools-section');
-        if (!heroSection) {
-            console.error("Hero section not found");
+    function restoreToolState(toolId) {
+        const state = loadToolState(toolId);
+        const section = document.getElementById(toolId);
+        if (!section) {
+            console.error(`Tool section with ID ${toolId} not found for state restoration`);
             return;
         }
-        heroSection.style.display = 'none';
-        toolsSections.forEach(section => {
-            section.classList.remove('active');
-            section.style.display = 'none';
-        });
-        const historySection = document.getElementById('history');
-        historySection.classList.add('active', 'animate__animated', 'animate__fadeInUp');
-        historySection.style.display = 'block';
-        historySection.scrollIntoView({ behavior: 'smooth' });
-        loadHistory();
-    }
-
-    function openContactModal() {
-        document.getElementById('contactModal').classList.add('active', 'animate__animated', 'animate__zoomIn');
-    }
-
-    function closeModal() {
-        document.getElementById('contactModal').classList.remove('active');
-    }
-
-    function searchTools() {
-        const query = document.getElementById('searchInput').value.toLowerCase();
-        const toolLinks = document.querySelectorAll('.tool-nav a');
-        toolLinks.forEach(link => {
-            const toolName = link.querySelector('.tooltip').textContent.toLowerCase();
-            link.style.display = toolName.includes(query) ? 'flex' : 'none';
-        });
-    }
-
-    function summarizeText() {
-        const textInput = document.getElementById('textInput');
-        const summaryLength = document.getElementById('summaryLength').value;
-        const textError = document.getElementById('textError');
-        const textLoading = document.getElementById('textLoading');
-        const textResult = document.getElementById('textResult');
-        const summaryOutput = document.getElementById('summaryOutput');
-        
-        const text = textInput.value.trim();
-        const lang = localStorage.getItem('language') || 'vi';
-        if (!text) {
-            textError.textContent = translations[lang]['error_empty_text'];
-            textError.classList.add('active');
-            return;
-        }
-        if (text.length < 50) {
-            textError.textContent = translations[lang]['error_text_too_short'];
-            textError.classList.add('active');
-            return;
-        }
-        textError.classList.remove('active');
-        textLoading.classList.add('active');
-        textResult.classList.remove('active');
-
-        setTimeout(() => {
-            const sentences = text.split(/[.!?]+/).filter(s => s.trim());
-            const wordCount = text.split(/\s+/).length;
-            const summaryRatio = { short: 0.2, medium: 0.3, long: 0.4 }[summaryLength];
-            const summaryWordCount = Math.max(10, Math.floor(wordCount * summaryRatio));
-            const summarySentences = sentences.slice(0, Math.max(1, Math.floor(sentences.length * summaryRatio)));
-            const summary = summarySentences.join('. ') + (summarySentences.length ? '.' : '');
-            
-            summaryOutput.textContent = summary;
-            textLoading.classList.remove('active');
-            textResult.classList.add('active');
-            saveToHistory('summarize', text, summary);
-        }, 1000);
-    }
-
-    function convertLength() {
-        const lengthInput = document.getElementById('lengthInput');
-        const fromUnit = document.getElementById('lengthFromUnit').value;
-        const toUnit = document.getElementById('lengthToUnit').value;
-        const lengthError = document.getElementById('lengthError');
-        const lengthLoading = document.getElementById('lengthLoading');
-        const lengthResult = document.getElementById('lengthResult');
-        const lengthOutput = document.getElementById('lengthOutput');
-        
-        const value = parseFloat(lengthInput.value);
-        const lang = localStorage.getItem('language') || 'vi';
-        if (isNaN(value) || value < 0) {
-            lengthError.textContent = translations[lang]['error_invalid_length'];
-            lengthError.classList.add('active');
-            return;
-        }
-        lengthError.classList.remove('active');
-        lengthLoading.classList.add('active');
-        lengthResult.classList.remove('active');
-
-        setTimeout(() => {
-            const conversionRates = {
-                m: 1, km: 0.001, cm: 100, in: 39.3701, ft: 3.28084, yd: 1.09361
-            };
-            const valueInMeters = value / conversionRates[fromUnit];
-            const convertedValue = valueInMeters * conversionRates[toUnit];
-            const result = `${value} ${translations[lang][`length_unit_${fromUnit}`]} = ${convertedValue.toFixed(2)} ${translations[lang][`length_unit_${toUnit}`]}`;
-            
-            lengthOutput.textContent = result;
-            lengthLoading.classList.remove('active');
-            lengthResult.classList.add('active');
-            saveToHistory('length-converter', `${value} ${translations[lang][`length_unit_${fromUnit}`]}`, result);
-        }, 500);
-    }
-
-    function calculate() {
-        const input1 = parseFloat(document.getElementById('calcInput1').value);
-        const input2 = parseFloat(document.getElementById('calcInput2').value);
-        const operation = document.getElementById('calcOperation').value;
-        const calcError = document.getElementById('calcError');
-        const calcLoading = document.getElementById('calcLoading');
-        const calcResult = document.getElementById('calcResult');
-        const calcOutput = document.getElementById('calcOutput');
-        
-        const lang = localStorage.getItem('language') || 'vi';
-        if (isNaN(input1) || isNaN(input2)) {
-            calcError.textContent = translations[lang]['error_invalid_numbers'];
-            calcError.classList.add('active');
-            return;
-        }
-        if (operation === 'divide' && input2 === 0) {
-            calcError.textContent = translations[lang]['error_divide_by_zero'];
-            calcError.classList.add('active');
-            return;
-        }
-        calcError.classList.remove('active');
-        calcLoading.classList.add('active');
-        calcResult.classList.remove('active');
-
-        setTimeout(() => {
-            const operations = {
-                add: (a, b) => a + b,
-                subtract: (a, b) => a - b,
-                multiply: (a, b) => a * b,
-                divide: (a, b) => a / b
-            };
-            const result = operations[operation](input1, input2);
-            const operationSymbol = {
-                add: translations[lang]['calc_operation_add'],
-                subtract: translations[lang]['calc_operation_subtract'],
-                multiply: translations[lang]['calc_operation_multiply'],
-                divide: translations[lang]['calc_operation_divide']
-            }[operation];
-            calcOutput.textContent = `${input1} ${operationSymbol} ${input2} = ${result.toFixed(2)}`;
-            calcLoading.classList.remove('active');
-            calcResult.classList.add('active');
-            saveToHistory('calculator', `${input1} ${operationSymbol} ${input2}`, result.toFixed(2));
-        }, 500);
-    }
-
-    function generatePassword() {
-        const length = parseInt(document.getElementById('passwordLength').value);
-        const includeUppercase = document.getElementById('includeUppercase').checked;
-        const includeLowercase = document.getElementById('includeLowercase').checked;
-        const includeNumbers = document.getElementById('includeNumbers').checked;
-        const includeSymbols = document.getElementById('includeSymbols').checked;
-        const passwordError = document.getElementById('passwordError');
-        const passwordLoading = document.getElementById('passwordLoading');
-        const passwordResult = document.getElementById('passwordResult');
-        const passwordOutput = document.getElementById('passwordOutput');
-        
-        const lang = localStorage.getItem('language') || 'vi';
-        if (length < 4 || length > 50) {
-            passwordError.textContent = translations[lang]['error_invalid_password_length'];
-            passwordError.classList.add('active');
-            return;
-        }
-        if (!includeUppercase && !includeLowercase && !includeNumbers && !includeSymbols) {
-            passwordError.textContent = translations[lang]['error_no_character_types'];
-            passwordError.classList.add('active');
-            return;
-        }
-        passwordError.classList.remove('active');
-        passwordLoading.classList.add('active');
-        passwordResult.classList.remove('active');
-
-        setTimeout(() => {
-            const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-            const numbers = '0123456789';
-            const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
-            let chars = '';
-            if (includeUppercase) chars += uppercase;
-            if (includeLowercase) chars += lowercase;
-            if (includeNumbers) chars += numbers;
-            if (includeSymbols) chars += symbols;
-            
-            let password = '';
-            for (let i = 0; i < length; i++) {
-                password += chars.charAt(Math.floor(Math.random() * chars.length));
+        Object.keys(state).forEach(id => {
+            const element = section.querySelector(`#${id}`);
+            if (element) {
+                if (element.type === 'checkbox') element.checked = state[id];
+                else element.value = state[id];
+            } else {
+                console.warn(`Element with ID ${id} not found in section ${toolId}`);
             }
-            
-            passwordOutput.textContent = password;
-            passwordLoading.classList.remove('active');
-            passwordResult.classList.add('active');
-            saveToHistory('password-generator', `Length: ${length}`, password);
-        }, 500);
-    }
-
-    function copyPassword() {
-        const passwordOutput = document.getElementById('passwordOutput').textContent;
-        const lang = localStorage.getItem('language') || 'vi';
-        navigator.clipboard.writeText(passwordOutput).then(() => {
-            showToast(translations[lang]['copy_success'], 'success');
-        }).catch(() => {
-            showToast(translations[lang]['copy_error'], 'error');
         });
     }
 
-    function countChars() {
-        const charInput = document.getElementById('charInput');
-        const charError = document.getElementById('charError');
-        const charLoading = document.getElementById('charLoading');
-        const charResult = document.getElementById('charResult');
-        const charOutput = document.getElementById('charOutput');
-        
-        const text = charInput.value.trim();
+    function showHistory() {
+        showTool('history');
         const lang = localStorage.getItem('language') || 'vi';
-        if (!text) {
-            charError.textContent = translations[lang]['error_empty_text'];
-            charError.classList.add('active');
+        const historyResult = document.getElementById('historyResult');
+        if (!historyResult) {
+            console.error("History result element not found");
             return;
         }
-        charError.classList.remove('active');
-        charLoading.classList.add('active');
-        charResult.classList.remove('active');
-
-        setTimeout(() => {
-            const charCount = text.length;
-            const wordCount = text.split(/\s+/).filter(word => word).length;
-            charOutput.textContent = `${translations[lang]['char_count_label']}: ${charCount}, ${translations[lang]['word_count_label']}: ${wordCount}`;
-            charLoading.classList.remove('active');
-            charResult.classList.add('active');
-            saveToHistory('char-counter', text, `Chars: ${charCount}, Words: ${wordCount}`);
-        }, 500);
-    }
-
-    function checkURL() {
-        const urlInput = document.getElementById('urlInput');
-        const urlError = document.getElementById('urlError');
-        const urlLoading = document.getElementById('urlLoading');
-        const urlResult = document.getElementById('urlResult');
-        const urlOutput = document.getElementById('urlOutput');
-        
-        const url = urlInput.value.trim();
-        const lang = localStorage.getItem('language') || 'vi';
-        if (!url) {
-            urlError.textContent = translations[lang]['error_empty_url'];
-            urlError.classList.add('active');
-            return;
+        const history = JSON.parse(localStorage.getItem('toolHistory') || '[]');
+        historyResult.innerHTML = history.length ? `
+            <ul style="list-style: none; padding: 0;">
+                ${history.map(item => `
+                    <li style="margin-bottom: 15px;">
+                        <strong>${item.toolName}</strong> (${item.timestamp}): 
+                        <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto;">
+                            ${escapeHTML(JSON.stringify(item.result, null, 2))}
+                        </pre>
+                    </li>
+                `).join('')}
+            </ul>
+        ` : `<p>${translations[lang]['history_empty']}</p>`;
+        if (document.body.classList.contains('dark-mode')) {
+            historyResult.querySelectorAll('pre').forEach(pre => pre.style.background = '#3a3a4e');
         }
-        const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?$/i;
-        if (!urlPattern.test(url)) {
-            urlError.textContent = translations[lang]['error_invalid_url'];
-            urlError.classList.add('active');
-            return;
-        }
-        urlError.classList.remove('active');
-        urlLoading.classList.add('active');
-        urlResult.classList.remove('active');
-
-        setTimeout(() => {
-            urlOutput.textContent = translations[lang]['url_valid_message'];
-            urlLoading.classList.remove('active');
-            urlResult.classList.add('active');
-            saveToHistory('url-checker', url, 'Valid');
-        }, 1000);
-    }
-
-    function convertTemp() {
-        const tempInput = document.getElementById('tempInput');
-        const fromUnit = document.getElementById('tempFromUnit').value;
-        const toUnit = document.getElementById('tempToUnit').value;
-        const tempError = document.getElementById('tempError');
-        const tempLoading = document.getElementById('tempLoading');
-        const tempResult = document.getElementById('tempResult');
-        const tempOutput = document.getElementById('tempOutput');
-        
-        const value = parseFloat(tempInput.value);
-        const lang = localStorage.getItem('language') || 'vi';
-        if (isNaN(value)) {
-            tempError.textContent = translations[lang]['error_invalid_temperature'];
-            tempError.classList.add('active');
-            return;
-        }
-        if (fromUnit === 'K' && value < 0) {
-            tempError.textContent = translations[lang]['error_invalid_kelvin'];
-            tempError.classList.add('active');
-            return;
-        }
-        tempError.classList.remove('active');
-        tempLoading.classList.add('active');
-        tempResult.classList.remove('active');
-
-        setTimeout(() => {
-            let valueInCelsius;
-            if (fromUnit === 'C') valueInCelsius = value;
-            else if (fromUnit === 'F') valueInCelsius = (value - 32) * 5/9;
-            else valueInCelsius = value - 273.15;
-
-            let convertedValue;
-            if (toUnit === 'C') convertedValue = valueInCelsius;
-            else if (toUnit === 'F') convertedValue = valueInCelsius * 9/5 + 32;
-            else convertedValue = valueInCelsius + 273.15;
-
-            const result = `${value} ${translations[lang][`temp_unit_${fromUnit.toLowerCase()}`]} = ${convertedValue.toFixed(2)} ${translations[lang][`temp_unit_${toUnit.toLowerCase()}`]}`;
-            tempOutput.textContent = result;
-            tempLoading.classList.remove('active');
-            tempResult.classList.add('active');
-            saveToHistory('temp-converter', `${value} ${translations[lang][`temp_unit_${fromUnit.toLowerCase()}`]}`, result);
-        }, 500);
-    }
-
-    function convertCurrency() {
-        const currencyInput = document.getElementById('currencyInput');
-        const fromUnit = document.getElementById('currencyFromUnit').value;
-        const toUnit = document.getElementById('currencyToUnit').value;
-        const currencyError = document.getElementById('currencyError');
-        const currencyLoading = document.getElementById('currencyLoading');
-        const currencyResult = document.getElementById('currencyResult');
-        const currencyOutput = document.getElementById('currencyOutput');
-        
-        const value = parseFloat(currencyInput.value);
-        const lang = localStorage.getItem('language') || 'vi';
-        if (isNaN(value) || value < 0) {
-            currencyError.textContent = translations[lang]['error_invalid_amount'];
-            currencyError.classList.add('active');
-            return;
-        }
-        currencyError.classList.remove('active');
-        currencyLoading.classList.add('active');
-        currencyResult.classList.remove('active');
-
-        setTimeout(() => {
-            const rates = {
-                USD: 1,
-                EUR: 0.85,
-                JPY: 110,
-                VND: 23000
-            };
-            const valueInUSD = value / rates[fromUnit];
-            const convertedValue = valueInUSD * rates[toUnit];
-            const result = `${value} ${translations[lang][`currency_unit_${fromUnit.toLowerCase()}`]} = ${convertedValue.toFixed(2)} ${translations[lang][`currency_unit_${toUnit.toLowerCase()}`]}`;
-            
-            currencyOutput.textContent = result;
-            currencyLoading.classList.remove('active');
-            currencyResult.classList.add('active');
-            saveToHistory('currency-converter', `${value} ${translations[lang][`currency_unit_${fromUnit.toLowerCase()}`]}`, result);
-        }, 500);
-    }
-
-    function generateQR() {
-        const qrInput = document.getElementById('qrInput');
-        const qrError = document.getElementById('qrError');
-        const qrLoading = document.getElementById('qrLoading');
-        const qrResult = document.getElementById('qrResult');
-        const qrOutput = document.getElementById('qrOutput');
-        
-        const text = qrInput.value.trim();
-        const lang = localStorage.getItem('language') || 'vi';
-        if (!text) {
-            qrError.textContent = translations[lang]['error_empty_text'];
-            qrError.classList.add('active');
-            return;
-        }
-        qrError.classList.remove('active');
-        qrLoading.classList.add('active');
-        qrResult.classList.remove('active');
-
-        setTimeout(() => {
-            qrOutput.innerHTML = '';
-            new QRCode(qrOutput, {
-                text: text,
-                width: 200,
-                height: 200,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
-            qrLoading.classList.remove('active');
-            qrResult.classList.add('active');
-            saveToHistory('qr-generator', text, 'QR Code generated');
-        }, 1000);
-    }
-
-    function compressImage() {
-        const imageInput = document.getElementById('imageInput');
-        const imageError = document.getElementById('imageError');
-        const imageLoading = document.getElementById('imageLoading');
-        const imageResult = document.getElementById('imageResult');
-        const imageOutput = document.getElementById('imageOutput');
-        
-        const file = imageInput.files[0];
-        const lang = localStorage.getItem('language') || 'vi';
-        if (!file) {
-            imageError.textContent = translations[lang]['error_empty_image'];
-            imageError.classList.add('active');
-            return;
-        }
-        if (!file.type.startsWith('image/')) {
-            imageError.textContent = translations[lang]['error_invalid_image'];
-            imageError.classList.add('active');
-            return;
-        }
-        if (file.size > 5 * 1024 * 1024) {
-            imageError.textContent = translations[lang]['error_image_too_large'];
-            imageError.classList.add('active');
-            return;
-        }
-        imageError.classList.remove('active');
-        imageLoading.classList.add('active');
-        imageResult.classList.remove('active');
-
-        setTimeout(() => {
-            const reader = new FileReader();
-            reader.onload = () => {
-                const img = new Image();
-                img.src = reader.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    canvas.width = img.width * 0.7;
-                    canvas.height = img.height * 0.7;
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                    const originalSize = (file.size / 1024).toFixed(2);
-                    const compressedSize = (compressedDataUrl.length * 0.75 / 1024).toFixed(2);
-                    imageOutput.innerHTML = `Original: ${originalSize} KB<br>Compressed: ${compressedSize} KB<br><a href="${compressedDataUrl}" download="compressed-image.jpg">Download</a>`;
-                    imageLoading.classList.remove('active');
-                    imageResult.classList.add('active');
-                    saveToHistory('image-compressor', `Original: ${originalSize} KB`, `Compressed: ${compressedSize} KB`);
-                };
-            };
-            reader.readAsDataURL(file);
-        }, 1000);
-    }
-
-    function calculateBMI() {
-        const weightInput = document.getElementById('weightInput');
-        const heightInput = document.getElementById('heightInput');
-        const bmiError = document.getElementById('bmiError');
-        const bmiLoading = document.getElementById('bmiLoading');
-        const bmiResult = document.getElementById('bmiResult');
-        const bmiOutput = document.getElementById('bmiOutput');
-        
-        const weight = parseFloat(weightInput.value);
-        const height = parseFloat(heightInput.value) / 100; // Chuyển cm thành mét
-        const lang = localStorage.getItem('language') || 'vi';
-        if (isNaN(weight) || isNaN(height) || weight <= 0 || height <= 0) {
-            bmiError.textContent = translations[lang]['error_invalid_weight_height'];
-            bmiError.classList.add('active');
-            return;
-        }
-        bmiError.classList.remove('active');
-        bmiLoading.classList.add('active');
-        bmiResult.classList.remove('active');
-
-        setTimeout(() => {
-            const bmi = (weight / (height * height)).toFixed(2);
-            let category;
-            if (bmi < 18.5) category = translations[lang]['bmi_underweight'] || 'Underweight';
-            else if (bmi < 25) category = translations[lang]['bmi_normal'] || 'Normal';
-            else if (bmi < 30) category = translations[lang]['bmi_overweight'] || 'Overweight';
-            else category = translations[lang]['bmi_obese'] || 'Obese';
-
-            bmiOutput.textContent = `BMI: ${bmi} (${category})`;
-            bmiLoading.classList.remove('active');
-            bmiResult.classList.add('active');
-            saveToHistory('bmi-calculator', `Weight: ${weight} kg, Height: ${height * 100} cm`, `BMI: ${bmi} (${category})`);
-        }, 500);
-    }
-
-    function convertArea() {
-        const areaInput = document.getElementById('areaInput');
-        const fromUnit = document.getElementById('areaFromUnit').value;
-        const toUnit = document.getElementById('areaToUnit').value;
-        const areaError = document.getElementById('areaError');
-        const areaLoading = document.getElementById('areaLoading');
-        const areaResult = document.getElementById('areaResult');
-        const areaOutput = document.getElementById('areaOutput');
-        
-        const value = parseFloat(areaInput.value);
-        const lang = localStorage.getItem('language') || 'vi';
-        if (isNaN(value) || value < 0) {
-            areaError.textContent = translations[lang]['error_invalid_area'];
-            areaError.classList.add('active');
-            return;
-        }
-        areaError.classList.remove('active');
-        areaLoading.classList.add('active');
-        areaResult.classList.remove('active');
-
-        setTimeout(() => {
-            const conversionRates = {
-                m2: 1,
-                km2: 0.000001,
-                ha: 0.0001,
-                ft2: 10.7639
-            };
-            const valueInSquareMeters = value / conversionRates[fromUnit];
-            const convertedValue = valueInSquareMeters * conversionRates[toUnit];
-            const result = `${value} ${translations[lang][`area_unit_${fromUnit}`]} = ${convertedValue.toFixed(2)} ${translations[lang][`area_unit_${toUnit}`]}`;
-            
-            areaOutput.textContent = result;
-            areaLoading.classList.remove('active');
-            areaResult.classList.add('active');
-            saveToHistory('area-converter', `${value} ${translations[lang][`area_unit_${fromUnit}`]}`, result);
-        }, 500);
-    }
-
-    function saveToHistory(toolId, input, output) {
-        const lang = localStorage.getItem('language') || 'vi';
-        const history = JSON.parse(localStorage.getItem('toolHistory')) || [];
-        const toolSection = document.querySelector(`section[data-tool-name="${toolId}"]`);
-        const toolName = toolSection.querySelector('h3 span').textContent;
-        const timestamp = new Date().toLocaleString(lang);
-        history.push({ tool: toolName, input, output, timestamp });
-        localStorage.setItem('toolHistory', JSON.stringify(history));
-    }
-
-    function loadHistory() {
-        const historyTable = document.getElementById('historyTable');
-        const history = JSON.parse(localStorage.getItem('toolHistory')) || [];
-        const lang = localStorage.getItem('language') || 'vi';
-        historyTable.innerHTML = '';
-        if (history.length === 0) {
-            historyTable.innerHTML = `<tr><td colspan="4">${translations[lang]['history_empty']}</td></tr>`;
-            return;
-        }
-        history.forEach(entry => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${entry.tool}</td>
-                <td>${entry.input}</td>
-                <td>${entry.output}</td>
-                <td>${entry.timestamp}</td>
-            `;
-            historyTable.appendChild(row);
-        });
     }
 
     function clearHistory() {
         localStorage.removeItem('toolHistory');
-        loadHistory();
+        showHistory();
+        showToast('history_clear_success', 'success');
     }
 
-    function showToast(message, type) {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.className = `toast ${type} active`;
-        setTimeout(() => {
-            toast.classList.remove('active');
-        }, 3000);
+    function searchTools() {
+        const lang = localStorage.getItem('language') || 'vi';
+        const searchInput = document.getElementById('searchInput');
+        if (!searchInput) {
+            console.error("Search input not found");
+            return;
+        }
+        const searchValue = searchInput.value.trim().toLowerCase();
+        const toolsSections = document.querySelectorAll('.tools-section');
+        const heroSection = document.getElementById('hero');
+        if (!heroSection) {
+            console.error("Hero section not found");
+            return;
+        }
+
+        if (!searchValue) {
+            showHome();
+            return;
+        }
+
+        let found = false;
+        toolsSections.forEach(section => {
+            const toolName = translations[lang][`${section.dataset.toolName}_title`].toLowerCase();
+            if (toolName.includes(searchValue)) {
+                heroSection.style.display = 'none';
+                section.style.display = 'block';
+                section.classList.add('active', 'animate__animated', 'animate__fadeInUp');
+                section.scrollIntoView({ behavior: 'smooth' });
+                found = true;
+            } else {
+                section.style.display = 'none';
+                section.classList.remove('active');
+            }
+        });
+
+        if (!found) {
+            showToast('Không tìm thấy công cụ nào!', 'error');
+        }
+
+        document.querySelectorAll('.tool-nav a').forEach(link => link.classList.remove('active'));
     }
 
-    function restoreToolState(toolId) {
-        // Placeholder để khôi phục trạng thái nếu cần (có thể mở rộng sau)
+    // Tool Functions
+    function summarizeText(button) {
+        processTool(button, 'textLoading', 'textResult',
+            () => {
+                const textInput = document.getElementById('textInput');
+                if (!textInput) {
+                    console.error("Text input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập văn bản!", 'error');
+                    return { isValid: false };
+                }
+                const text = textInput.value.trim();
+                return {
+                    isValid: text && text.length <= 10000,
+                    input: textInput,
+                    errorId: 'textError',
+                    messageKey: text ? 'summarize_error_length' : 'summarize_error_empty'
+                };
+            },
+            () => {
+                const text = document.getElementById('textInput').value.trim();
+                const summaryLength = document.getElementById('summaryLength').value;
+                const sentences = text.split(/[.!?]+/).filter(s => s.trim());
+                const ratio = { short: 0.2, medium: 0.3, long: 0.4 }[summaryLength];
+                const count = Math.max(1, Math.ceil(sentences.length * ratio));
+                const summary = sentences.slice(0, count).join('. ') + (count ? '.' : '');
+                document.getElementById('summaryOutput').textContent = summary;
+                saveToHistory('summarize', { input: text.slice(0, 50) + '...', summary });
+                saveToolState('summarize', { textInput: text, summaryLength });
+                showToast('summarize_success', 'success');
+            }
+        );
+    }
+
+    function convertLength(button) {
+        processTool(button, 'lengthLoading', 'lengthResult',
+            () => {
+                const lengthInput = document.getElementById('lengthValue');
+                if (!lengthInput) {
+                    console.error("Length input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập giá trị độ dài!", 'error');
+                    return { isValid: false };
+                }
+                const value = parseFloat(lengthInput.value);
+                return {
+                    isValid: !isNaN(value) && value >= 0,
+                    input: lengthInput,
+                    errorId: 'lengthError',
+                    messageKey: 'length_converter_error'
+                };
+            },
+            () => {
+                const value = parseFloat(document.getElementById('lengthValue').value);
+                const fromUnit = document.getElementById('lengthFrom').value;
+                const toUnit = document.getElementById('lengthTo').value;
+                const conversions = { m: 1, km: 1000, cm: 0.01, inch: 0.0254, foot: 0.3048, yard: 0.9144 };
+                const result = (value * conversions[fromUnit]) / conversions[toUnit];
+                const output = {
+                    original: value.toFixed(2),
+                    fromUnit,
+                    converted: result.toFixed(2),
+                    toUnit
+                };
+                document.getElementById('lengthOutput').querySelector('tbody').innerHTML = `
+                    <tr>
+                        <td>${output.original}</td>
+                        <td>${output.fromUnit.toUpperCase()}</td>
+                        <td>${output.converted}</td>
+                        <td>${output.toUnit.toUpperCase()}</td>
+                    </tr>
+                `;
+                saveToHistory('length-converter', output);
+                saveToolState('length-converter', { lengthValue: value, lengthFrom: fromUnit, lengthTo: toUnit });
+                showToast('length_converter_success', 'success');
+            }
+        );
+    }
+
+    function calculate(button) {
+        processTool(button, 'calcLoading', 'calcResult',
+            () => {
+                const num1Input = document.getElementById('num1');
+                const num2Input = document.getElementById('num2');
+                if (!num1Input || !num2Input) {
+                    console.error("Calculator inputs not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập số!", 'error');
+                    return { isValid: false };
+                }
+                const num1 = parseFloat(num1Input.value);
+                const num2 = parseFloat(num2Input.value);
+                const operator = document.getElementById('operator').value;
+                if (isNaN(num1)) return { isValid: false, input: num1Input, errorId: 'calcError', messageKey: 'calculator_error_num1' };
+                if (isNaN(num2)) return { isValid: false, input: num2Input, errorId: 'calcError', messageKey: 'calculator_error_num2' };
+                if (operator === '/' && num2 === 0) return { isValid: false, input: num2Input, errorId: 'calcError', messageKey: 'calculator_error_divide_by_zero' };
+                return { isValid: true, input: num1Input, errorId: 'calcError' };
+            },
+            () => {
+                const lang = localStorage.getItem('language') || 'vi';
+                const num1 = parseFloat(document.getElementById('num1').value);
+                const num2 = parseFloat(document.getElementById('num2').value);
+                const operator = document.getElementById('operator').value;
+                let result;
+                switch (operator) {
+                    case '+': result = num1 + num2; break;
+                    case '-': result = num1 - num2; break;
+                    case '*': result = num1 * num2; break;
+                    case '/': result = num1 / num2; break;
+                }
+                const output = { num1, operator, num2, result: result.toFixed(2) };
+                document.getElementById('calcOutput').textContent = `${translations[lang]['calculator_result'] || 'Kết quả'}: ${output.result}`;
+                saveToHistory('calculator', output);
+                saveToolState('calculator', { num1, num2, operator });
+                showToast('calculator_success', 'success');
+            }
+        );
+    }
+
+    function generatePassword(button) {
+        processTool(button, 'passLoading', 'passResult',
+            () => {
+                const passLengthInput = document.getElementById('passLength');
+                if (!passLengthInput) {
+                    console.error("Password length input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập độ dài mật khẩu!", 'error');
+                    return { isValid: false };
+                }
+                const passLength = parseInt(passLengthInput.value);
+                const includeUppercase = document.getElementById('includeUppercase').checked;
+                const includeLowercase = document.getElementById('includeLowercase').checked;
+                const includeNumbers = document.getElementById('includeNumbers').checked;
+                const includeSymbols = document.getElementById('includeSymbols').checked;
+                if (isNaN(passLength) || passLength < 8 || passLength > 32) {
+                    return { isValid: false, input: passLengthInput, errorId: 'passError', messageKey: 'password_generator_error_length' };
+                }
+                if (!includeUppercase && !includeLowercase && !includeNumbers && !includeSymbols) {
+                    return { isValid: false, input: passLengthInput, errorId: 'passError', messageKey: 'password_generator_error_chars' };
+                }
+                return { isValid: true, input: passLengthInput, errorId: 'passError' };
+            },
+            () => {
+                const passLength = parseInt(document.getElementById('passLength').value);
+                const includeUppercase = document.getElementById('includeUppercase').checked;
+                const includeLowercase = document.getElementById('includeLowercase').checked;
+                const includeNumbers = document.getElementById('includeNumbers').checked;
+                const includeSymbols = document.getElementById('includeSymbols').checked;
+                let chars = '';
+                if (includeUppercase) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                if (includeLowercase) chars += 'abcdefghijklmnopqrstuvwxyz';
+                if (includeNumbers) chars += '0123456789';
+                if (includeSymbols) chars += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+                let password = '';
+                for (let i = 0; i < passLength; i++) {
+                    password += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                document.getElementById('passOutput').textContent = password;
+                saveToHistory('password-generator', { length: passLength, password });
+                saveToolState('password-generator', {
+                    passLength,
+                    includeUppercase,
+                    includeLowercase,
+                    includeNumbers,
+                    includeSymbols
+                });
+                showToast('password_generator_success', 'success');
+            }
+        );
+    }
+
+    function copyPassword() {
+        const passOutput = document.getElementById('passOutput');
+        if (!passOutput) {
+            console.error("Password output not found");
+            showToast("Lỗi: Không tìm thấy mật khẩu để sao chép!", 'error');
+            return;
+        }
+        const text = passOutput.textContent;
+        if (!navigator.clipboard) {
+            console.error("Clipboard API not supported");
+            showToast("Lỗi: Trình duyệt không hỗ trợ sao chép!", 'error');
+            return;
+        }
+        navigator.clipboard.writeText(text).then(() => {
+            const copyBtn = document.querySelector('#passResult .copy-btn');
+            if (copyBtn) {
+                const lang = localStorage.getItem('language') || 'vi';
+                copyBtn.textContent = translations[lang]['password_generator_copy_success'];
+                showToast('password_generator_copy_success', 'success');
+                setTimeout(() => {
+                    copyBtn.textContent = translations[lang]['password_generator_copy'];
+                }, 2000);
+            }
+        }).catch(err => {
+            console.error("Failed to copy password:", err);
+            showError(document.getElementById('passLength'), 'passError', 'Không thể sao chép mật khẩu!');
+        });
+    }
+
+    function countChars(button) {
+        processTool(button, 'charLoading', 'charResult',
+            () => {
+                const charInput = document.getElementById('charInput');
+                if (!charInput) {
+                    console.error("Char input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập văn bản để đếm!", 'error');
+                    return { isValid: false };
+                }
+                const text = charInput.value.trim();
+                return {
+                    isValid: !!text,
+                    input: charInput,
+                    errorId: 'charError',
+                    messageKey: 'char_counter_error'
+                };
+            },
+            () => {
+                const lang = localStorage.getItem('language') || 'vi';
+                const text = document.getElementById('charInput').value;
+                const charCount = text.length;
+                const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+                document.getElementById('charOutput').textContent = `${translations[lang]['char_counter_chars'] || 'Ký tự'}: ${charCount}, ${translations[lang]['char_counter_words'] || 'Từ'}: ${wordCount}`;
+                saveToHistory('char-counter', { text: text.slice(0, 50) + '...', charCount, wordCount });
+                saveToolState('char-counter', { charInput: text });
+                showToast('char_counter_success', 'success');
+            }
+        );
+    }
+
+    function checkURL(button) {
+        processTool(button, 'urlLoading', 'urlResult',
+            () => {
+                const urlInput = document.getElementById('urlInput');
+                if (!urlInput) {
+                    console.error("URL input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập URL!", 'error');
+                    return { isValid: false };
+                }
+                const url = urlInput.value.trim();
+                const urlPattern = /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)(\/[\w-./?%&=]*)?$/i;
+                return {
+                    isValid: url && urlPattern.test(url),
+                    input: urlInput,
+                    errorId: 'urlError',
+                    messageKey: 'url_checker_error'
+                };
+            },
+            () => {
+                const lang = localStorage.getItem('language') || 'vi';
+                const url = document.getElementById('urlInput').value.trim();
+                document.getElementById('urlOutput').textContent = `${translations[lang]['url_checker_valid'] || 'URL hợp lệ'}: ${url}`;
+                saveToHistory('url-checker', { url });
+                saveToolState('url-checker', { urlInput: url });
+                showToast('url_checker_success', 'success');
+            }
+        );
+    }
+
+    function convertTemp(button) {
+        processTool(button, 'tempLoading', 'tempResult',
+            () => {
+                const tempInput = document.getElementById('tempValue');
+                if (!tempInput) {
+                    console.error("Temperature input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập giá trị nhiệt độ!", 'error');
+                    return { isValid: false };
+                }
+                const value = parseFloat(tempInput.value);
+                return {
+                    isValid: !isNaN(value),
+                    input: tempInput,
+                    errorId: 'tempError',
+                    messageKey: 'temp_converter_error'
+                };
+            },
+            () => {
+                const value = parseFloat(document.getElementById('tempValue').value);
+                const fromUnit = document.getElementById('tempFrom').value;
+                const toUnit = document.getElementById('tempTo').value;
+                let celsius;
+                if (fromUnit === 'C') celsius = value;
+                else if (fromUnit === 'F') celsius = (value - 32) * 5 / 9;
+                else celsius = value - 273.15;
+                let result;
+                if (toUnit === 'C') result = celsius;
+                else if (toUnit === 'F') result = celsius * 9 / 5 + 32;
+                else result = celsius + 273.15;
+                const output = {
+                    original: value.toFixed(2),
+                    fromUnit,
+                    converted: result.toFixed(2),
+                    toUnit
+                };
+                document.getElementById('tempOutput').querySelector('tbody').innerHTML = `
+                    <tr>
+                        <td>${output.original}</td>
+                        <td>${output.fromUnit}</td>
+                        <td>${output.converted}</td>
+                        <td>${output.toUnit}</td>
+                    </tr>
+                `;
+                saveToHistory('temp-converter', output);
+                saveToolState('temp-converter', { tempValue: value, tempFrom: fromUnit, tempTo: toUnit });
+                showToast('temp_converter_success', 'success');
+            }
+        );
+    }
+
+    function convertCurrency(button) {
+        processTool(button, 'currencyLoading', 'currencyResult',
+            () => {
+                const currencyInput = document.getElementById('currencyValue');
+                if (!currencyInput) {
+                    console.error("Currency input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập giá trị tiền tệ!", 'error');
+                    return { isValid: false };
+                }
+                const value = parseFloat(currencyInput.value);
+                return {
+                    isValid: !isNaN(value) && value >= 0,
+                    input: currencyInput,
+                    errorId: 'currencyError',
+                    messageKey: 'currency_converter_error'
+                };
+            },
+            async () => {
+                const value = parseFloat(document.getElementById('currencyValue').value);
+                const fromCurrency = document.getElementById('currencyFrom').value;
+                const toCurrency = document.getElementById('currencyTo').value;
+                
+                try {
+                    const response = await fetch(`https://v6.exchangerate-api.com/v6/YOUR_API_KEY_HERE/pair/${fromCurrency}/${toCurrency}`);
+                    const data = await response.json();
+                    if (data.result !== "success") {
+                        throw new Error("API request failed");
+                    }
+                    const rate = data.conversion_rate;
+                    const convertedValue = value * rate;
+                    const output = {
+                        original: value.toFixed(2),
+                        fromCurrency,
+                        converted: convertedValue.toFixed(2),
+                        toCurrency
+                    };
+                    document.getElementById('currencyOutput').querySelector('tbody').innerHTML = `
+                        <tr>
+                            <td>${output.original}</td>
+                            <td>${output.fromCurrency}</td>
+                            <td>${output.converted}</td>
+                            <td>${output.toCurrency}</td>
+                        </tr>
+                    `;
+                    saveToHistory('currency-converter', output);
+                    saveToolState('currency-converter', { currencyValue: value, currencyFrom: fromCurrency, currencyTo: toCurrency });
+                    showToast('currency_converter_success', 'success');
+                } catch (error) {
+                    console.error("Currency conversion failed:", error);
+                    showError(document.getElementById('currencyValue'), 'currencyError', 'Không thể chuyển đổi tiền tệ!');
+                }
+            }
+        );
+    }
+
+    function generateQR(button) {
+        processTool(button, 'qrLoading', 'qrResult',
+            () => {
+                const qrInput = document.getElementById('qrInput');
+                if (!qrInput) {
+                    console.error("QR input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập văn bản để tạo QR!", 'error');
+                    return { isValid: false };
+                }
+                const text = qrInput.value.trim();
+                return {
+                    isValid: !!text,
+                    input: qrInput,
+                    errorId: 'qrError',
+                    messageKey: 'qr_generator_error'
+                };
+            },
+            () => {
+                const text = document.getElementById('qrInput').value.trim();
+                const qrOutput = document.getElementById('qrOutput');
+                if (!qrOutput) {
+                    console.error("QR output not found");
+                    showToast("Lỗi: Không tìm thấy phần hiển thị mã QR!", 'error');
+                    return;
+                }
+                QRCode.toDataURL(text, { width: 200, margin: 1 }, (err, url) => {
+                    if (err) {
+                        console.error("QR generation failed:", err);
+                        showError(document.getElementById('qrInput'), 'qrError', 'Không thể tạo mã QR!');
+                        return;
+                    }
+                    qrOutput.src = url;
+                    saveToHistory('qr-generator', { text });
+                    saveToolState('qr-generator', { qrInput: text });
+                    showToast('qr_generator_success', 'success');
+                });
+            }
+        );
+    }
+
+    function compressImage(button) {
+        processTool(button, 'imageLoading', 'imageResult',
+            () => {
+                const imageInput = document.getElementById('imageInput');
+                if (!imageInput) {
+                    console.error("Image input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập ảnh!", 'error');
+                    return { isValid: false };
+                }
+                const file = imageInput.files[0];
+                if (!file) return { isValid: false, input: imageInput, errorId: 'imageError', messageKey: 'image_compressor_error_empty' };
+                const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                return {
+                    isValid: validTypes.includes(file.type),
+                    input: imageInput,
+                    errorId: 'imageError',
+                    messageKey: 'image_compressor_error_format'
+                };
+            },
+            () => {
+                const file = document.getElementById('imageInput').files[0];
+                const imageResult = document.getElementById('imageResult');
+                if (!imageResult) {
+                    console.error("Image result not found");
+                    showToast("Lỗi: Không tìm thấy phần hiển thị ảnh!", 'error');
+                    return;
+                }
+                new Compressor(file, {
+                    quality: 0.6,
+                    maxWidth: 800,
+                    maxHeight: 800,
+                    success(compressedFile) {
+                        const url = URL.createObjectURL(compressedFile);
+                        imageResult.innerHTML = `
+                            <p>Kích thước gốc: ${(file.size / 1024).toFixed(2)} KB</p>
+                            <p>Kích thước sau nén: ${(compressedFile.size / 1024).toFixed(2)} KB</p>
+                            <img src="${url}" alt="Ảnh đã nén" style="max-width: 200px;">
+                            <a href="${url}" download="compressed-image.jpg">Tải xuống</a>
+                        `;
+                        saveToHistory('image-compressor', {
+                            originalSize: (file.size / 1024).toFixed(2),
+                            compressedSize: (compressedFile.size / 1024).toFixed(2)
+                        });
+                        showToast('image_compressor_success', 'success');
+                    },
+                    error(err) {
+                        console.error("Image compression failed:", err);
+                        showError(document.getElementById('imageInput'), 'imageError', 'Không thể nén ảnh!');
+                    }
+                });
+            }
+        );
+    }
+
+    function calculateBMI(button) {
+        processTool(button, 'bmiLoading', 'bmiResult',
+            () => {
+                const weightInput = document.getElementById('weight');
+                const heightInput = document.getElementById('height');
+                if (!weightInput || !heightInput) {
+                    console.error("BMI inputs not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập cân nặng hoặc chiều cao!", 'error');
+                    return { isValid: false };
+                }
+                const weight = parseFloat(weightInput.value);
+                const height = parseFloat(heightInput.value);
+                if (isNaN(weight) || weight <= 0) return { isValid: false, input: weightInput, errorId: 'bmiError', messageKey: 'bmi_calculator_error_weight' };
+                if (isNaN(height) || height <= 0) return { isValid: false, input: heightInput, errorId: 'bmiError', messageKey: 'bmi_calculator_error_height' };
+                return { isValid: true, input: weightInput, errorId: 'bmiError' };
+            },
+            () => {
+                const lang = localStorage.getItem('language') || 'vi';
+                const weight = parseFloat(document.getElementById('weight').value);
+                const height = parseFloat(document.getElementById('height').value) / 100; // Convert cm to m
+                const bmi = (weight / (height * height)).toFixed(2);
+                let status;
+                if (bmi < 18.5) status = translations[lang]['bmi_underweight'] || 'Thiếu cân';
+                else if (bmi < 25) status = translations[lang]['bmi_normal'] || 'Bình thường';
+                else if (bmi < 30) status = translations[lang]['bmi_overweight'] || 'Thừa cân';
+                else status = translations[lang]['bmi_obese'] || 'Béo phì';
+                document.getElementById('bmiOutput').querySelector('tbody').innerHTML = `
+                    <tr>
+                        <td>${weight}</td>
+                        <td>${height * 100}</td>
+                        <td>${bmi}</td>
+                        <td>${status}</td>
+                    </tr>
+                `;
+                saveToHistory('bmi-calculator', { weight, height: height * 100, bmi, status });
+                saveToolState('bmi-calculator', { weight, height });
+                showToast('bmi_calculator_success', 'success');
+            }
+        );
+    }
+
+    function convertArea(button) {
+        processTool(button, 'areaLoading', 'areaResult',
+            () => {
+                const areaInput = document.getElementById('areaValue');
+                if (!areaInput) {
+                    console.error("Area input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập giá trị diện tích!", 'error');
+                    return { isValid: false };
+                }
+                const value = parseFloat(areaInput.value);
+                return {
+                    isValid: !isNaN(value) && value >= 0,
+                    input: areaInput,
+                    errorId: 'areaError',
+                    messageKey: 'area_converter_error'
+                };
+            },
+            () => {
+                const value = parseFloat(document.getElementById('areaValue').value);
+                const fromUnit = document.getElementById('areaFrom').value;
+                const toUnit = document.getElementById('areaTo').value;
+                const conversions = { m2: 1, km2: 1000000, ha: 10000, ft2: 0.092903 };
+                const result = (value * conversions[fromUnit]) / conversions[toUnit];
+                const output = {
+                    original: value.toFixed(2),
+                    fromUnit,
+                    converted: result.toFixed(2),
+                    toUnit
+                };
+                document.getElementById('areaOutput').querySelector('tbody').innerHTML = `
+                    <tr>
+                        <td>${output.original}</td>
+                        <td>${output.fromUnit.toUpperCase()}</td>
+                        <td>${output.converted}</td>
+                        <td>${output.toUnit.toUpperCase()}</td>
+                    </tr>
+                `;
+                saveToHistory('area-converter', output);
+                saveToolState('area-converter', { areaValue: value, areaFrom: fromUnit, areaTo: toUnit });
+                showToast('area_converter_success', 'success');
+            }
+        );
+    }
+
+    // Event Listeners
+    document.addEventListener('click', (e) => {
+        const action = e.target.closest('[data-action]')?.dataset.action;
+        if (!action) return;
+        const actions = {
+            showHome: showHome,
+            showHistory: showHistory,
+            openContactModal: openContactModal,
+            closeContactModal: closeContactModal,
+            searchTools: searchTools,
+            summarizeText: (btn) => summarizeText(btn),
+            convertLength: (btn) => convertLength(btn),
+            calculate: (btn) => calculate(btn),
+            generatePassword: (btn) => generatePassword(btn),
+            copyPassword: copyPassword,
+            countChars: (btn) => countChars(btn),
+            checkURL: (btn) => checkURL(btn),
+            convertTemp: (btn) => convertTemp(btn),
+            convertCurrency: (btn) => convertCurrency(btn),
+            generateQR: (btn) => generateQR(btn),
+            compressImage: (btn) => compressImage(btn),
+            calculateBMI: (btn) => calculateBMI(btn),
+            convertArea: (btn) => convertArea(btn),
+            clearHistory: clearHistory
+        };
+        const handler = actions[action];
+        if (handler) handler(e.target.closest('button'));
+    });
+
+    document.querySelectorAll('.tool-nav a').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const toolId = link.dataset.tool;
+            if (toolId) showTool(toolId);
+        });
+    });
+
+    document.getElementById('darkModeToggle')?.addEventListener('change', toggleDarkMode);
+
+    document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') searchTools();
+    });
+
+    // Initialize
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.getElementById('darkModeToggle').checked = true;
+        toggleDarkMode();
     }
 });
