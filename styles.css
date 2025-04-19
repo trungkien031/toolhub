@@ -5,6 +5,12 @@
     box-sizing: border-box;
 }
 
+/* Đảm bảo body và html chiếm toàn bộ chiều cao */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
 body {
     font-family: 'Poppins', sans-serif;
     line-height: 1.6;
@@ -255,12 +261,34 @@ header {
 }
 
 .search-bar input {
-    width: 100%;
+    flex: 1;
     padding: 12px 40px;
     border: 1px solid #ccc;
-    border-radius: 25px;
+    border-radius: 25px 0 0 25px;
     font-size: 1rem;
     transition: border-color 0.3s;
+}
+
+.search-bar button {
+    padding: 12px 15px;
+    border: none;
+    background: #007bff;
+    color: #fff;
+    border-radius: 0 25px 25px 0;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.search-bar button:hover {
+    background: #0056b3;
+}
+
+.dark-mode .search-bar button {
+    background: #6495ed;
+}
+
+.dark-mode .search-bar button:hover {
+    background: #4169e1;
 }
 
 .search-bar input:focus {
@@ -552,11 +580,21 @@ header {
     margin-top: 15px;
 }
 
+/* Cố định footer */
+main {
+    padding-bottom: 60px; /* Chiều cao của footer */
+}
+
 footer {
     text-align: center;
     padding: 20px;
     background: #fff;
     box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
 }
 
 .dark-mode footer {
