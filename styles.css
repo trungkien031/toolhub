@@ -14,14 +14,15 @@ html, body {
 body {
     font-family: 'Poppins', sans-serif;
     line-height: 1.6;
-    color: #333;
-    background: #f0f2f5;
+    color: #2d2d2d;
+    background: #f5f7fa;
     position: relative;
     overflow-x: hidden;
+    transition: background 0.5s ease, color 0.5s ease;
 }
 
 body.dark-mode {
-    background: #1a1a2e;
+    background: #121224;
     color: #e0e0e0;
 }
 
@@ -39,6 +40,8 @@ body.dark-mode {
     position: absolute;
     border-radius: 50%;
     background: rgba(100, 149, 237, 0.2);
+    transition: background 0.5s ease, transform 1s ease;
+    animation: float 6s ease-in-out infinite;
 }
 
 .circle:nth-child(1) {
@@ -46,6 +49,7 @@ body.dark-mode {
     height: 300px;
     top: 10%;
     left: 10%;
+    animation-delay: 0s;
 }
 
 .circle:nth-child(2) {
@@ -53,6 +57,7 @@ body.dark-mode {
     height: 200px;
     top: 60%;
     right: 15%;
+    animation-delay: 2s;
 }
 
 .circle:nth-child(3) {
@@ -60,10 +65,17 @@ body.dark-mode {
     height: 150px;
     bottom: 20%;
     left: 30%;
+    animation-delay: 4s;
 }
 
 .dark-mode .circle {
     background: rgba(100, 149, 237, 0.1);
+}
+
+@keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0); }
 }
 
 header {
@@ -71,15 +83,21 @@ header {
     justify-content: space-between;
     align-items: center;
     padding: 20px;
-    background: #fff;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     position: sticky;
     top: 0;
     z-index: 1000;
+    transition: background 0.5s ease, box-shadow 0.3s ease;
+}
+
+header:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 .dark-mode header {
-    background: #16213e;
+    background: rgba(22, 33, 62, 0.9);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
@@ -88,11 +106,12 @@ header {
     font-weight: 600;
     color: #007bff;
     cursor: pointer;
-    transition: color 0.3s;
+    transition: color 0.3s, transform 0.3s;
 }
 
 .logo:hover {
     color: #0056b3;
+    transform: scale(1.05);
 }
 
 .dark-mode .logo {
@@ -102,13 +121,14 @@ header {
 .nav a {
     margin-left: 20px;
     text-decoration: none;
-    color: #333;
+    color: #2d2d2d;
     font-weight: 500;
-    transition: color 0.3s;
+    transition: color 0.3s, transform 0.3s;
 }
 
 .nav a:hover {
     color: #007bff;
+    transform: translateY(-2px);
 }
 
 .dark-mode .nav a {
@@ -134,7 +154,11 @@ header {
     font-size: 1.5rem;
     color: #007bff;
     cursor: pointer;
-    transition: color 0.3s;
+    transition: color 0.3s, transform 0.3s;
+}
+
+.dark-mode-toggle label:hover {
+    transform: scale(1.1);
 }
 
 .dark-mode-toggle input:checked + label {
@@ -146,15 +170,21 @@ header {
     justify-content: center;
     gap: 15px;
     padding: 15px;
-    background: #fff;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     position: sticky;
     top: 70px;
     z-index: 900;
+    transition: background 0.5s ease, box-shadow 0.3s ease;
+}
+
+.tool-nav:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 .dark-mode .tool-nav {
-    background: #16213e;
+    background: rgba(22, 33, 62, 0.9);
 }
 
 .tool-nav a {
@@ -162,17 +192,18 @@ header {
     flex-direction: column;
     align-items: center;
     text-decoration: none;
-    color: #333;
+    color: #2d2d2d;
     font-size: 1.2rem;
     padding: 10px;
     border-radius: 8px;
-    transition: background 0.3s, color 0.3s;
+    transition: background 0.3s, color 0.3s, transform 0.3s;
     position: relative;
 }
 
 .tool-nav a:hover {
     background: #e9ecef;
     color: #007bff;
+    transform: scale(1.1);
 }
 
 .dark-mode .tool-nav a {
@@ -205,6 +236,7 @@ header {
     font-size: 0.9rem;
     white-space: nowrap;
     z-index: 10;
+    transition: opacity 0.3s, transform 0.3s;
 }
 
 .dark-mode .tool-nav .tooltip {
@@ -213,27 +245,32 @@ header {
 
 .tool-nav a:hover .tooltip {
     visibility: visible;
+    opacity: 1;
+    transform: translateY(-5px);
 }
 
 .hero {
     text-align: center;
     padding: 50px 20px;
-    background: linear-gradient(to bottom, #e9ecef, #f0f2f5);
+    background: linear-gradient(to bottom, #e9ecef, #f5f7fa);
+    transition: background 0.5s ease;
 }
 
 .dark-mode .hero {
-    background: linear-gradient(to bottom, #2a2a4e, #1a1a2e);
+    background: linear-gradient(to bottom, #2a2a4e, #121224);
 }
 
 .hero h1 {
     font-size: 2.5rem;
     margin-bottom: 20px;
+    animation: fadeInDown 1s ease-in-out;
 }
 
 .hero p {
     font-size: 1.2rem;
     margin-bottom: 30px;
     color: #555;
+    animation: fadeInUp 1s ease-in-out 0.3s;
 }
 
 .dark-mode .hero p {
@@ -244,6 +281,12 @@ header {
     max-width: 300px;
     margin: 20px auto;
     display: block;
+    transition: transform 0.3s;
+    animation: bounceIn 1s ease-in-out 0.6s;
+}
+
+.hero-image:hover {
+    transform: scale(1.05);
 }
 
 .search-bar {
@@ -252,12 +295,14 @@ header {
     max-width: 500px;
     margin: 0 auto;
     position: relative;
+    animation: fadeIn 1s ease-in-out 0.9s;
 }
 
 .search-bar i {
     position: absolute;
     left: 15px;
     color: #777;
+    transition: color 0.3s;
 }
 
 .search-bar input {
@@ -266,11 +311,23 @@ header {
     border: 1px solid #ccc;
     border-radius: 25px 0 0 25px;
     font-size: 1rem;
-    transition: border-color 0.3s;
+    transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 .search-bar input:invalid:not(:placeholder-shown) {
     border-color: #dc3545;
+}
+
+.search-bar input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+    outline: none;
+}
+
+.dark-mode .search-bar input {
+    background: #2a2a4e;
+    border-color: #444;
+    color: #e0e0e0;
 }
 
 .search-bar button {
@@ -280,11 +337,12 @@ header {
     color: #fff;
     border-radius: 0 25px 25px 0;
     cursor: pointer;
-    transition: background 0.3s;
+    transition: background 0.3s, transform 0.3s;
 }
 
 .search-bar button:hover {
     background: #0056b3;
+    transform: scale(1.05);
 }
 
 .dark-mode .search-bar button {
@@ -293,17 +351,6 @@ header {
 
 .dark-mode .search-bar button:hover {
     background: #4169e1;
-}
-
-.search-bar input:focus {
-    border-color: #007bff;
-    outline: none;
-}
-
-.dark-mode .search-bar input {
-    background: #2a2a4e;
-    border-color: #444;
-    color: #e0e0e0;
 }
 
 .tools-section {
@@ -318,16 +365,25 @@ header {
 }
 
 .tool-card {
-    background: #fff;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.tool-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
 }
 
 .dark-mode .tool-card {
-    background: #16213e;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    background: rgba(22, 33, 62, 0.8);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .tool-card h3 {
@@ -336,6 +392,11 @@ header {
     display: flex;
     align-items: center;
     gap: 10px;
+    color: #007bff;
+}
+
+.dark-mode .tool-card h3 {
+    color: #6495ed;
 }
 
 .tool-card p {
@@ -356,13 +417,14 @@ header {
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 1rem;
-    transition: border-color 0.3s;
+    transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 .tool-card input:focus,
 .tool-card textarea:focus,
 .tool-card select:focus {
     border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
     outline: none;
 }
 
@@ -391,13 +453,22 @@ header {
     align-items: center;
     gap: 8px;
     font-size: 1rem;
-    color: #333;
+    color: #2d2d2d;
     cursor: pointer;
-    transition: color 0.3s;
+    transition: color 0.3s, transform 0.3s;
+}
+
+.checkbox-group label:hover {
+    color: #007bff;
+    transform: translateX(5px);
 }
 
 .dark-mode .checkbox-group label {
     color: #e0e0e0;
+}
+
+.dark-mode .checkbox-group label:hover {
+    color: #6495ed;
 }
 
 .checkbox-group input[type="checkbox"] {
@@ -405,14 +476,6 @@ header {
     height: 18px;
     accent-color: #007bff;
     cursor: pointer;
-}
-
-.checkbox-group label:hover {
-    color: #007bff;
-}
-
-.dark-mode .checkbox-group label:hover {
-    color: #6495ed;
 }
 
 .button-group {
@@ -429,11 +492,13 @@ header {
     color: #fff;
     font-size: 1rem;
     cursor: pointer;
-    transition: background 0.3s;
+    transition: background 0.3s, transform 0.3s;
 }
 
 .tool-card button:hover {
     background: #0056b3;
+    transform: scale(1.05);
+    animation: pulse 0.5s ease-in-out;
 }
 
 .dark-mode .tool-card button {
@@ -447,6 +512,7 @@ header {
 .tool-card button:disabled {
     background: #ccc;
     cursor: not-allowed;
+    transform: none;
 }
 
 .loading {
@@ -527,6 +593,7 @@ header {
 
 .copy-btn:hover {
     background: #218838;
+    transform: scale(1.05);
 }
 
 .dark-mode .copy-btn {
@@ -555,16 +622,23 @@ header {
 }
 
 .modal-content {
-    background: #fff;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
     padding: 20px;
     border-radius: 10px;
     max-width: 400px;
     width: 90%;
     text-align: center;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s;
+}
+
+.modal-content:hover {
+    transform: scale(1.02);
 }
 
 .dark-mode .modal-content {
-    background: #16213e;
+    background: rgba(22, 33, 62, 0.9);
 }
 
 .modal-content h2 {
@@ -584,7 +658,6 @@ header {
     margin-top: 15px;
 }
 
-/* Cố định footer */
 main {
     padding-bottom: 60px; /* Chiều cao của footer */
 }
@@ -592,17 +665,19 @@ main {
 footer {
     text-align: center;
     padding: 20px;
-    background: #fff;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
     box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
     position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
     z-index: 1000;
+    transition: background 0.5s ease;
 }
 
 .dark-mode footer {
-    background: #16213e;
+    background: rgba(22, 33, 62, 0.9);
     box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.3);
 }
 
@@ -659,5 +734,13 @@ footer p {
 
     .checkbox-group {
         grid-template-columns: 1fr;
+    }
+
+    .tool-card {
+        padding: 15px;
+    }
+
+    .tool-card h3 {
+        font-size: 1.3rem;
     }
 }
