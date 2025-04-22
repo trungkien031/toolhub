@@ -1,135 +1,148 @@
-const elements = {
-    toast: document.getElementById('toast')
-};
+function validateInput(value, type, inputElement, errorId) {
+    console.log(`Validating input: ${value}, type: ${type}`);
+    let isValid = true;
+    let message = '';
 
-function escapeHTML(str) {
-    return str.replace(/[&<>"']/g, match => ({
-        '&': '&',
-        '<': '<',
-        '>': '>',
-        '"': '"',
-        "'": '''
-    }[match]));
+    if (!value) {
+        isValid = false;
+        message = i18next.t('error.emptyText', 'Please enter valid text!');
+    } else {
+        switch (type) {
+            case 'text':
+                if (value.trim().length === 0) {
+                    isValid = false;
+                    message = i18next.t('error.emptyText', 'Please enter valid text!');
+                }
+                break;
+            case 'number':
+                const num = parseFloat(value);
+                if (isNaN(num) || num < 0) {
+                    isValid = false;
+                    message = i18next.t('error.invalidNumber', 'Please enter a valid positive number!');
+                }
+                break;
+            case 'url':
+                const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+                if (!urlPattern.test(value)) {
+                    isValid = false;
+                    message = i18next.t('error.invalidUrl', 'Please enter a valid URL!');
+                }
+                break;
+        }
+    }
+
+    if (!isValid) {
+        showError(inputElement, errorId, message);
+    } else {
+        clearError(errorId);
+    }
+
+    return { isValid, input: inputElement, errorId, message };
 }
 
-function showError(inputElement, errorElementId, message) {
-    const errorElement = document.getElementById(errorElementId);
-    if (!errorElement) return;
-    inputElement.classList.add('error');
-    errorElement.textContent = message;
-    errorElement.classList.add('active');
-    showToast(message, 'error');
+function showError(inputElement, errorId, message) {
+    console.log(`Showing error: ${message}`);
+    const errorElement = document.getElementById(errorId);
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.classList.add('active');
+    }
+    if (inputElement) {
+        inputElement.classList.add('error');
+        inputElement.focus();
+    }
 }
 
-function clearError(inputElement, errorElementId) {
-    const errorElement = document.getElementById(errorElementId);
-    if (!errorElement) return;
-    inputElement.classList.remove('error');
-    errorElement.textContent = '';
-    errorElement.classList.remove('active');
+function clearError(errorId) {
+    console.log(`Clearing error for: ${errorId}`);
+    const errorElement = document.getElementById(errorId);
+    if (errorElement) {
+        errorElement.textContent = '';
+        errorElement.classList.remove('active');
+    }
+    const inputs = document.querySelectorAll(`#${errorId.replace('Error', '')} input`);
+    inputs.forEach(input => input.classList.remove('error'));
 }
 
 function showToast(message, type) {
-    if (!elements.toast) return;
-    elements.toast.textContent = message;
-    elements.toast.className = `toast ${type} active animate__animated animate__slideInRight`;
+    console.log(`Showing toast: ${message}, type: ${type}`);
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+    toast.textContent = message;
+    toast.className = `toast ${type} active animate__animated animate__fadeIn`;
     setTimeout(() => {
-        elements.toast.className = 'toast';
+        toast.classList.remove('active');
     }, 3000);
 }
 
-function showLoading(button, loadingId, resultId, callback) {
-    const loading = document.getElementById(loadingId);
-    const result = document.getElementById(resultId);
-    if (!loading || !result) return;
-    loading.style.display = 'block';
-    result.classList.remove('active');
-    button.disabled = true;
-    setTimeout(() => {
-        loading.style.display = 'none';
-        button.disabled = false;
-        callback();
-    }, 300);
-}
-
-function processTool(button, loadingId, resultId, validateFn, processFn) {
-    showLoading(button, loadingId, resultId, () => {
-        const validation = validateFn();
-        if (!validation.isValid) {
-            return showError(validation.input, validation.errorId, validation.message);
-        }
-        clearError(validation.input, validation.errorId);
-        processFn();
-        document.getElementById(resultId).classList.add('active', 'animate__animated', 'animate__fadeIn');
-    });
-}
-
-function validateInput(value, type, inputElement, errorId) {
-    switch (type) {
-        case 'text':
-            if (/^\s*$/.test(value)) {
-                return {
-                    isValid: false,
-                    input: inputElement,
-                    errorId,
-                    message: i18next.t('error.emptyText', 'Please enter valid text!')
-                };
-            }
-            break;
-        case 'number':
-            const num = parseFloat(value);
-            if (isNaN(num) || num < 0) {
-                return {
-                    isValid: false,
-                    input: inputElement,
-                    errorId,
-                    message: i18next.t('error.invalidNumber', 'Please enter a valid positive number!')
-                };
-            }
-            break;
-        case 'url':
-            const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w-./?%&=]*)?$/i;
-            if (!urlPattern.test(value)) {
-                return {
-                    isValid: false,
-                    input: inputElement,
-                    errorId,
-                    message: i18next.t('error.invalidUrl', 'Please enter a valid URL!')
-                };
-            }
-            break;
-    }
-    return { isValid: true, input: inputElement, errorId };
-}
-
 function saveToHistory(toolId, result) {
-    let history = JSON.parse(localStorage.getItem('toolHistory') || '[]');
+    console.log(`Saving to history: ${toolId}`);
+    const history = JSON.parse(localStorage.getItem('toolHistory') || '[]');
     history.push({
         toolId,
         result,
-        timestamp: new Date().toLocaleString(i18next.language === 'vi' ? 'vi-VN' : i18next.language === 'ja' ? 'ja-JP' : 'en-US')
+        timestamp: new Date().toLocaleString()
     });
-    if (history.length > 100) history = history.slice(-100);
     localStorage.setItem('toolHistory', JSON.stringify(history));
 }
 
-function saveToolState(toolId, inputData) {
-    localStorage.setItem(`toolState_${toolId}`, JSON.stringify(inputData));
-}
-
-function loadToolState(toolId) {
-    return JSON.parse(localStorage.getItem(`toolState_${toolId}`) || '{}');
+function saveToolState(toolId, state) {
+    console.log(`Saving tool state: ${toolId}`);
+    localStorage.setItem(`toolState_${toolId}`, JSON.stringify(state));
 }
 
 function restoreToolState(toolId) {
-    const state = loadToolState(toolId);
+    console.log(`Restoring tool state: ${toolId}`);
+    const state = JSON.parse(localStorage.getItem(`toolState_${toolId}`) || '{}');
     const section = document.getElementById(toolId);
     if (!section) return;
-    Object.keys(state).forEach(id => {
-        const element = section.querySelector(`#${id}`);
+
+    Object.keys(state).forEach(key => {
+        const element = section.querySelector(`#${key}`);
         if (element) {
-            if (element.type === 'checkbox') element.checked = state[id];
-            else element.value = state[id];
+            if (element.type === 'checkbox') {
+                element.checked = state[key];
+            } else {
+                element.value = state[key];
+            }
         }
     });
+}
+
+function processTool(button, loadingId, resultId, validateFn, executeFn) {
+    console.log(`Processing tool for button: ${button.dataset.action}`);
+    const loadingElement = document.getElementById(loadingId);
+    const resultElement = document.getElementById(resultId);
+
+    const validation = validateFn();
+    if (!validation.isValid) {
+        showError(validation.input, validation.errorId, validation.message);
+        return;
+    }
+
+    clearError(validation.errorId);
+    if (loadingElement) loadingElement.style.display = 'block';
+    if (resultElement) resultElement.style.display = 'none';
+
+    setTimeout(async () => {
+        try {
+            await executeFn();
+            if (resultElement) resultElement.style.display = 'block';
+        } catch (error) {
+            console.error('Tool execution error:', error);
+            showError(validation.input, validation.errorId, i18next.t('error.apiError', 'Error executing tool.'));
+        } finally {
+            if (loadingElement) loadingElement.style.display = 'none';
+        }
+    }, 500);
+}
+
+function escapeHTML(str) {
+    return str.replace(/[&<>"']/g, match => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    }[match]));
 }
