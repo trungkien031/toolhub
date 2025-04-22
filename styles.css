@@ -87,11 +87,11 @@ body.dark-mode .circle {
 .dark-mode-toggle {
     position: fixed;
     top: 20px;
-    right: 20px;
+    right: 80px;
     background: var(--primary-color);
     color: #fff;
-    border: none;
-    border-radius: var(--border-radius);
+    border: 2px solid #fff;
+    border-radius: 50%;
     padding: 8px;
     cursor: pointer;
     font-size: 1.2rem;
@@ -102,23 +102,25 @@ body.dark-mode .circle {
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .dark-mode-toggle:hover {
     background: #0056b3;
-    transform: scale(1.05);
+    transform: rotate(360deg);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 /* Language selector */
 .language-selector {
     position: fixed;
-    top: 60px;
+    top: 20px;
     right: 20px;
-    padding: 5px;
+    padding: 8px;
     border-radius: var(--border-radius);
     background: var(--primary-color);
     color: #fff;
-    border: none;
+    border: 2px solid #fff;
     font-size: 1rem;
     cursor: pointer;
     transition: var(--transition);
@@ -127,6 +129,7 @@ body.dark-mode .circle {
 
 .language-selector:hover {
     background: #0056b3;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 /* Header */
@@ -220,7 +223,6 @@ body.dark-mode .tool-nav {
     justify-content: center;
     text-decoration: none;
     color: var(--text-color);
-    font-size: 1.5rem;
     width: 50px;
     height: 50px;
     border-radius: var(--border-radius);
@@ -240,6 +242,13 @@ body.dark-mode .tool-nav a {
 body.dark-mode .tool-nav a:hover {
     background: #2a2a4e;
     color: #6495ed;
+}
+
+/* Tool icon */
+.tool-icon {
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
 }
 
 /* Hero section */
@@ -526,6 +535,14 @@ main {
 
     .tool-card {
         padding: 15px;
+    }
+
+    .dark-mode-toggle {
+        right: 70px;
+    }
+
+    .language-selector {
+        right: 20px;
     }
 }
 
