@@ -87,7 +87,7 @@ body.dark-mode .circle {
 .dark-mode-toggle {
     position: fixed;
     top: 20px;
-    right: 80px;
+    left: 20px; /* Moved to top-left */
     background: var(--primary-color);
     color: #fff;
     border: 2px solid #fff;
@@ -115,7 +115,7 @@ body.dark-mode .circle {
 .language-selector {
     position: fixed;
     top: 20px;
-    right: 20px;
+    right: 20px; /* Kept at top-right */
     padding: 8px;
     border-radius: var(--border-radius);
     background: var(--primary-color);
@@ -265,7 +265,7 @@ body.dark-mode .hero {
 
 .hero h1 {
     font-size: 2.5rem;
-    margin-bottom: 20px;
+    margin-bottom: 20FFICpx;
 }
 
 .hero p {
@@ -498,6 +498,39 @@ body.dark-mode .modal-content {
     display: block;
 }
 
+/* History Stats */
+.history-stats {
+    margin-bottom: 20px;
+    padding: 10px;
+    border-radius: var(--border-radius);
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow);
+}
+
+body.dark-mode .history-stats {
+    background: rgba(22, 33, 62, 0.8);
+}
+
+.history-stats h4 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+
+body.dark-mode .history-stats h4 {
+    color: #6495ed;
+}
+
+.history-stats ul {
+    list-style: none;
+    padding: 0;
+}
+
+.history-stats li {
+    margin-bottom: 5px;
+}
+
 /* Footer */
 footer {
     position: fixed;
@@ -538,11 +571,11 @@ main {
     }
 
     .dark-mode-toggle {
-        right: 70px;
+        left: 10px;
     }
 
     .language-selector {
-        right: 20px;
+        right: 10px;
     }
 }
 
