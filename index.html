@@ -48,18 +48,18 @@
     </header>
 
     <nav class="tool-nav" role="navigation" aria-label="Tool navigation">
-        <a href="#" data-tool="summarize" title="Text Summary" aria-label="Text Summary"><i class="fas fa-brain"></i></a>
-        <a href="#" data-tool="length-converter" title="Length Converter" aria-label="Length Converter"><i class="fas fa-ruler"></i></a>
-        <a href="#" data-tool="calculator" title="Calculator" aria-label="Calculator"><i class="fas fa-calculator"></i></a>
-        <a href="#" data-tool="password-generator" title="Password Generator" aria-label="Password Generator"><i class="fas fa-key"></i></a>
-        <a href="#" data-tool="char-counter" title="Character Counter" aria-label="Character Counter"><i class="fas fa-text-width"></i></a>
-        <a href="#" data-tool="url-checker" title="URL Checker" aria-label="URL Checker"><i class="fas fa-globe"></i></a>
-        <a href="#" data-tool="temp-converter" title="Temperature Converter" aria-label="Temperature Converter"><i class="fas fa-thermometer-half"></i></a>
-        <a href="#" data-tool="currency-converter" title="Currency Converter" aria-label="Currency Converter"><i class="fas fa-money-bill-wave"></i></a>
-        <a href="#" data-tool="qr-generator" title="QR Code Generator" aria-label="QR Code Generator"><i class="fas fa-qrcode"></i></a>
-        <a href="#" data-tool="image-compressor" title="Image Compressor" aria-label="Image Compressor"><i class="fas fa-image"></i></a>
-        <a href="#" data-tool="bmi-calculator" title="BMI Calculator" aria-label="BMI Calculator"><i class="fas fa-weight-scale"></i></a>
-        <a href="#" data-tool="area-converter" title="Area Converter" aria-label="Area Converter"><i class="fas fa-square"></i></a>
+        <a href="#" data-tool="summarize" title="Text Summary" aria-label="Text Summary"><img src="/toolhub/assets/icons/brain.png" alt="Text Summary" class="tool-icon"></a>
+        <a href="#" data-tool="length-converter" title="Length Converter" aria-label="Length Converter"><img src="/toolhub/assets/icons/ruler.png" alt="Length Converter" class="tool-icon"></a>
+        <a href="#" data-tool="calculator" title="Calculator" aria-label="Calculator"><img src="/toolhub/assets/icons/calculator.png" alt="Calculator" class="tool-icon"></a>
+        <a href="#" data-tool="password-generator" title="Password Generator" aria-label="Password Generator"><img src="/toolhub/assets/icons/key.png" alt="Password Generator" class="tool-icon"></a>
+        <a href="#" data-tool="char-counter" title="Character Counter" aria-label="Character Counter"><img src="/toolhub/assets/icons/text-width.png" alt="Character Counter" class="tool-icon"></a>
+        <a href="#" data-tool="url-checker" title="URL Checker" aria-label="URL Checker"><img src="/toolhub/assets/icons/globe.png" alt="URL Checker" class="tool-icon"></a>
+        <a href="#" data-tool="temp-converter" title="Temperature Converter" aria-label="Temperature Converter"><img src="/toolhub/assets/icons/thermometer.png" alt="Temperature Converter" class="tool-icon"></a>
+        <a href="#" data-tool="currency-converter" title="Currency Converter" aria-label="Currency Converter"><img src="/toolhub/assets/icons/money.png" alt="Currency Converter" class="tool-icon"></a>
+        <a href="#" data-tool="qr-generator" title="QR Code Generator" aria-label="QR Code Generator"><img src="/toolhub/assets/icons/qr-code.png" alt="QR Code Generator" class="tool-icon"></a>
+        <a href="#" data-tool="image-compressor" title="Image Compressor" aria-label="Image Compressor"><img src="/toolhub/assets/icons/image.png" alt="Image Compressor" class="tool-icon"></a>
+        <a href="#" data-tool="bmi-calculator" title="BMI Calculator" aria-label="BMI Calculator"><img src="/toolhub/assets/icons/weight.png" alt="BMI Calculator" class="tool-icon"></a>
+        <a href="#" data-tool="area-converter" title="Area Converter" aria-label="Area Converter"><img src="/toolhub/assets/icons/square.png" alt="Area Converter" class="tool-icon"></a>
     </nav>
 
     <div class="modal" id="contactModal">
@@ -89,7 +89,7 @@
     <main>
         <section class="tools-section" id="summarize" data-tool-name="summarize">
             <div class="tool-card">
-                <h3><i class="fas fa-brain"></i> <span data-i18n="summarize">Text Summary</span></h3>
+                <h3><img src="/toolhub/assets/icons/brain.png" alt="Text Summary" class="tool-icon"> <span data-i18n="summarize">Text Summary</span></h3>
                 <p data-i18n="summarizeDesc">Condense long content into a concise summary.</p>
                 <textarea id="textInput" rows="4" placeholder="Enter text to summarize..." aria-label="Text to summarize" aria-describedby="textError" data-i18n-placeholder="textInputPlaceholder"></textarea>
                 <select id="summaryLength" aria-label="Select summary length">
@@ -110,7 +110,7 @@
 
         <section class="tools-section" id="length-converter" data-tool-name="length converter">
             <div class="tool-card">
-                <h3><i class="fas fa-ruler"></i> <span data-i18n="length-converter">Length Converter</span></h3>
+                <h3><img src="/toolhub/assets/icons/ruler.png" alt="Length Converter" class="tool-icon"> <span data-i18n="length-converter">Length Converter</span></h3>
                 <p data-i18n="lengthConverterDesc">Convert length between meters, kilometers, centimeters, inches, feet, and yards.</p>
                 <input type="number" id="lengthValue" placeholder="Enter value" min="0" step="any" aria-label="Length value" aria-describedby="lengthError" data-i18n-placeholder="valuePlaceholder">
                 <select id="lengthFrom" aria-label="Select original unit">
@@ -152,7 +152,7 @@
 
         <section class="tools-section" id="calculator" data-tool-name="calculator">
             <div class="tool-card">
-                <h3><i class="fas fa-calculator"></i> <span data-i18n="calculator">Calculator</span></h3>
+                <h3><img src="/toolhub/assets/icons/calculator.png" alt="Calculator" class="tool-icon"> <span data-i18n="calculator">Calculator</span></h3>
                 <p data-i18n="calculatorDesc">Perform basic calculations: addition, subtraction, multiplication, division.</p>
                 <input type="number" id="num1" placeholder="First number" step="any" aria-label="First number" aria-describedby="calcError" data-i18n-placeholder="firstNumberPlaceholder">
                 <select id="operator" aria-label="Select operator">
@@ -175,7 +175,7 @@
 
         <section class="tools-section" id="password-generator" data-tool-name="password generator">
             <div class="tool-card">
-                <h3><i class="fas fa-key"></i> <span data-i18n="password-generator">Password Generator</span></h3>
+                <h3><img src="/toolhub/assets/icons/key.png" alt="Password Generator" class="tool-icon"> <span data-i18n="password-generator">Password Generator</span></h3>
                 <p data-i18n="passwordGeneratorDesc">Generate secure random passwords with customizable length and character types.</p>
                 <input type="number" id="passLength" placeholder="Password length (8-32)" min="8" max="32" aria-label="Password length" aria-describedby="passError" data-i18n-placeholder="passLengthPlaceholder">
                 <label><input type="checkbox" id="includeUppercase" checked> <span data-i18n="uppercase">Uppercase (A-Z)</span></label>
@@ -196,7 +196,7 @@
 
         <section class="tools-section" id="char-counter" data-tool-name="character counter">
             <div class="tool-card">
-                <h3><i class="fas fa-text-width"></i> <span data-i18n="char-counter">Character Counter</span></h3>
+                <h3><img src="/toolhub/assets/icons/text-width.png" alt="Character Counter" class="tool-icon"> <span data-i18n="char-counter">Character Counter</span></h3>
                 <p data-i18n="charCounterDesc">Count characters and words in your text.</p>
                 <textarea id="charInput" rows="4" placeholder="Enter text..." aria-label="Text to count" aria-describedby="charError" data-i18n-placeholder="charInputPlaceholder"></textarea>
                 <p class="error-message" id="charError"></p>
@@ -212,7 +212,7 @@
 
         <section class="tools-section" id="url-checker" data-tool-name="url checker">
             <div class="tool-card">
-                <h3><i class="fas fa-globe"></i> <span data-i18n="url-checker">URL Checker</span></h3>
+                <h3><img src="/toolhub/assets/icons/globe.png" alt="URL Checker" class="tool-icon"> <span data-i18n="url-checker">URL Checker</span></h3>
                 <p data-i18n="urlCheckerDesc">Check if a URL is valid and safe.</p>
                 <input type="text" id="urlInput" placeholder="Enter URL..." aria-label="URL to check" aria-describedby="urlError" data-i18n-placeholder="urlInputPlaceholder">
                 <p class="error-message" id="urlError"></p>
@@ -228,7 +228,7 @@
 
         <section class="tools-section" id="temp-converter" data-tool-name="temperature converter">
             <div class="tool-card">
-                <h3><i class="fas fa-thermometer-half"></i> <span data-i18n="temp-converter">Temperature Converter</span></h3>
+                <h3><img src="/toolhub/assets/icons/thermometer.png" alt="Temperature Converter" class="tool-icon"> <span data-i18n="temp-converter">Temperature Converter</span></h3>
                 <p data-i18n="tempConverterDesc">Convert between Celsius, Fahrenheit, and Kelvin.</p>
                 <input type="number" id="tempValue" placeholder="Enter value" step="any" aria-label="Temperature value" aria-describedby="tempError" data-i18n-placeholder="valuePlaceholder">
                 <select id="tempFrom" aria-label="Select original unit">
@@ -264,7 +264,7 @@
 
         <section class="tools-section" id="currency-converter" data-tool-name="currency converter">
             <div class="tool-card">
-                <h3><i class="fas fa-money-bill-wave"></i> <span data-i18n="currency-converter">Currency Converter</span></h3>
+                <h3><img src="/toolhub/assets/icons/money.png" alt="Currency Converter" class="tool-icon"> <span data-i18n="currency-converter">Currency Converter</span></h3>
                 <p data-i18n="currencyConverterDesc">Convert between different currencies using real-time rates.</p>
                 <input type="number" id="currencyValue" placeholder="Enter value" min="0" step="any" aria-label="Currency value" aria-describedby="currencyError" data-i18n-placeholder="valuePlaceholder">
                 <select id="currencyFrom" aria-label="Select original currency">
@@ -304,7 +304,7 @@
 
         <section class="tools-section" id="qr-generator" data-tool-name="qr code generator">
             <div class="tool-card">
-                <h3><i class="fas fa-qrcode"></i> <span data-i18n="qr-generator">QR Code Generator</span></h3>
+                <h3><img src="/toolhub/assets/icons/qr-code.png" alt="QR Code Generator" class="tool-icon"> <span data-i18n="qr-generator">QR Code Generator</span></h3>
                 <p data-i18n="qrGeneratorDesc">Generate QR codes for URLs or text.</p>
                 <input type="text" id="qrInput" placeholder="Enter URL or text..." aria-label="Text for QR code" aria-describedby="qrError" data-i18n-placeholder="urlInputPlaceholder">
                 <p class="error-message" id="qrError"></p>
@@ -320,7 +320,7 @@
 
         <section class="tools-section" id="image-compressor" data-tool-name="image compressor">
             <div class="tool-card">
-                <h3><i class="fas fa-image"></i> <span data-i18n="image-compressor">Image Compressor</span></h3>
+                <h3><img src="/toolhub/assets/icons/image.png" alt="Image Compressor" class="tool-icon"> <span data-i18n="image-compressor">Image Compressor</span></h3>
                 <p data-i18n="imageCompressorDesc">Compress images to reduce file size.</p>
                 <input type="file" id="imageInput" accept="image/*" aria-label="Select image to compress" aria-describedby="imageError">
                 <p class="error-message" id="imageError"></p>
@@ -334,7 +334,7 @@
 
         <section class="tools-section" id="bmi-calculator" data-tool-name="bmi calculator">
             <div class="tool-card">
-                <h3><i class="fas fa-weight-scale"></i> <span data-i18n="bmi-calculator">BMI Calculator</span></h3>
+                <h3><img src="/toolhub/assets/icons/weight.png" alt="BMI Calculator" class="tool-icon"> <span data-i18n="bmi-calculator">BMI Calculator</span></h3>
                 <p data-i18n="bmiCalculatorDesc">Calculate your Body Mass Index (BMI).</p>
                 <input type="number" id="weight" placeholder="Weight (kg)" min="0" step="any" aria-label="Weight in kilograms" aria-describedby="bmiError" data-i18n-placeholder="valuePlaceholder">
                 <input type="number" id="height" placeholder="Height (cm)" min="0" step="any" aria-label="Height in centimeters" aria-describedby="bmiError" data-i18n-placeholder="valuePlaceholder">
@@ -361,7 +361,7 @@
 
         <section class="tools-section" id="area-converter" data-tool-name="area converter">
             <div class="tool-card">
-                <h3><i class="fas fa-square"></i> <span data-i18n="area-converter">Area Converter</span></h3>
+                <h3><img src="/toolhub/assets/icons/square.png" alt="Area Converter" class="tool-icon"> <span data-i18n="area-converter">Area Converter</span></h3>
                 <p data-i18n="areaConverterDesc">Convert between square meters, kilometers, hectares, and square feet.</p>
                 <input type="number" id="areaValue" placeholder="Enter value" min="0" step="any" aria-label="Area value" aria-describedby="areaError" data-i18n-placeholder="valuePlaceholder">
                 <select id="areaFrom" aria-label="Select original unit">
