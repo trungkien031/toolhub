@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('Script loaded successfully.');
+
     // API Keys (Replace with your own)
     const EXCHANGE_RATE_API_KEY = 'YOUR_EXCHANGERATE_API_KEY'; // Get from exchangerate-api.com
     const GOOGLE_SAFE_BROWSING_KEY = 'YOUR_GOOGLE_SAFE_BROWSING_KEY'; // Get from Google Cloud
@@ -92,11 +94,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Utility Functions
     function escapeHTML(str) {
         return str.replace(/[&<>"']/g, match => ({
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#39;'
+            '&': '&',
+            '<': '<',
+            '>': '>',
+            '"': '"',
+            "'": '''
         }[match]));
     }
 
@@ -212,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // UI Functions
     function toggleDarkMode() {
+        console.log('Toggling dark mode...');
         document.body.classList.toggle('dark-mode');
         const isDarkMode = document.body.classList.contains('dark-mode');
         localStorage.setItem('darkMode', isDarkMode);
@@ -232,16 +235,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openContactModal() {
+        console.log('Opening contact modal...');
         if (!elements.contactModal) return;
         elements.contactModal.classList.add('active', 'animate__animated', 'animate__fadeIn');
     }
 
     function closeContactModal() {
+        console.log('Closing contact modal...');
         if (!elements.contactModal) return;
         elements.contactModal.classList.remove('active');
     }
 
     function showHome() {
+        console.log('Showing home...');
         const toolsSections = document.querySelectorAll('.tools-section');
         if (!elements.hero) return;
         toolsSections.forEach(section => {
@@ -256,6 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showTool(toolId) {
+        console.log(`Showing tool: ${toolId}`);
         if (!elements.hero) return;
         elements.hero.style.display = 'none';
         document.querySelectorAll('.tools-section').forEach(section => {
@@ -289,6 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showHistory() {
+        console.log('Showing history...');
         showTool('history');
         if (!elements.historyResult) return;
         const history = JSON.parse(localStorage.getItem('toolHistory') || '[]');
@@ -307,12 +315,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function clearHistory() {
+        console.log('Clearing history...');
         localStorage.removeItem('toolHistory');
         showHistory();
         showToast(i18next.t('historyCleared', 'History cleared!'), 'success');
     }
 
     function searchTools() {
+        console.log('Searching tools...');
         if (!elements.searchInput || !elements.hero) return;
         const searchValue = elements.searchInput.value.trim().toLowerCase();
         const toolsSections = document.querySelectorAll('.tools-section');
@@ -346,6 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Language Initialization with i18next
     function initLanguage() {
+        console.log('Initializing language...');
         i18next.init({
             lng: localStorage.getItem('language') || 'vi',
             resources: {
@@ -466,7 +477,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         passLengthPlaceholder: 'Password length (8-32)',
                         charInputPlaceholder: 'Enter text...',
                         urlInputPlaceholder: 'Enter URL...',
-                        searchPlaceholder: 'Search tools...'
+                        searchPlaceholder: 'Search tools...',
+                        clearHistory: 'Clear History',
+                        weight: 'Weight (kg)',
+                        height: 'Height (cm)',
+                        status: 'Status',
+                        createdBy: 'Created by'
                     }
                 },
                 vi: {
@@ -586,11 +602,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         passLengthPlaceholder: 'Độ dài mật khẩu (8-32)',
                         charInputPlaceholder: 'Nhập văn bản...',
                         urlInputPlaceholder: 'Nhập URL...',
-                        searchPlaceholder: 'Tìm kiếm công cụ...'
+                        searchPlaceholder: 'Tìm kiếm công cụ...',
+                        clearHistory: 'Xóa lịch sử',
+                        weight: 'Cân nặng (kg)',
+                        height: 'Chiều cao (cm)',
+                        status: 'Trạng thái',
+                        createdBy: 'Được tạo bởi'
                     }
                 }
             }
-        }, () => {
+        }, (err) => {
+            if (err) {
+                console.error('Failed to initialize i18next:', err);
+                return;
+            }
             updateContent();
         });
 
@@ -599,6 +624,7 @@ document.addEventListener('DOMContentLoaded', () => {
             i18next.changeLanguage(lang, () => {
                 updateContent();
                 localStorage.setItem('language', lang);
+                showHistory(); // Update history display if visible
             });
         });
     }
@@ -615,6 +641,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Tool Functions
     function summarizeText() {
+        console.log('Summarizing text...');
         const validate = () => {
             const text = elements.textInput.value;
             if (text.length > 10000) {
@@ -651,6 +678,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function convertLength() {
+        console.log('Converting length...');
         const validate = () => validateInput(elements.lengthValue.value, 'number', elements.lengthValue, 'lengthError');
 
         const process = () => {
@@ -684,6 +712,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calculate() {
+        console.log('Calculating...');
         const validate = () => {
             const num1 = validateInput(elements.num1.value, 'number', elements.num1, 'calcError');
             if (!num1.isValid) return num1;
@@ -722,6 +751,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function generatePassword() {
+        console.log('Generating password...');
         const validate = () => {
             const length = parseInt(elements.passLength.value);
             if (isNaN(length) || length < 8 || length > 32) {
@@ -774,6 +804,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function copyPassword() {
+        console.log('Copying password...');
         const password = elements.passOutput.textContent;
         if (password) {
             navigator.clipboard.writeText(password).then(() => {
@@ -785,6 +816,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function countChars() {
+        console.log('Counting characters...');
         const validate = () => validateInput(elements.charInput.value, 'text', elements.charInput, 'charError');
 
         const process = () => {
@@ -802,6 +834,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function checkURL() {
+        console.log('Checking URL...');
         const validate = () => validateInput(elements.urlInput.value, 'url', elements.urlInput, 'urlError');
 
         const process = () => {
@@ -827,7 +860,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveToolState('url-checker', { urlInput: url });
                 showToast(i18next.t('checkURL', 'Check') + ' ' + i18next.t('result', 'Result'), isSafe ? 'success' : 'error');
             })
-            .catch(() => {
+            .catch(err => {
+                console.error('URL check failed:', err);
                 showToast(i18next.t('error.apiError', 'Error connecting to API.'), 'error');
             });
         };
@@ -837,6 +871,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function convertTemp() {
+        console.log('Converting temperature...');
         const validate = () => validateInput(elements.tempValue.value, 'number', elements.tempValue, 'tempError');
 
         const process = () => {
@@ -869,6 +904,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function convertCurrency() {
+        console.log('Converting currency...');
         const validate = () => validateInput(elements.currencyValue.value, 'number', elements.currencyValue, 'currencyError');
 
         const process = () => {
@@ -895,7 +931,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     saveToolState('currency-converter', { currencyValue: value, currencyFrom: fromCurrency, currencyTo: toCurrency });
                     showToast(i18next.t('convertCurrency', 'Convert') + ' ' + i18next.t('result', 'Result'), 'success');
                 })
-                .catch(() => {
+                .catch(err => {
+                    console.error('Currency conversion failed:', err);
                     showToast(i18next.t('error.apiError', 'Error connecting to API.'), 'error');
                 });
         };
@@ -905,13 +942,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function generateQR() {
+        console.log('Generating QR code...');
         const validate = () => validateInput(elements.qrInput.value, 'text', elements.qrInput, 'qrError');
 
         const process = () => {
             const text = elements.qrInput.value;
             elements.qrOutput.src = '';
+            if (typeof QRCode === 'undefined') {
+                console.error('QRCode library not loaded.');
+                showToast('QRCode library not loaded.', 'error');
+                return;
+            }
             QRCode.toDataURL(text, { width: 200, margin: 2 }, (err, url) => {
                 if (err) {
+                    console.error('QR code generation failed:', err);
                     showToast(i18next.t('error.qrFailed', 'Failed to generate QR code!'), 'error');
                     return;
                 }
@@ -927,6 +971,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function compressImage() {
+        console.log('Compressing image...');
         const validate = () => {
             if (!elements.imageInput.files || elements.imageInput.files.length === 0) {
                 return {
@@ -950,6 +995,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const process = () => {
             const file = elements.imageInput.files[0];
+            if (typeof Compressor === 'undefined') {
+                console.error('Compressor library not loaded.');
+                showToast('Compressor library not loaded.', 'error');
+                return;
+            }
             new Compressor(file, {
                 quality: 0.6,
                 maxWidth: 1024,
@@ -964,7 +1014,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     saveToHistory('image-compressor', { originalSize: file.size, compressedSize: result.size });
                     showToast(i18next.t('compressImage', 'Compress') + ' ' + i18next.t('result', 'Result'), 'success');
                 },
-                error() {
+                error(err) {
+                    console.error('Image compression failed:', err);
                     showToast(i18next.t('error.compressFailed', 'Failed to compress image!'), 'error');
                 }
             });
@@ -975,6 +1026,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calculateBMI() {
+        console.log('Calculating BMI...');
         const validate = () => {
             const weight = validateInput(elements.weight.value, 'number', elements.weight, 'bmiError');
             if (!weight.isValid) return weight;
@@ -1008,6 +1060,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function convertArea() {
+        console.log('Converting area...');
         const validate = () => validateInput(elements.areaValue.value, 'number', elements.areaValue, 'areaError');
 
         const process = () => {
@@ -1043,6 +1096,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('click', (e) => {
             const action = e.target.closest('[data-action]')?.dataset.action;
             if (!action) return;
+            console.log(`Action triggered: ${action}`);
             switch (action) {
                 case 'showHome': showHome(); break;
                 case 'showHistory': showHistory(); break;
@@ -1063,6 +1117,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'convertArea': convertArea(); break;
                 case 'clearHistory': clearHistory(); break;
                 case 'searchTools': searchTools(); break;
+                default: console.warn(`Unhandled action: ${action}`);
             }
         });
 
@@ -1070,18 +1125,28 @@ document.addEventListener('DOMContentLoaded', () => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const toolId = link.dataset.tool;
+                console.log(`Tool navigation clicked: ${toolId}`);
                 showTool(toolId);
             });
         });
 
         elements.darkModeToggle.addEventListener('click', toggleDarkMode);
         elements.searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') searchTools();
+            if (e.key === 'Enter') {
+                console.log('Search triggered via Enter key.');
+                searchTools();
+            }
         });
     }
 
     // Initialize
-    initDarkMode();
-    initLanguage();
-    initEventListeners();
+    try {
+        initDarkMode();
+        initLanguage();
+        initEventListeners();
+        console.log('Initialization completed.');
+    } catch (err) {
+        console.error('Initialization failed:', err);
+        showToast('Application initialization failed. Check console for details.', 'error');
+    }
 });
