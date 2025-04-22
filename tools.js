@@ -2,6 +2,7 @@ const EXCHANGE_RATE_API_KEY = 'YOUR_EXCHANGERATE_API_KEY';
 const GOOGLE_SAFE_BROWSING_KEY = 'YOUR_GOOGLE_SAFE_BROWSING_KEY';
 const GROK_API_KEY = 'YOUR_GROK_API_KEY';
 
+// Cache DOM elements for performance
 const elements = {
     textInput: document.getElementById('textInput'),
     summaryLength: document.getElementById('summaryLength'),
@@ -69,170 +70,144 @@ const elements = {
     areaLoading: document.getElementById('areaLoading')
 };
 
+// 1. Text Summary Tool
 async function summarizeText() {
-    console.log('Summarizing text...');
     const button = document.querySelector('[data-action="summarizeText"]');
     processTool(button, 'textLoading', 'textResult', () => {
-        const text = elements.textInput.value.trim();
-        const length = elements.summaryLength.value;
+        const text = elements.textInput.value;
+        const validation = validateInput(text, 'text', elements.textInput, 'textError');
         if (text.length > 10000) {
-            return {
-                isValid: false,
-                input: elements.textInput,
-                errorId: 'textError',
-                message: i18next.t('error.textTooLong', 'Text is too long (max 10,000 characters)!')
-            };
+            validation.isValid = false;
+            validation.message = i18next.t('error.textTooLong', 'Text is too long (max 10,000 characters)!');
         }
-        return validateInput(text, 'text', elements.textInput, 'textError');
+        return validation;
     }, async () => {
-        try {
-            elements.textLoading.style.display = 'block';
-            const response = await fetch('https://api.x.ai/grok/summarize', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${GROK_API_KEY}`
-                },
-                body: JSON.stringify({
-                    text: elements.textInput.value,
-                    length: elements.summaryLength.value
-                })
-            });
-            if (!response.ok) throw new Error('API Error');
-            const data = await response.json();
-            const summary = data.summary || i18next.t('error.summarizeFailed', 'Failed to summarize text!');
-            document.getElementById('summaryOutput').textContent = summary;
-            saveToHistory('summarize', { input: elements.textInput.value, length, output: summary });
-            saveToolState('summarize', { textInput: elements.textInput.value, summaryLength: length });
-            showToast(i18next.t('summarizeText', 'Summarize') + ' ' + i18next.t('result', 'Result'), 'success');
-        } catch (error) {
-            console.error('Summarize error:', error);
-            showError(elements.textInput, 'textError', i18next.t('error.summarizeFailed', 'Failed to summarize text!'));
-        } finally {
-            elements.textLoading.style.display = 'none';
+        const text = elements.textInput.value;
+        const length = elements.summaryLength.value;
+        let summaryRatio;
+        switch (length) {
+            case 'short': summaryRatio = 0.2; break;
+            case 'medium': summaryRatio = 0.3; break;
+            case 'long': summaryRatio = 0.4; break;
         }
+        const response = await fetch('https://api.x.ai/grok/summarize', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${GROK_API_KEY}`
+            },
+            body: JSON.stringify({ text, summaryRatio })
+        });
+        if (!response.ok) throw new Error(i18next.t('error.summarizeFailed', 'Failed to summarize text!'));
+        const data = await response.json();
+        const summary = data.summary || i18next.t('error.summarizeFailed', 'Failed to summarize text!');
+        document.getElementById('summaryOutput').textContent = summary;
+        saveToolState('summarize', { textInput: text, summaryLength: length });
+        saveToHistory('summarize', summary);
+        showToast(i18next.t('result', 'Result'), 'success');
     });
 }
 
-function convertLength() {
-    console.log('Converting length...');
+// 2. Length Converter Tool
+async function convertLength() {
     const button = document.querySelector('[data-action="convertLength"]');
     processTool(button, 'lengthLoading', 'lengthResult', () => {
         return validateInput(elements.lengthValue.value, 'number', elements.lengthValue, 'lengthError');
-    }, () => {
+    }, async () => {
         const value = parseFloat(elements.lengthValue.value);
         const fromUnit = elements.lengthFrom.value;
         const toUnit = elements.lengthTo.value;
-        const conversions = {
+        const conversionRates = {
             m: 1,
-            km: 1000,
-            cm: 0.01,
-            inch: 0.0254,
-            foot: 0.3048,
-            yard: 0.9144
+            km: 0.001,
+            cm: 100,
+            inch: 39.3701,
+            foot: 3.28084,
+            yard: 1.09361
         };
-        const result = (value * conversions[fromUnit]) / conversions[toUnit];
-        const outputTable = document.getElementById('lengthOutput');
-        outputTable.innerHTML = `
+        const valueInMeters = value / conversionRates[fromUnit];
+        const convertedValue = valueInMeters * conversionRates[toUnit];
+        const result = `${value} ${fromUnit} = ${convertedValue.toFixed(2)} ${toUnit}`;
+        document.getElementById('lengthOutput').innerHTML = `
             <tr>
-                <td>${value.toFixed(2)}</td>
-                <td>${i18next.t(fromUnit)}</td>
-                <td>${result.toFixed(2)}</td>
-                <td>${i18next.t(toUnit)}</td>
+                <td>${value}</td>
+                <td>${fromUnit}</td>
+                <td>${convertedValue.toFixed(2)}</td>
+                <td>${toUnit}</td>
             </tr>
         `;
-        saveToHistory('length-converter', { value, fromUnit, toUnit, result });
-        saveToolState('length-converter', {
-            lengthValue: value,
-            lengthFrom: fromUnit,
-            lengthTo: toUnit
-        });
-        showToast(i18next.t('convertLength', 'Convert') + ' ' + i18next.t('result', 'Result'), 'success');
+        saveToolState('length-converter', { lengthValue: value, lengthFrom: fromUnit, lengthTo: toUnit });
+        saveToHistory('length-converter', result);
+        showToast(i18next.t('result', 'Result'), 'success');
     });
 }
 
-function calculate() {
-    console.log('Calculating...');
+// 3. Calculator Tool
+async function calculate() {
     const button = document.querySelector('[data-action="calculate"]');
     processTool(button, 'calcLoading', 'calcResult', () => {
+        const validation1 = validateInput(elements.num1.value, 'number', elements.num1, 'calcError');
+        const validation2 = validateInput(elements.num2.value, 'number', elements.num2, 'calcError');
+        return { isValid: validation1.isValid && validation2.isValid, input: elements.num1, errorId: 'calcError', message: validation1.message || validation2.message };
+    }, async () => {
         const num1 = parseFloat(elements.num1.value);
         const num2 = parseFloat(elements.num2.value);
-        if (isNaN(num1) || isNaN(num2)) {
-            return {
-                isValid: false,
-                input: elements.num1,
-                errorId: 'calcError',
-                message: i18next.t('error.invalidNumber', 'Please enter a valid positive number!')
-            };
-        }
-        if (elements.operator.value === '/' && num2 === 0) {
-            return {
-                isValid: false,
-                input: elements.num2,
-                errorId: 'calcError',
-                message: i18next.t('error.divideByZero', 'Cannot divide by zero!')
-            };
-        }
-        return { isValid: true, input: elements.num1, errorId: 'calcError' };
-    }, () => {
-        const num1 = parseFloat(elements.num1.value);
-        const num2 = parseFloat(elements.num2.value);
-        const operator = elements.operator.value;
+        const op = elements.operator.value;
         let result;
-        switch (operator) {
+        switch (op) {
             case '+': result = num1 + num2; break;
             case '-': result = num1 - num2; break;
             case '*': result = num1 * num2; break;
-            case '/': result = num1 / num2; break;
+            case '/':
+                if (num2 === 0) throw new Error(i18next.t('error.divideByZero', 'Cannot divide by zero!'));
+                result = num1 / num2;
+                break;
         }
-        document.getElementById('calcOutput').textContent = `${num1} ${operator} ${num2} = ${result.toFixed(2)}`;
-        saveToHistory('calculator', { num1, operator, num2, result });
-        saveToolState('calculator', {
-            num1: elements.num1.value,
-            operator: operator,
-            num2: elements.num2.value
-        });
-        showToast(i18next.t('calculate', 'Calculate') + ' ' + i18next.t('result', 'Result'), 'success');
+        const output = `${num1} ${op} ${num2} = ${result.toFixed(2)}`;
+        document.getElementById('calcOutput').textContent = output;
+        saveToolState('calculator', { num1: num1, operator: op, num2: num2 });
+        saveToHistory('calculator', output);
+        showToast(i18next.t('result', 'Result'), 'success');
     });
 }
 
-function generatePassword() {
-    console.log('Generating password...');
+// 4. Password Generator Tool
+async function generatePassword() {
     const button = document.querySelector('[data-action="generatePassword"]');
     processTool(button, 'passLoading', 'passResult', () => {
-        const length = parseInt(elements.passLength.value);
-        if (isNaN(length) || length < 8 || length > 32) {
-            return {
-                isValid: false,
-                input: elements.passLength,
-                errorId: 'passError',
-                message: i18next.t('error.invalidLength', 'Length must be between 8 and 32!')
-            };
+        const lengthValidation = validateInput(elements.passLength.value, 'number', elements.passLength, 'passError');
+        if (lengthValidation.isValid) {
+            const length = parseInt(elements.passLength.value);
+            if (length < 8 || length > 32) {
+                lengthValidation.isValid = false;
+                lengthValidation.message = i18next.t('error.invalidLength', 'Length must be between 8 and 32!');
+            }
+            const hasCharacterType = elements.includeUppercase.checked || elements.includeLowercase.checked || elements.includeNumbers.checked || elements.includeSymbols.checked;
+            if (!hasCharacterType) {
+                lengthValidation.isValid = false;
+                lengthValidation.message = i18next.t('error.selectCharacterType', 'Please select at least one character type!');
+            }
         }
-        if (!elements.includeUppercase.checked && !elements.includeLowercase.checked &&
-            !elements.includeNumbers.checked && !elements.includeSymbols.checked) {
-            return {
-                isValid: false,
-                input: elements.passLength,
-                errorId: 'passError',
-                message: i18next.t('error.selectCharacterType', 'Please select at least one character type!')
-            };
-        }
-        return { isValid: true, input: elements.passLength, errorId: 'passError' };
-    }, () => {
+        return lengthValidation;
+    }, async () => {
         const length = parseInt(elements.passLength.value);
-        const chars = [
-            elements.includeUppercase.checked ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' : '',
-            elements.includeLowercase.checked ? 'abcdefghijklmnopqrstuvwxyz' : '',
-            elements.includeNumbers.checked ? '0123456789' : '',
-            elements.includeSymbols.checked ? '!@#$%^&*()_+-=[]{}|;:,.<>?' : ''
-        ].join('');
+        const charSets = {
+            uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            lowercase: 'abcdefghijklmnopqrstuvwxyz',
+            numbers: '0123456789',
+            symbols: '!@#$%^&*()_+-=[]{}|;:,.<>?'
+        };
+        let characters = '';
+        if (elements.includeUppercase.checked) characters += charSets.uppercase;
+        if (elements.includeLowercase.checked) characters += charSets.lowercase;
+        if (elements.includeNumbers.checked) characters += charSets.numbers;
+        if (elements.includeSymbols.checked) characters += charSets.symbols;
         let password = '';
         for (let i = 0; i < length; i++) {
-            password += chars.charAt(Math.floor(Math.random() * chars.length));
+            const randomIndex = Math.floor(Math.random() * characters.length);
+            password += characters[randomIndex];
         }
         document.getElementById('passOutput').textContent = password;
-        saveToHistory('password-generator', { length, password });
         saveToolState('password-generator', {
             passLength: length,
             includeUppercase: elements.includeUppercase.checked,
@@ -240,247 +215,198 @@ function generatePassword() {
             includeNumbers: elements.includeNumbers.checked,
             includeSymbols: elements.includeSymbols.checked
         });
-        showToast(i18next.t('generatePassword', 'Generate') + ' ' + i18next.t('result', 'Result'), 'success');
+        saveToHistory('password-generator', password);
+        showToast(i18next.t('result', 'Result'), 'success');
     });
 }
 
-function copyPassword() {
-    console.log('Copying password...');
+async function copyPassword() {
     const password = document.getElementById('passOutput').textContent;
-    navigator.clipboard.writeText(password).then(() => {
-        showToast(i18next.t('copyPassword', 'Copy') + ' ' + i18next.t('result', 'Result'), 'success');
-    });
+    if (password) {
+        try {
+            await navigator.clipboard.writeText(password);
+            showToast(i18next.t('copyPassword', 'Copied!'), 'success');
+        } catch (err) {
+            showToast(i18next.t('error.apiError', 'Failed to copy!'), 'error');
+        }
+    }
 }
 
-function countChars() {
-    console.log('Counting characters...');
+// 5. Character Counter Tool
+async function countChars() {
     const button = document.querySelector('[data-action="countChars"]');
     processTool(button, 'charLoading', 'charResult', () => {
         return validateInput(elements.charInput.value, 'text', elements.charInput, 'charError');
-    }, () => {
+    }, async () => {
         const text = elements.charInput.value;
         const charCount = text.length;
         const wordCount = text.trim().split(/\s+/).filter(word => word.length > 0).length;
-        document.getElementById('charOutput').innerHTML = `
-            ${i18next.t('characters', 'Characters')}: ${charCount}<br>
-            ${i18next.t('words', 'Words')}: ${wordCount}
-        `;
-        saveToHistory('char-counter', { text, charCount, wordCount });
+        const output = `${i18next.t('characters', 'Characters')}: ${charCount}\n${i18next.t('words', 'Words')}: ${wordCount}`;
+        document.getElementById('charOutput').textContent = output;
         saveToolState('char-counter', { charInput: text });
-        showToast(i18next.t('countChars', 'Count') + ' ' + i18next.t('result', 'Result'), 'success');
+        saveToHistory('char-counter', output);
+        showToast(i18next.t('result', 'Result'), 'success');
     });
 }
 
+// 6. URL Checker Tool
 async function checkURL() {
-    console.log('Checking URL...');
     const button = document.querySelector('[data-action="checkURL"]');
     processTool(button, 'urlLoading', 'urlResult', () => {
         return validateInput(elements.urlInput.value, 'url', elements.urlInput, 'urlError');
     }, async () => {
-        try {
-            const url = elements.urlInput.value;
-            const response = await fetch(`https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${GOOGLE_SAFE_BROWSING_KEY}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    client: { clientId: 'toolhub', clientVersion: '1.0.0' },
-                    threatInfo: {
-                        threatTypes: ['MALWARE', 'SOCIAL_ENGINEERING'],
-                        platformTypes: ['ANY_PLATFORM'],
-                        threatEntryTypes: ['URL'],
-                        threatEntries: [{ url }]
-                    }
-                })
-            });
-            const data = await response.json();
-            const isSafe = !data.matches;
-            document.getElementById('urlOutput').textContent = isSafe
-                ? i18next.t('validUrl', 'Valid URL')
-                : i18next.t('error.unsafeUrl', 'Unsafe URL detected!');
-            saveToHistory('url-checker', { url, isSafe });
-            saveToolState('url-checker', { urlInput: url });
-            showToast(i18next.t('checkURL', 'Check') + ' ' + i18next.t('result', 'Result'), isSafe ? 'success' : 'error');
-        } catch (error) {
-            console.error('URL check error:', error);
-            showError(elements.urlInput, 'urlError', i18next.t('error.apiError', 'Error connecting to API.'));
-        }
+        const url = elements.urlInput.value;
+        const response = await fetch(`https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${GOOGLE_SAFE_BROWSING_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                client: { clientId: "ToolHub", clientVersion: "1.0.0" },
+                threatInfo: {
+                    threatTypes: ["MALWARE", "SOCIAL_ENGINEERING"],
+                    platformTypes: ["ANY_PLATFORM"],
+                    threatEntryTypes: ["URL"],
+                    threatEntries: [{ url }]
+                }
+            })
+        });
+        const data = await response.json();
+        const output = data.matches ? i18next.t('error.unsafeUrl', 'Unsafe URL detected!') : i18next.t('validUrl', 'Valid URL');
+        document.getElementById('urlOutput').textContent = output;
+        saveToolState('url-checker', { urlInput: url });
+        saveToHistory('url-checker', output);
+        showToast(i18next.t('result', 'Result'), 'success');
     });
 }
 
-function convertTemp() {
-    console.log('Converting temperature...');
+// 7. Temperature Converter Tool
+async function convertTemp() {
     const button = document.querySelector('[data-action="convertTemp"]');
     processTool(button, 'tempLoading', 'tempResult', () => {
         return validateInput(elements.tempValue.value, 'number', elements.tempValue, 'tempError');
-    }, () => {
+    }, async () => {
         const value = parseFloat(elements.tempValue.value);
         const fromUnit = elements.tempFrom.value;
         const toUnit = elements.tempTo.value;
-        let celsius;
-        if (fromUnit === 'C') celsius = value;
-        else if (fromUnit === 'F') celsius = (value - 32) * 5 / 9;
-        else if (fromUnit === 'K') celsius = value - 273.15;
-        let result;
-        if (toUnit === 'C') result = celsius;
-        else if (toUnit === 'F') result = celsius * 9 / 5 + 32;
-        else if (toUnit === 'K') result = celsius + 273.15;
-        const outputTable = document.getElementById('tempOutput');
-        outputTable.innerHTML = `
+        let valueInCelsius;
+        switch (fromUnit) {
+            case 'C': valueInCelsius = value; break;
+            case 'F': valueInCelsius = (value - 32) * 5 / 9; break;
+            case 'K': valueInCelsius = value - 273.15; break;
+        }
+        let convertedValue;
+        switch (toUnit) {
+            case 'C': convertedValue = valueInCelsius; break;
+            case 'F': convertedValue = valueInCelsius * 9 / 5 + 32; break;
+            case 'K': convertedValue = valueInCelsius + 273.15; break;
+        }
+        const result = `${value} ${fromUnit} = ${convertedValue.toFixed(2)} ${toUnit}`;
+        document.getElementById('tempOutput').innerHTML = `
             <tr>
-                <td>${value.toFixed(2)}</td>
-                <td>${i18next.t(fromUnit)}</td>
-                <td>${result.toFixed(2)}</td>
-                <td>${i18next.t(toUnit)}</td>
+                <td>${value}</td>
+                <td>${fromUnit}</td>
+                <td>${convertedValue.toFixed(2)}</td>
+                <td>${toUnit}</td>
             </tr>
         `;
-        saveToHistory('temp-converter', { value, fromUnit, toUnit, result });
-        saveToolState('temp-converter', {
-            tempValue: value,
-            tempFrom: fromUnit,
-            tempTo: toUnit
-        });
-        showToast(i18next.t('convertTemp', 'Convert') + ' ' + i18next.t('result', 'Result'), 'success');
+        saveToolState('temp-converter', { tempValue: value, tempFrom: fromUnit, tempTo: toUnit });
+        saveToHistory('temp-converter', result);
+        showToast(i18next.t('result', 'Result'), 'success');
     });
 }
 
+// 8. Currency Converter Tool
 async function convertCurrency() {
-    console.log('Converting currency...');
     const button = document.querySelector('[data-action="convertCurrency"]');
     processTool(button, 'currencyLoading', 'currencyResult', () => {
         return validateInput(elements.currencyValue.value, 'number', elements.currencyValue, 'currencyError');
     }, async () => {
-        try {
-            const value = parseFloat(elements.currencyValue.value);
-            const fromCurrency = elements.currencyFrom.value;
-            const toCurrency = elements.currencyTo.value;
-            const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrency}?apiKey=${EXCHANGE_RATE_API_KEY}`);
-            if (!response.ok) throw new Error('API Error');
-            const data = await response.json();
-            const rate = data.rates[toCurrency];
-            const result = value * rate;
-            const outputTable = document.getElementById('currencyOutput');
-            outputTable.innerHTML = `
-                <tr>
-                    <td>${value.toFixed(2)}</td>
-                    <td>${fromCurrency}</td>
-                    <td>${result.toFixed(2)}</td>
-                    <td>${toCurrency}</td>
-                </tr>
-            `;
-            saveToHistory('currency-converter', { value, fromCurrency, toCurrency, result });
-            saveToolState('currency-converter', {
-                currencyValue: value,
-                currencyFrom: fromCurrency,
-                currencyTo: toCurrency
-            });
-            showToast(i18next.t('convertCurrency', 'Convert') + ' ' + i18next.t('result', 'Result'), 'success');
-        } catch (error) {
-            console.error('Currency conversion error:', error);
-            showError(elements.currencyValue, 'currencyError', i18next.t('error.apiFailed', 'Failed to fetch exchange rate.'));
-        }
+        const value = parseFloat(elements.currencyValue.value);
+        const fromCurrency = elements.currencyFrom.value;
+        const toCurrency = elements.currencyTo.value;
+        const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrency}?apiKey=${EXCHANGE_RATE_API_KEY}`);
+        if (!response.ok) throw new Error(i18next.t('error.apiFailed', 'Failed to fetch exchange rate.'));
+        const data = await response.json();
+        const rate = data.rates[toCurrency];
+        const convertedValue = value * rate;
+        const result = `${value} ${fromCurrency} = ${convertedValue.toFixed(2)} ${toCurrency}`;
+        document.getElementById('currencyOutput').innerHTML = `
+            <tr>
+                <td>${value}</td>
+                <td>${fromCurrency}</td>
+                <td>${convertedValue.toFixed(2)}</td>
+                <td>${toCurrency}</td>
+            </tr>
+        `;
+        saveToolState('currency-converter', { currencyValue: value, currencyFrom: fromCurrency, currencyTo: toCurrency });
+        saveToHistory('currency-converter', result);
+        showToast(i18next.t('result', 'Result'), 'success');
     });
 }
 
-function generateQR() {
-    console.log('Generating QR code...');
+// 9. QR Code Generator Tool
+async function generateQR() {
     const button = document.querySelector('[data-action="generateQR"]');
     processTool(button, 'qrLoading', 'qrResult', () => {
         return validateInput(elements.qrInput.value, 'text', elements.qrInput, 'qrError');
-    }, () => {
+    }, async () => {
         const text = elements.qrInput.value;
         const qrOutput = document.getElementById('qrOutput');
-        try {
-            qrOutput.src = '';
-            QRCode.toDataURL(text, { width: 200, margin: 1 }, (err, url) => {
-                if (err) throw err;
-                qrOutput.src = url;
-                saveToHistory('qr-generator', { text, qrUrl: url });
-                saveToolState('qr-generator', { qrInput: text });
-                showToast(i18next.t('generateQR', 'Generate QR') + ' ' + i18next.t('result', 'Result'), 'success');
-            });
-        } catch (error) {
-            console.error('QR generation error:', error);
-            showError(elements.qrInput, 'qrError', i18next.t('error.qrFailed', 'Failed to generate QR code!'));
-        }
+        await QRCode.toDataURL(text, { width: 200, height: 200 }, (err, url) => {
+            if (err) throw new Error(i18next.t('error.qrFailed', 'Failed to generate QR code!'));
+            qrOutput.src = url;
+        });
+        saveToolState('qr-generator', { qrInput: text });
+        saveToHistory('qr-generator', i18next.t('result', 'Result'));
+        showToast(i18next.t('result', 'Result'), 'success');
     });
 }
 
-function compressImage() {
-    console.log('Compressing image...');
+// 10. Image Compressor Tool
+async function compressImage() {
     const button = document.querySelector('[data-action="compressImage"]');
     processTool(button, 'imageLoading', 'imageResult', () => {
         const file = elements.imageInput.files[0];
         if (!file) {
-            return {
-                isValid: false,
-                input: elements.imageInput,
-                errorId: 'imageError',
-                message: i18next.t('error.noImage', 'Please select an image!')
-            };
-        }
-        if (!file.type.startsWith('image/')) {
-            return {
-                isValid: false,
-                input: elements.imageInput,
-                errorId: 'imageError',
-                message: i18next.t('error.invalidImage', 'Invalid image format!')
-            };
+            return { isValid: false, input: elements.imageInput, errorId: 'imageError', message: i18next.t('error.noImage', 'Please select an image!') };
         }
         return { isValid: true, input: elements.imageInput, errorId: 'imageError' };
-    }, () => {
+    }, async () => {
         const file = elements.imageInput.files[0];
         new Compressor(file, {
             quality: 0.6,
-            maxWidth: 800,
-            maxHeight: 800,
             success(result) {
                 const url = URL.createObjectURL(result);
                 const img = document.createElement('img');
                 img.src = url;
                 img.alt = i18next.t('compressedImage', 'Compressed image');
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `compressed_${file.name}`;
-                link.textContent = i18next.t('download', 'Download');
+                img.style.maxWidth = '200px';
+                const downloadLink = document.createElement('a');
+                downloadLink.href = url;
+                downloadLink.download = 'compressed-image.jpg';
+                downloadLink.textContent = i18next.t('download', 'Download');
+                downloadLink.style.display = 'block';
+                downloadLink.style.marginTop = '10px';
                 elements.imageResult.innerHTML = '';
                 elements.imageResult.appendChild(img);
-                elements.imageResult.appendChild(link);
-                saveToHistory('image-compressor', { originalSize: file.size, compressedSize: result.size });
-                saveToolState('image-compressor', {});
-                showToast(i18next.t('compressImage', 'Compress') + ' ' + i18next.t('result', 'Result'), 'success');
+                elements.imageResult.appendChild(downloadLink);
+                saveToHistory('image-compressor', i18next.t('compressedImage', 'Compressed image'));
+                showToast(i18next.t('result', 'Result'), 'success');
             },
             error(err) {
-                console.error('Image compression error:', err);
-                showError(elements.imageInput, 'imageError', i18next.t('error.compressFailed', 'Failed to compress image!'));
+                throw new Error(i18next.t('error.compressFailed', 'Failed to compress image!'));
             }
         });
     });
 }
 
-function calculateBMI() {
-    console.log('Calculating BMI...');
+// 11. BMI Calculator Tool
+async function calculateBMI() {
     const button = document.querySelector('[data-action="calculateBMI"]');
     processTool(button, 'bmiLoading', 'bmiResult', () => {
-        const weight = parseFloat(elements.weight.value);
-        const height = parseFloat(elements.height.value) / 100; // Convert cm to m
-        if (isNaN(weight) || weight <= 0) {
-            return {
-                isValid: false,
-                input: elements.weight,
-                errorId: 'bmiError',
-                message: i18next.t('error.invalidNumber', 'Please enter a valid positive number!')
-            };
-        }
-        if (isNaN(height) || height <= 0) {
-            return {
-                isValid: false,
-                input: elements.height,
-                errorId: 'bmiError',
-                message: i18next.t('error.invalidNumber', 'Please enter a valid positive number!')
-            };
-        }
-        return { isValid: true, input: elements.weight, errorId: 'bmiError' };
-    }, () => {
+        const weightValidation = validateInput(elements.weight.value, 'number', elements.weight, 'bmiError');
+        const heightValidation = validateInput(elements.height.value, 'number', elements.height, 'bmiError');
+        return { isValid: weightValidation.isValid && heightValidation.isValid, input: elements.weight, errorId: 'bmiError', message: weightValidation.message || heightValidation.message };
+    }, async () => {
         const weight = parseFloat(elements.weight.value);
         const height = parseFloat(elements.height.value) / 100; // Convert cm to m
         const bmi = weight / (height * height);
@@ -489,56 +415,49 @@ function calculateBMI() {
         else if (bmi < 25) status = i18next.t('bmi.normal', 'Normal');
         else if (bmi < 30) status = i18next.t('bmi.overweight', 'Overweight');
         else status = i18next.t('bmi.obese', 'Obese');
-        const outputTable = document.getElementById('bmiOutput');
-        outputTable.innerHTML = `
+        document.getElementById('bmiOutput').innerHTML = `
             <tr>
-                <td>${weight.toFixed(1)}</td>
-                <td>${elements.height.value}</td>
-                <td>${bmi.toFixed(1)}</td>
+                <td>${weight}</td>
+                <td>${height * 100}</td>
+                <td>${bmi.toFixed(2)}</td>
                 <td>${status}</td>
             </tr>
         `;
-        saveToHistory('bmi-calculator', { weight, height: elements.height.value, bmi, status });
-        saveToolState('bmi-calculator', {
-            weight: elements.weight.value,
-            height: elements.height.value
-        });
-        showToast(i18next.t('calculateBMI', 'Calculate BMI') + ' ' + i18next.t('result', 'Result'), 'success');
+        saveToolState('bmi-calculator', { weight: weight, height: height * 100 });
+        saveToHistory('bmi-calculator', `BMI: ${bmi.toFixed(2)} - ${status}`);
+        showToast(i18next.t('result', 'Result'), 'success');
     });
 }
 
-function convertArea() {
-    console.log('Converting area...');
+// 12. Area Converter Tool
+async function convertArea() {
     const button = document.querySelector('[data-action="convertArea"]');
     processTool(button, 'areaLoading', 'areaResult', () => {
         return validateInput(elements.areaValue.value, 'number', elements.areaValue, 'areaError');
-    }, () => {
+    }, async () => {
         const value = parseFloat(elements.areaValue.value);
         const fromUnit = elements.areaFrom.value;
         const toUnit = elements.areaTo.value;
-        const conversions = {
+        const conversionRates = {
             m2: 1,
-            km2: 1000000,
-            ha: 10000,
-            ft2: 0.092903,
-            mau: 3600 // 1 mau = 3600 m²
+            km2: 0.000001,
+            ha: 0.0001,
+            ft2: 10.7639,
+            mau: 0.0002777778 // 1 mau = 3600 m²
         };
-        const result = (value * conversions[fromUnit]) / conversions[toUnit];
-        const outputTable = document.getElementById('areaOutput');
-        outputTable.innerHTML = `
+        const valueInSquareMeters = value / conversionRates[fromUnit];
+        const convertedValue = valueInSquareMeters * conversionRates[toUnit];
+        const result = `${value} ${fromUnit} = ${convertedValue.toFixed(2)} ${toUnit}`;
+        document.getElementById('areaOutput').innerHTML = `
             <tr>
-                <td>${value.toFixed(2)}</td>
-                <td>${i18next.t(fromUnit)}</td>
-                <td>${result.toFixed(2)}</td>
-                <td>${i18next.t(toUnit)}</td>
+                <td>${value}</td>
+                <td>${fromUnit}</td>
+                <td>${convertedValue.toFixed(2)}</td>
+                <td>${toUnit}</td>
             </tr>
         `;
-        saveToHistory('area-converter', { value, fromUnit, toUnit, result });
-        saveToolState('area-converter', {
-            areaValue: value,
-            areaFrom: fromUnit,
-            areaTo: toUnit
-        });
-        showToast(i18next.t('convertArea', 'Convert') + ' ' + i18next.t('result', 'Result'), 'success');
+        saveToolState('area-converter', { areaValue: value, areaFrom: fromUnit, areaTo: toUnit });
+        saveToHistory('area-converter', result);
+        showToast(i18next.t('result', 'Result'), 'success');
     });
 }
