@@ -7,32 +7,79 @@ document.addEventListener('DOMContentLoaded', () => {
     const elements = {
         textInput: document.getElementById('textInput'),
         summaryLength: document.getElementById('summaryLength'),
+        textError: document.getElementById('textError'),
+        textResult: document.getElementById('textResult'),
+        textLoading: document.getElementById('textLoading'),
+        summaryOutput: document.getElementById('summaryOutput'),
         lengthValue: document.getElementById('lengthValue'),
         lengthFrom: document.getElementById('lengthFrom'),
         lengthTo: document.getElementById('lengthTo'),
+        lengthError: document.getElementById('lengthError'),
+        lengthResult: document.getElementById('lengthResult'),
+        lengthLoading: document.getElementById('lengthLoading'),
+        lengthOutput: document.getElementById('lengthOutput'),
         num1: document.getElementById('num1'),
         operator: document.getElementById('operator'),
         num2: document.getElementById('num2'),
+        calcError: document.getElementById('calcError'),
+        calcResult: document.getElementById('calcResult'),
+        calcLoading: document.getElementById('calcLoading'),
+        calcOutput: document.getElementById('calcOutput'),
         passLength: document.getElementById('passLength'),
         includeUppercase: document.getElementById('includeUppercase'),
         includeLowercase: document.getElementById('includeLowercase'),
         includeNumbers: document.getElementById('includeNumbers'),
         includeSymbols: document.getElementById('includeSymbols'),
+        passError: document.getElementById('passError'),
+        passResult: document.getElementById('passResult'),
+        passLoading: document.getElementById('passLoading'),
+        passOutput: document.getElementById('passOutput'),
         charInput: document.getElementById('charInput'),
+        charError: document.getElementById('charError'),
+        charResult: document.getElementById('charResult'),
+        charLoading: document.getElementById('charLoading'),
+        charOutput: document.getElementById('charOutput'),
         urlInput: document.getElementById('urlInput'),
+        urlError: document.getElementById('urlError'),
+        urlResult: document.getElementById('urlResult'),
+        urlLoading: document.getElementById('urlLoading'),
+        urlOutput: document.getElementById('urlOutput'),
         tempValue: document.getElementById('tempValue'),
         tempFrom: document.getElementById('tempFrom'),
         tempTo: document.getElementById('tempTo'),
+        tempError: document.getElementById('tempError'),
+        tempResult: document.getElementById('tempResult'),
+        tempLoading: document.getElementById('tempLoading'),
+        tempOutput: document.getElementById('tempOutput'),
         currencyValue: document.getElementById('currencyValue'),
         currencyFrom: document.getElementById('currencyFrom'),
         currencyTo: document.getElementById('currencyTo'),
+        currencyError: document.getElementById('currencyError'),
+        currencyResult: document.getElementById('currencyResult'),
+        currencyLoading: document.getElementById('currencyLoading'),
+        currencyOutput: document.getElementById('currencyOutput'),
         qrInput: document.getElementById('qrInput'),
+        qrError: document.getElementById('qrError'),
+        qrResult: document.getElementById('qrResult'),
+        qrLoading: document.getElementById('qrLoading'),
+        qrOutput: document.getElementById('qrOutput'),
         imageInput: document.getElementById('imageInput'),
+        imageError: document.getElementById('imageError'),
+        imageResult: document.getElementById('imageResult'),
+        imageLoading: document.getElementById('imageLoading'),
         weight: document.getElementById('weight'),
         height: document.getElementById('height'),
+        bmiError: document.getElementById('bmiError'),
+        bmiResult: document.getElementById('bmiResult'),
+        bmiLoading: document.getElementById('bmiLoading'),
+        bmiOutput: document.getElementById('bmiOutput'),
         areaValue: document.getElementById('areaValue'),
         areaFrom: document.getElementById('areaFrom'),
         areaTo: document.getElementById('areaTo'),
+        areaError: document.getElementById('areaError'),
+        areaResult: document.getElementById('areaResult'),
+        areaLoading: document.getElementById('areaLoading'),
+        areaOutput: document.getElementById('areaOutput'),
         searchInput: document.getElementById('searchInput'),
         darkModeToggle: document.getElementById('darkModeToggle'),
         languageSelector: document.getElementById('languageSelector'),
@@ -83,11 +130,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const loading = document.getElementById(loadingId);
         const result = document.getElementById(resultId);
         if (!loading || !result) return;
-        loading.classList.add('active');
+        loading.style.display = 'block';
         result.classList.remove('active');
         button.disabled = true;
         setTimeout(() => {
-            loading.classList.remove('active');
+            loading.style.display = 'none';
             button.disabled = false;
             callback();
         }, 300);
@@ -168,7 +215,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.toggle('dark-mode');
         const isDarkMode = document.body.classList.contains('dark-mode');
         localStorage.setItem('darkMode', isDarkMode);
-        elements.darkModeToggle.textContent = isDarkMode ? i18next.t('lightMode', 'Light Mode') : i18next.t('darkMode', 'Dark Mode');
+        const icon = elements.darkModeToggle.querySelector('i');
+        icon.className = isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
         document.querySelectorAll('pre').forEach(pre => {
             pre.style.background = isDarkMode ? '#3a3a4e' : '#f5f5f5';
         });
@@ -178,7 +226,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const isDarkMode = localStorage.getItem('darkMode') === 'true';
         if (isDarkMode) {
             document.body.classList.add('dark-mode');
-            elements.darkModeToggle.textContent = i18next.t('lightMode', 'Light Mode');
+            const icon = elements.darkModeToggle.querySelector('i');
+            icon.className = 'fas fa-sun';
         }
     }
 
@@ -318,8 +367,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         'image-compressor': 'Image Compressor',
                         'bmi-calculator': 'BMI Calculator',
                         'area-converter': 'Area Converter',
-                        darkMode: 'Dark Mode',
-                        lightMode: 'Light Mode',
                         welcome: 'Welcome to ToolHub',
                         description: 'Summarize text, convert units, generate QR codes, and more - all free and easy to use.',
                         summarizeDesc: 'Condense long content into a concise summary.',
@@ -440,8 +487,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         'image-compressor': 'Nén ảnh',
                         'bmi-calculator': 'Tính BMI',
                         'area-converter': 'Chuyển đổi diện tích',
-                        darkMode: 'Chế độ tối',
-                        lightMode: 'Chế độ sáng',
                         welcome: 'Chào mừng đến với ToolHub',
                         description: 'Tóm tắt văn bản, chuyển đổi đơn vị, tạo mã QR và nhiều tính năng khác - miễn phí và dễ sử dụng.',
                         summarizeDesc: 'Tóm tắt nội dung dài thành một bản ngắn gọn.',
@@ -569,477 +614,463 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Tool Functions
-    function summarizeText(button) {
-        processTool(button, 'textLoading', 'textResult',
-            () => {
-                const text = elements.textInput.value.trim();
-                const validation = validateInput(text, 'text', elements.textInput, 'textError');
-                if (!validation.isValid) return validation;
-                if (text.length > 10000) {
-                    return {
-                        isValid: false,
-                        input: elements.textInput,
-                        errorId: 'textError',
-                        message: i18next.t('error.textTooLong')
-                    };
-                }
-                return { isValid: true, input: elements.textInput, errorId: 'textError' };
-            },
-            () => {
-                const text = elements.textInput.value.trim();
-                const summaryLength = elements.summaryLength.value;
-                const sentences = text.split(/[.!?]+/).filter(s => s.trim());
-                const ratio = { short: 0.2, medium: 0.3, long: 0.4 }[summaryLength];
-                const count = Math.max(1, Math.ceil(sentences.length * ratio));
-                const summary = sentences.slice(0, count).join('. ') + (count ? '.' : '');
-                document.getElementById('summaryOutput').textContent = summary;
-                saveToHistory('summarize', { input: text.slice(0, 50) + '...', summary });
-                saveToolState('summarize', { textInput: text, summaryLength });
-                showToast(i18next.t('summarizeText', 'Summarized!'), 'success');
-            }
-        );
-    }
-
-    function convertLength(button) {
-        processTool(button, 'lengthLoading', 'lengthResult',
-            () => {
-                const value = elements.lengthValue.value;
-                return validateInput(value, 'number', elements.lengthValue, 'lengthError');
-            },
-            () => {
-                const value = parseFloat(elements.lengthValue.value);
-                const fromUnit = elements.lengthFrom.value;
-                const toUnit = elements.lengthTo.value;
-                const conversions = { m: 1, km: 1000, cm: 0.01, inch: 0.0254, foot: 0.3048, yard: 0.9144 };
-                const result = (value * conversions[fromUnit]) / conversions[toUnit];
-                const output = {
-                    original: value.toFixed(2),
-                    fromUnit,
-                    converted: result.toFixed(2),
-                    toUnit
+    function summarizeText() {
+        const validate = () => {
+            const text = elements.textInput.value;
+            if (text.length > 10000) {
+                return {
+                    isValid: false,
+                    input: elements.textInput,
+                    errorId: 'textError',
+                    message: i18next.t('error.textTooLong', 'Text is too long (max 10,000 characters)!')
                 };
-                document.getElementById('lengthOutput').querySelector('tbody').innerHTML = `
-                    <tr>
-                        <td>${output.original}</td>
-                        <td>${output.fromUnit.toUpperCase()}</td>
-                        <td>${output.converted}</td>
-                        <td>${output.toUnit.toUpperCase()}</td>
-                    </tr>
-                `;
-                saveToHistory('length-converter', output);
-                saveToolState('length-converter', { lengthValue: value, lengthFrom: fromUnit, lengthTo: toUnit });
-                showToast(i18next.t('convertLength', 'Converted!'), 'success');
             }
-        );
+            return validateInput(text, 'text', elements.textInput, 'textError');
+        };
+
+        const process = () => {
+            const text = elements.textInput.value;
+            const length = elements.summaryLength.value;
+            const words = text.split(/\s+/).filter(word => word.length > 0);
+            const wordCount = words.length;
+            let targetLength;
+            switch (length) {
+                case 'short': targetLength = Math.round(wordCount * 0.2); break;
+                case 'medium': targetLength = Math.round(wordCount * 0.3); break;
+                case 'long': targetLength = Math.round(wordCount * 0.4); break;
+            }
+            const summary = words.slice(0, targetLength).join(' ') + (targetLength < wordCount ? '...' : '');
+            elements.summaryOutput.textContent = summary;
+            saveToHistory('summarize', { input: text, summary, length });
+            saveToolState('summarize', { textInput: text, summaryLength: length });
+            showToast(i18next.t('summarizeText', 'Summarize') + ' ' + i18next.t('result', 'Result'), 'success');
+        };
+
+        const button = document.querySelector('[data-action="summarizeText"]');
+        processTool(button, 'textLoading', 'textResult', validate, process);
     }
 
-    function calculate(button) {
-        processTool(button, 'calcLoading', 'calcResult',
-            () => {
-                const num1 = parseFloat(elements.num1.value);
-                const num2 = parseFloat(elements.num2.value);
-                const operator = elements.operator.value;
-                if (isNaN(num1)) return validateInput(elements.num1.value, 'number', elements.num1, 'calcError');
-                if (isNaN(num2)) return validateInput(elements.num2.value, 'number', elements.num2, 'calcError');
-                if (operator === '/' && num2 === 0) {
-                    return {
-                        isValid: false,
-                        input: elements.num2,
-                        errorId: 'calcError',
-                        message: i18next.t('error.divideByZero')
-                    };
-                }
-                return { isValid: true, input: elements.num1, errorId: 'calcError' };
-            },
-            () => {
-                const num1 = parseFloat(elements.num1.value);
-                const num2 = parseFloat(elements.num2.value);
-                const operator = elements.operator.value;
-                let result;
-                switch (operator) {
-                    case '+': result = num1 + num2; break;
-                    case '-': result = num1 - num2; break;
-                    case '*': result = num1 * num2; break;
-                    case '/': result = num1 / num2; break;
-                }
-                const output = { num1, operator, num2, result: result.toFixed(2) };
-                document.getElementById('calcOutput').textContent = `${i18next.t('result', 'Result')}: ${output.result}`;
-                saveToHistory('calculator', output);
-                saveToolState('calculator', { num1, num2, operator });
-                showToast(i18next.t('calculate', 'Calculated!'), 'success');
-            }
-        );
+    function convertLength() {
+        const validate = () => validateInput(elements.lengthValue.value, 'number', elements.lengthValue, 'lengthError');
+
+        const process = () => {
+            const value = parseFloat(elements.lengthValue.value);
+            const fromUnit = elements.lengthFrom.value;
+            const toUnit = elements.lengthTo.value;
+            const conversionRates = {
+                m: 1,
+                km: 0.001,
+                cm: 100,
+                inch: 39.3701,
+                foot: 3.28084,
+                yard: 1.09361
+            };
+            const result = (value * conversionRates[fromUnit]) / conversionRates[toUnit];
+            elements.lengthOutput.querySelector('tbody').innerHTML = `
+                <tr>
+                    <td>${value.toFixed(2)}</td>
+                    <td>${i18next.t(fromUnit)}</td>
+                    <td>${result.toFixed(2)}</td>
+                    <td>${i18next.t(toUnit)}</td>
+                </tr>
+            `;
+            saveToHistory('length-converter', { value, fromUnit, toUnit, result });
+            saveToolState('length-converter', { lengthValue: value, lengthFrom: fromUnit, lengthTo: toUnit });
+            showToast(i18next.t('convertLength', 'Convert') + ' ' + i18next.t('result', 'Result'), 'success');
+        };
+
+        const button = document.querySelector('[data-action="convertLength"]');
+        processTool(button, 'lengthLoading', 'lengthResult', validate, process);
     }
 
-    function generatePassword(button) {
-        processTool(button, 'passLoading', 'passResult',
-            () => {
-                const passLength = parseInt(elements.passLength.value);
-                const includeUppercase = elements.includeUppercase.checked;
-                const includeLowercase = elements.includeLowercase.checked;
-                const includeNumbers = elements.includeNumbers.checked;
-                const includeSymbols = elements.includeSymbols.checked;
-                if (isNaN(passLength) || passLength < 8 || passLength > 32) {
-                    return {
-                        isValid: false,
-                        input: elements.passLength,
-                        errorId: 'passError',
-                        message: i18next.t('error.invalidLength')
-                    };
-                }
-                if (!includeUppercase && !includeLowercase && !includeNumbers && !includeSymbols) {
-                    return {
-                        isValid: false,
-                        input: elements.passLength,
-                        errorId: 'passError',
-                        message: i18next.t('error.selectCharacterType')
-                    };
-                }
-                return { isValid: true, input: elements.passLength, errorId: 'passError' };
-            },
-            () => {
-                const passLength = parseInt(elements.passLength.value);
-                const includeUppercase = elements.includeUppercase.checked;
-                const includeLowercase = elements.includeLowercase.checked;
-                const includeNumbers = elements.includeNumbers.checked;
-                const includeSymbols = elements.includeSymbols.checked;
-                let chars = '';
-                if (includeUppercase) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-                if (includeLowercase) chars += 'abcdefghijklmnopqrstuvwxyz';
-                if (includeNumbers) chars += '0123456789';
-                if (includeSymbols) chars += '!@#$%^&*()_+-=[]{}|;:,.<>?';
-                let password = '';
-                for (let i = 0; i < passLength; i++) {
-                    password += chars.charAt(Math.floor(Math.random() * chars.length));
-                }
-                document.getElementById('passOutput').textContent = password;
-                saveToHistory('password-generator', { length: passLength, password });
-                saveToolState('password-generator', {
-                    passLength,
-                    includeUppercase,
-                    includeLowercase,
-                    includeNumbers,
-                    includeSymbols
-                });
-                showToast(i18next.t('generatePassword', 'Password generated!'), 'success');
+    function calculate() {
+        const validate = () => {
+            const num1 = validateInput(elements.num1.value, 'number', elements.num1, 'calcError');
+            if (!num1.isValid) return num1;
+            const num2 = validateInput(elements.num2.value, 'number', elements.num2, 'calcError');
+            if (!num2.isValid) return num2;
+            if (elements.operator.value === '/' && parseFloat(elements.num2.value) === 0) {
+                return {
+                    isValid: false,
+                    input: elements.num2,
+                    errorId: 'calcError',
+                    message: i18next.t('error.divideByZero', 'Cannot divide by zero!')
+                };
             }
-        );
+            return { isValid: true, input: elements.num1, errorId: 'calcError' };
+        };
+
+        const process = () => {
+            const num1 = parseFloat(elements.num1.value);
+            const num2 = parseFloat(elements.num2.value);
+            const operator = elements.operator.value;
+            let result;
+            switch (operator) {
+                case '+': result = num1 + num2; break;
+                case '-': result = num1 - num2; break;
+                case '*': result = num1 * num2; break;
+                case '/': result = num1 / num2; break;
+            }
+            elements.calcOutput.textContent = `${num1} ${operator} ${num2} = ${result.toFixed(2)}`;
+            saveToHistory('calculator', { num1, operator, num2, result });
+            saveToolState('calculator', { num1: num1, operator, num2: num2 });
+            showToast(i18next.t('calculate', 'Calculate') + ' ' + i18next.t('result', 'Result'), 'success');
+        };
+
+        const button = document.querySelector('[data-action="calculate"]');
+        processTool(button, 'calcLoading', 'calcResult', validate, process);
+    }
+
+    function generatePassword() {
+        const validate = () => {
+            const length = parseInt(elements.passLength.value);
+            if (isNaN(length) || length < 8 || length > 32) {
+                return {
+                    isValid: false,
+                    input: elements.passLength,
+                    errorId: 'passError',
+                    message: i18next.t('error.invalidLength', 'Length must be between 8 and 32!')
+                };
+            }
+            if (!elements.includeUppercase.checked && !elements.includeLowercase.checked &&
+                !elements.includeNumbers.checked && !elements.includeSymbols.checked) {
+                return {
+                    isValid: false,
+                    input: elements.passLength,
+                    errorId: 'passError',
+                    message: i18next.t('error.selectCharacterType', 'Please select at least one character type!')
+                };
+            }
+            return { isValid: true, input: elements.passLength, errorId: 'passError' };
+        };
+
+        const process = () => {
+            const length = parseInt(elements.passLength.value);
+            const chars = [];
+            if (elements.includeUppercase.checked) chars.push('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+            if (elements.includeLowercase.checked) chars.push('abcdefghijklmnopqrstuvwxyz');
+            if (elements.includeNumbers.checked) chars.push('0123456789');
+            if (elements.includeSymbols.checked) chars.push('!@#$%^&*()');
+            const allChars = chars.join('');
+            let password = '';
+            for (let i = 0; i < length; i++) {
+                const randomIndex = Math.floor(Math.random() * allChars.length);
+                password += allChars[randomIndex];
+            }
+            elements.passOutput.textContent = password;
+            saveToHistory('password-generator', { password, length });
+            saveToolState('password-generator', {
+                passLength: length,
+                includeUppercase: elements.includeUppercase.checked,
+                includeLowercase: elements.includeLowercase.checked,
+                includeNumbers: elements.includeNumbers.checked,
+                includeSymbols: elements.includeSymbols.checked
+            });
+            showToast(i18next.t('generatePassword', 'Generate') + ' ' + i18next.t('result', 'Result'), 'success');
+        };
+
+        const button = document.querySelector('[data-action="generatePassword"]');
+        processTool(button, 'passLoading', 'passResult', validate, process);
     }
 
     function copyPassword() {
-        const passOutput = document.getElementById('passOutput');
-        if (!passOutput) return;
-        const text = passOutput.textContent;
-        navigator.clipboard.writeText(text).then(() => {
-            const copyBtn = document.querySelector('#passResult .copy-btn');
-            if (copyBtn) {
-                copyBtn.textContent = i18next.t('copyPassword', 'Copied!');
-                showToast(i18next.t('copyPassword', 'Password copied!'), 'success');
-                setTimeout(() => { copyBtn.textContent = i18next.t('copyPassword', 'Copy'); }, 2000);
-            }
-        }).catch(() => {
-            showError(elements.passLength, 'passError', i18next.t('error.copyFailed', 'Failed to copy password!'));
-        });
+        const password = elements.passOutput.textContent;
+        if (password) {
+            navigator.clipboard.writeText(password).then(() => {
+                showToast(i18next.t('copyPassword', 'Copy') + ' ' + i18next.t('result', 'Result'), 'success');
+            }).catch(() => {
+                showToast('Failed to copy password!', 'error');
+            });
+        }
     }
 
-    function countChars(button) {
-        processTool(button, 'charLoading', 'charResult',
-            () => validateInput(elements.charInput.value, 'text', elements.charInput, 'charError'),
-            () => {
-                const text = elements.charInput.value;
-                const charCount = text.length;
-                const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
-                document.getElementById('charOutput').textContent = `${i18next.t('characters', 'Characters')}: ${charCount}, ${i18next.t('words', 'Words')}: ${wordCount}`;
-                saveToHistory('char-counter', { text: text.slice(0, 50) + '...', charCount, wordCount });
-                saveToolState('char-counter', { charInput: text });
-                showToast(i18next.t('countChars', 'Counted!'), 'success');
-            }
-        );
+    function countChars() {
+        const validate = () => validateInput(elements.charInput.value, 'text', elements.charInput, 'charError');
+
+        const process = () => {
+            const text = elements.charInput.value;
+            const charCount = text.length;
+            const wordCount = text.split(/\s+/).filter(word => word.length > 0).length;
+            elements.charOutput.textContent = `${i18next.t('characters', 'Characters')}: ${charCount}, ${i18next.t('words', 'Words')}: ${wordCount}`;
+            saveToHistory('char-counter', { text, charCount, wordCount });
+            saveToolState('char-counter', { charInput: text });
+            showToast(i18next.t('countChars', 'Count') + ' ' + i18next.t('result', 'Result'), 'success');
+        };
+
+        const button = document.querySelector('[data-action="countChars"]');
+        processTool(button, 'charLoading', 'charResult', validate, process);
     }
 
-    function checkURL(button) {
-        processTool(button, 'urlLoading', 'urlResult',
-            () => validateInput(elements.urlInput.value, 'url', elements.urlInput, 'urlError'),
-            () => {
-                const url = elements.urlInput.value.trim();
-                document.getElementById('urlOutput').textContent = `${i18next.t('validUrl', 'Valid URL')}: ${url}`;
-                saveToHistory('url-checker', { url });
+    function checkURL() {
+        const validate = () => validateInput(elements.urlInput.value, 'url', elements.urlInput, 'urlError');
+
+        const process = () => {
+            const url = elements.urlInput.value;
+            fetch(`https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${GOOGLE_SAFE_BROWSING_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    client: { clientId: 'ToolHub', clientVersion: '1.0.0' },
+                    threatInfo: {
+                        threatTypes: ['MALWARE', 'SOCIAL_ENGINEERING'],
+                        platformTypes: ['ANY_PLATFORM'],
+                        threatEntryTypes: ['URL'],
+                        threatEntries: [{ url }]
+                    }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const isSafe = !data.matches;
+                elements.urlOutput.textContent = isSafe ? i18next.t('validUrl', 'Valid URL') : i18next.t('error.unsafeUrl', 'Unsafe URL detected!');
+                saveToHistory('url-checker', { url, isSafe });
                 saveToolState('url-checker', { urlInput: url });
-                showToast(i18next.t('checkURL', 'URL checked!'), 'success');
-            }
-        );
+                showToast(i18next.t('checkURL', 'Check') + ' ' + i18next.t('result', 'Result'), isSafe ? 'success' : 'error');
+            })
+            .catch(() => {
+                showToast(i18next.t('error.apiError', 'Error connecting to API.'), 'error');
+            });
+        };
+
+        const button = document.querySelector('[data-action="checkURL"]');
+        processTool(button, 'urlLoading', 'urlResult', validate, process);
     }
 
-    function convertTemp(button) {
-        processTool(button, 'tempLoading', 'tempResult',
-            () => validateInput(elements.tempValue.value, 'number', elements.tempValue, 'tempError'),
-            () => {
-                const value = parseFloat(elements.tempValue.value);
-                const fromUnit = elements.tempFrom.value;
-                const toUnit = elements.tempTo.value;
-                let celsius;
-                if (fromUnit === 'C') celsius = value;
-                else if (fromUnit === 'F') celsius = (value - 32) * 5 / 9;
-                else celsius = value - 273.15;
+    function convertTemp() {
+        const validate = () => validateInput(elements.tempValue.value, 'number', elements.tempValue, 'tempError');
 
-                let result;
-                if (toUnit === 'C') result = celsius;
-                else if (toUnit === 'F') result = (celsius * 9 / 5) + 32;
-                else result = celsius + 273.15;
+        const process = () => {
+            const value = parseFloat(elements.tempValue.value);
+            const fromUnit = elements.tempFrom.value;
+            const toUnit = elements.tempTo.value;
+            let celsius;
+            if (fromUnit === 'C') celsius = value;
+            else if (fromUnit === 'F') celsius = (value - 32) * 5 / 9;
+            else if (fromUnit === 'K') celsius = value - 273.15;
+            let result;
+            if (toUnit === 'C') result = celsius;
+            else if (toUnit === 'F') result = celsius * 9 / 5 + 32;
+            else if (toUnit === 'K') result = celsius + 273.15;
+            elements.tempOutput.querySelector('tbody').innerHTML = `
+                <tr>
+                    <td>${value.toFixed(2)}</td>
+                    <td>${i18next.t(fromUnit)}</td>
+                    <td>${result.toFixed(2)}</td>
+                    <td>${i18next.t(toUnit)}</td>
+                </tr>
+            `;
+            saveToHistory('temp-converter', { value, fromUnit, toUnit, result });
+            saveToolState('temp-converter', { tempValue: value, tempFrom: fromUnit, tempTo: toUnit });
+            showToast(i18next.t('convertTemp', 'Convert') + ' ' + i18next.t('result', 'Result'), 'success');
+        };
 
-                const output = {
-                    original: value.toFixed(2),
-                    fromUnit,
-                    converted: result.toFixed(2),
-                    toUnit
-                };
-                document.getElementById('tempOutput').querySelector('tbody').innerHTML = `
-                    <tr>
-                        <td>${output.original}</td>
-                        <td>${output.fromUnit}</td>
-                        <td>${output.converted}</td>
-                        <td>${output.toUnit}</td>
-                    </tr>
-                `;
-                saveToHistory('temp-converter', output);
-                saveToolState('temp-converter', { tempValue: value, tempFrom: fromUnit, tempTo: toUnit });
-                showToast(i18next.t('convertTemp', 'Converted!'), 'success');
-            }
-        );
+        const button = document.querySelector('[data-action="convertTemp"]');
+        processTool(button, 'tempLoading', 'tempResult', validate, process);
     }
 
-    async function convertCurrency(button) {
-        processTool(button, 'currencyLoading', 'currencyResult',
-            () => validateInput(elements.currencyValue.value, 'number', elements.currencyValue, 'currencyError'),
-            async () => {
-                const value = parseFloat(elements.currencyValue.value);
-                const fromCurrency = elements.currencyFrom.value;
-                const toCurrency = elements.currencyTo.value;
-                try {
-                    const response = await fetch(`https://v6.exchangerate-api.com/v6/${EXCHANGE_RATE_API_KEY}/latest/${fromCurrency}`);
-                    const data = await response.json();
-                    if (data.result === 'success') {
-                        const rate = data.conversion_rates[toCurrency];
-                        const result = (value * rate).toFixed(2);
-                        const output = {
-                            original: value.toFixed(2),
-                            fromCurrency,
-                            converted: result,
-                            toCurrency
-                        };
-                        document.getElementById('currencyOutput').querySelector('tbody').innerHTML = `
-                            <tr>
-                                <td>${output.original}</td>
-                                <td>${output.fromCurrency}</td>
-                                <td>${output.converted}</td>
-                                <td>${output.toCurrency}</td>
-                            </tr>
-                        `;
-                        saveToHistory('currency-converter', output);
-                        saveToolState('currency-converter', { currencyValue: value, currencyFrom: fromCurrency, currencyTo: toCurrency });
-                        showToast(i18next.t('convertCurrency', 'Converted!'), 'success');
-                    } else {
-                        showError(elements.currencyValue, 'currencyError', i18next.t('error.apiFailed', 'Failed to fetch exchange rate.'));
+    function convertCurrency() {
+        const validate = () => validateInput(elements.currencyValue.value, 'number', elements.currencyValue, 'currencyError');
+
+        const process = () => {
+            const value = parseFloat(elements.currencyValue.value);
+            const fromCurrency = elements.currencyFrom.value;
+            const toCurrency = elements.currencyTo.value;
+            fetch(`https://v6.exchangerate-api.com/v6/${EXCHANGE_RATE_API_KEY}/pair/${fromCurrency}/${toCurrency}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.result !== 'success') {
+                        throw new Error(i18next.t('error.apiFailed', 'Failed to fetch exchange rate.'));
                     }
-                } catch (error) {
-                    showError(elements.currencyValue, 'currencyError', i18next.t('error.apiError', 'Error connecting to exchange rate API.'));
-                }
-            }
-        );
-    }
-
-    async function generateQR(button) {
-        processTool(button, 'qrLoading', 'qrResult',
-            () => validateInput(elements.qrInput.value, 'url', elements.qrInput, 'qrError'),
-            async () => {
-                const text = elements.qrInput.value.trim();
-                const qrOutput = document.getElementById('qrOutput');
-                if (!qrOutput || !window.QRCode) return;
-                qrOutput.src = '';
-                try {
-                    const safeBrowsingResponse = await fetch(`https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${GOOGLE_SAFE_BROWSING_KEY}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            client: { clientId: 'toolhub', clientVersion: '1.0' },
-                            threatInfo: {
-                                threatTypes: ['MALWARE', 'SOCIAL_ENGINEERING'],
-                                platformTypes: ['ANY_PLATFORM'],
-                                threatEntryTypes: ['URL'],
-                                threatEntries: [{ url: text }]
-                            }
-                        })
-                    });
-                    const safeBrowsingData = await safeBrowsingResponse.json();
-                    if (safeBrowsingData.matches) {
-                        showError(elements.qrInput, 'qrError', i18next.t('error.unsafeUrl', 'Unsafe URL detected!'));
-                        return;
-                    }
-
-                    window.QRCode.toDataURL(text, { width: 200, margin: 1 }, (err, url) => {
-                        if (err) {
-                            showError(elements.qrInput, 'qrError', i18next.t('error.qrFailed', 'Failed to generate QR code!'));
-                            return;
-                        }
-                        qrOutput.src = url;
-                        saveToHistory('qr-generator', { input: text });
-                        saveToolState('qr-generator', { qrInput: text });
-                        showToast(i18next.t('generateQR', 'QR code generated!'), 'success');
-                    });
-                } catch (error) {
-                    showError(elements.qrInput, 'qrError', i18next.t('error.apiError', 'Error connecting to Safe Browsing API.'));
-                }
-            }
-        );
-    }
-
-    function compressImage(button) {
-        processTool(button, 'imageLoading', 'imageResult',
-            () => {
-                const file = elements.imageInput.files[0];
-                if (!file) {
-                    return {
-                        isValid: false,
-                        input: elements.imageInput,
-                        errorId: 'imageError',
-                        message: i18next.t('error.noImage', 'Please select an image!')
-                    };
-                }
-                if (!/\.(jpe?g|png|gif|bmp)$/i.test(file.name)) {
-                    return {
-                        isValid: false,
-                        input: elements.imageInput,
-                        errorId: 'imageError',
-                        message: i18next.t('error.invalidImage', 'Invalid image format!')
-                    };
-                }
-                return { isValid: true, input: elements.imageInput, errorId: 'imageError' };
-            },
-            () => {
-                const file = elements.imageInput.files[0];
-                new window.Compressor(file, {
-                    quality: 0.6,
-                    maxWidth: 800,
-                    maxHeight: 800,
-                    success(result) {
-                        const url = URL.createObjectURL(result);
-                        document.getElementById('imageResult').innerHTML = `
-                            <p>${i18next.t('compressedImage', 'Compressed image')}: ${(result.size / 1024).toFixed(2)} KB</p>
-                            <img src="${url}" alt="${i18next.t('compressedImage', 'Compressed image')}" style="max-width: 100%;">
-                            <a href="${url}" download="compressed_image_${Date.now()}.jpg">${i18next.t('download', 'Download')}</a>
-                        `;
-                        saveToHistory('image-compressor', { originalSize: (file.size / 1024).toFixed(2), compressedSize: (result.size / 1024).toFixed(2) });
-                        showToast(i18next.t('compressImage', 'Image compressed!'), 'success');
-                    },
-                    error(err) {
-                        showError(elements.imageInput, 'imageError', i18next.t('error.compressFailed', 'Failed to compress image!'));
-                    }
+                    const rate = data.conversion_rate;
+                    const result = value * rate;
+                    elements.currencyOutput.querySelector('tbody').innerHTML = `
+                        <tr>
+                            <td>${value.toFixed(2)}</td>
+                            <td>${fromCurrency}</td>
+                            <td>${result.toFixed(2)}</td>
+                            <td>${toCurrency}</td>
+                        </tr>
+                    `;
+                    saveToHistory('currency-converter', { value, fromCurrency, toCurrency, result });
+                    saveToolState('currency-converter', { currencyValue: value, currencyFrom: fromCurrency, currencyTo: toCurrency });
+                    showToast(i18next.t('convertCurrency', 'Convert') + ' ' + i18next.t('result', 'Result'), 'success');
+                })
+                .catch(() => {
+                    showToast(i18next.t('error.apiError', 'Error connecting to API.'), 'error');
                 });
-            }
-        );
+        };
+
+        const button = document.querySelector('[data-action="convertCurrency"]');
+        processTool(button, 'currencyLoading', 'currencyResult', validate, process);
     }
 
-    function calculateBMI(button) {
-        processTool(button, 'bmiLoading', 'bmiResult',
-            () => {
-                const weight = parseFloat(elements.weight.value);
-                const height = parseFloat(elements.height.value);
-                if (isNaN(weight) || weight <= 0) return validateInput(elements.weight.value, 'number', elements.weight, 'bmiError');
-                if (isNaN(height) || height <= 0) return validateInput(elements.height.value, 'number', elements.height, 'bmiError');
-                return { isValid: true, input: elements.weight, errorId: 'bmiError' };
-            },
-            () => {
-                const weight = parseFloat(elements.weight.value);
-                const height = parseFloat(elements.height.value);
-                const bmi = weight / ((height / 100) ** 2);
-                let status = i18next.t('bmi.underweight', 'Underweight');
-                if (bmi >= 18.5 && bmi < 25) status = i18next.t('bmi.normal', 'Normal');
-                else if (bmi < 30) status = i18next.t('bmi.overweight', 'Overweight');
-                else status = i18next.t('bmi.obese', 'Obese');
-                const output = {
-                    weight: weight.toFixed(1),
-                    height: height.toFixed(1),
-                    bmi: bmi.toFixed(1),
-                    status
-                };
-                document.getElementById('bmiOutput').querySelector('tbody').innerHTML = `
-                    <tr>
-                        <td>${output.weight}</td>
-                        <td>${output.height}</td>
-                        <td>${output.bmi}</td>
-                        <td>${output.status}</td>
-                    </tr>
-                `;
-                saveToHistory('bmi-calculator', output);
-                saveToolState('bmi-calculator', { weight, height });
-                showToast(i18next.t('calculateBMI', 'BMI calculated!'), 'success');
-            }
-        );
+    function generateQR() {
+        const validate = () => validateInput(elements.qrInput.value, 'text', elements.qrInput, 'qrError');
+
+        const process = () => {
+            const text = elements.qrInput.value;
+            elements.qrOutput.src = '';
+            QRCode.toDataURL(text, { width: 200, margin: 2 }, (err, url) => {
+                if (err) {
+                    showToast(i18next.t('error.qrFailed', 'Failed to generate QR code!'), 'error');
+                    return;
+                }
+                elements.qrOutput.src = url;
+                saveToHistory('qr-generator', { text, qrUrl: url });
+                saveToolState('qr-generator', { qrInput: text });
+                showToast(i18next.t('generateQR', 'Generate QR') + ' ' + i18next.t('result', 'Result'), 'success');
+            });
+        };
+
+        const button = document.querySelector('[data-action="generateQR"]');
+        processTool(button, 'qrLoading', 'qrResult', validate, process);
     }
 
-    function convertArea(button) {
-        processTool(button, 'areaLoading', 'areaResult',
-            () => validateInput(elements.areaValue.value, 'number', elements.areaValue, 'areaError'),
-            () => {
-                const value = parseFloat(elements.areaValue.value);
-                const fromUnit = elements.areaFrom.value;
-                const toUnit = elements.areaTo.value;
-                const conversions = { m2: 1, km2: 1000000, ha: 10000, ft2: 0.092903 };
-                const result = (value * conversions[fromUnit]) / conversions[toUnit];
-                const output = {
-                    original: value.toFixed(2),
-                    fromUnit,
-                    converted: result.toFixed(2),
-                    toUnit
+    function compressImage() {
+        const validate = () => {
+            if (!elements.imageInput.files || elements.imageInput.files.length === 0) {
+                return {
+                    isValid: false,
+                    input: elements.imageInput,
+                    errorId: 'imageError',
+                    message: i18next.t('error.noImage', 'Please select an image!')
                 };
-                document.getElementById('areaOutput').querySelector('tbody').innerHTML = `
-                    <tr>
-                        <td>${output.original}</td>
-                        <td>${output.fromUnit.toUpperCase()}</td>
-                        <td>${output.converted}</td>
-                        <td>${output.toUnit.toUpperCase()}</td>
-                    </tr>
-                `;
-                saveToHistory('area-converter', output);
-                saveToolState('area-converter', { areaValue: value, areaFrom: fromUnit, areaTo: toUnit });
-                showToast(i18next.t('convertArea', 'Converted!'), 'success');
             }
-        );
+            const file = elements.imageInput.files[0];
+            if (!file.type.startsWith('image/')) {
+                return {
+                    isValid: false,
+                    input: elements.imageInput,
+                    errorId: 'imageError',
+                    message: i18next.t('error.invalidImage', 'Invalid image format!')
+                };
+            }
+            return { isValid: true, input: elements.imageInput, errorId: 'imageError' };
+        };
+
+        const process = () => {
+            const file = elements.imageInput.files[0];
+            new Compressor(file, {
+                quality: 0.6,
+                maxWidth: 1024,
+                maxHeight: 1024,
+                success(result) {
+                    const url = URL.createObjectURL(result);
+                    elements.imageResult.innerHTML = `
+                        <p>${i18next.t('compressedImage', 'Compressed image')}</p>
+                        <img src="${url}" alt="Compressed Image" style="max-width: 100%;">
+                        <a href="${url}" download="compressed_${file.name}" class="button">${i18next.t('download', 'Download')}</a>
+                    `;
+                    saveToHistory('image-compressor', { originalSize: file.size, compressedSize: result.size });
+                    showToast(i18next.t('compressImage', 'Compress') + ' ' + i18next.t('result', 'Result'), 'success');
+                },
+                error() {
+                    showToast(i18next.t('error.compressFailed', 'Failed to compress image!'), 'error');
+                }
+            });
+        };
+
+        const button = document.querySelector('[data-action="compressImage"]');
+        processTool(button, 'imageLoading', 'imageResult', validate, process);
+    }
+
+    function calculateBMI() {
+        const validate = () => {
+            const weight = validateInput(elements.weight.value, 'number', elements.weight, 'bmiError');
+            if (!weight.isValid) return weight;
+            return validateInput(elements.height.value, 'number', elements.height, 'bmiError');
+        };
+
+        const process = () => {
+            const weight = parseFloat(elements.weight.value);
+            const height = parseFloat(elements.height.value) / 100; // Convert cm to m
+            const bmi = weight / (height * height);
+            let status;
+            if (bmi < 18.5) status = i18next.t('bmi.underweight', 'Underweight');
+            else if (bmi < 25) status = i18next.t('bmi.normal', 'Normal');
+            else if (bmi < 30) status = i18next.t('bmi.overweight', 'Overweight');
+            else status = i18next.t('bmi.obese', 'Obese');
+            elements.bmiOutput.querySelector('tbody').innerHTML = `
+                <tr>
+                    <td>${weight.toFixed(2)}</td>
+                    <td>${(height * 100).toFixed(2)}</td>
+                    <td>${bmi.toFixed(2)}</td>
+                    <td>${status}</td>
+                </tr>
+            `;
+            saveToHistory('bmi-calculator', { weight, height: height * 100, bmi, status });
+            saveToolState('bmi-calculator', { weight, height: height * 100 });
+            showToast(i18next.t('calculateBMI', 'Calculate BMI') + ' ' + i18next.t('result', 'Result'), 'success');
+        };
+
+        const button = document.querySelector('[data-action="calculateBMI"]');
+        processTool(button, 'bmiLoading', 'bmiResult', validate, process);
+    }
+
+    function convertArea() {
+        const validate = () => validateInput(elements.areaValue.value, 'number', elements.areaValue, 'areaError');
+
+        const process = () => {
+            const value = parseFloat(elements.areaValue.value);
+            const fromUnit = elements.areaFrom.value;
+            const toUnit = elements.areaTo.value;
+            const conversionRates = {
+                m2: 1,
+                km2: 0.000001,
+                ha: 0.0001,
+                ft2: 10.7639
+            };
+            const result = (value * conversionRates[fromUnit]) / conversionRates[toUnit];
+            elements.areaOutput.querySelector('tbody').innerHTML = `
+                <tr>
+                    <td>${value.toFixed(2)}</td>
+                    <td>${i18next.t(fromUnit)}</td>
+                    <td>${result.toFixed(2)}</td>
+                    <td>${i18next.t(toUnit)}</td>
+                </tr>
+            `;
+            saveToHistory('area-converter', { value, fromUnit, toUnit, result });
+            saveToolState('area-converter', { areaValue: value, areaFrom: fromUnit, areaTo: toUnit });
+            showToast(i18next.t('convertArea', 'Convert') + ' ' + i18next.t('result', 'Result'), 'success');
+        };
+
+        const button = document.querySelector('[data-action="convertArea"]');
+        processTool(button, 'areaLoading', 'areaResult', validate, process);
     }
 
     // Event Listeners
-    function setupEventListeners() {
-        const actions = {
-            showHome,
-            showHistory,
-            clearHistory,
-            openContactModal,
-            closeContactModal,
-            summarizeText: (e) => summarizeText(e.target),
-            convertLength: (e) => convertLength(e.target),
-            calculate: (e) => calculate(e.target),
-            generatePassword: (e) => generatePassword(e.target),
-            copyPassword,
-            countChars: (e) => countChars(e.target),
-            checkURL: (e) => checkURL(e.target),
-            convertTemp: (e) => convertTemp(e.target),
-            convertCurrency: (e) => convertCurrency(e.target),
-            generateQR: (e) => generateQR(e.target),
-            compressImage: (e) => compressImage(e.target),
-            calculateBMI: (e) => calculateBMI(e.target),
-            convertArea: (e) => convertArea(e.target),
-            searchTools
-        };
+    function initEventListeners() {
+        document.addEventListener('click', (e) => {
+            const action = e.target.closest('[data-action]')?.dataset.action;
+            if (!action) return;
+            switch (action) {
+                case 'showHome': showHome(); break;
+                case 'showHistory': showHistory(); break;
+                case 'openContactModal': openContactModal(); break;
+                case 'closeContactModal': closeContactModal(); break;
+                case 'summarizeText': summarizeText(); break;
+                case 'convertLength': convertLength(); break;
+                case 'calculate': calculate(); break;
+                case 'generatePassword': generatePassword(); break;
+                case 'copyPassword': copyPassword(); break;
+                case 'countChars': countChars(); break;
+                case 'checkURL': checkURL(); break;
+                case 'convertTemp': convertTemp(); break;
+                case 'convertCurrency': convertCurrency(); break;
+                case 'generateQR': generateQR(); break;
+                case 'compressImage': compressImage(); break;
+                case 'calculateBMI': calculateBMI(); break;
+                case 'convertArea': convertArea(); break;
+                case 'clearHistory': clearHistory(); break;
+                case 'searchTools': searchTools(); break;
+            }
+        });
 
-        document.querySelectorAll('[data-action], [data-tool]').forEach(element => {
-            element.addEventListener('click', () => {
-                const action = element.dataset.action;
-                const tool = element.dataset.tool;
-                if (action && actions[action]) {
-                    actions[action]();
-                } else if (tool) {
-                    showTool(tool);
-                }
+        document.querySelectorAll('.tool-nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const toolId = link.dataset.tool;
+                showTool(toolId);
             });
         });
 
@@ -1052,5 +1083,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize
     initDarkMode();
     initLanguage();
-    setupEventListeners();
+    initEventListeners();
 });
