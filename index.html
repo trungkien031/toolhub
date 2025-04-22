@@ -32,7 +32,7 @@
         <div class="circle"></div>
     </div>
 
-    <button class="dark-mode-toggle" id="darkModeToggle" data-i18n="darkMode">Dark Mode</button>
+    <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode"><i class="fas fa-moon"></i></button>
     <select class="language-selector" id="languageSelector" aria-label="Select language">
         <option value="vi">Tiếng Việt</option>
         <option value="en">English</option>
@@ -48,18 +48,18 @@
     </header>
 
     <nav class="tool-nav" role="navigation" aria-label="Tool navigation">
-        <a href="#" data-tool="summarize" title="Text Summary" aria-label="Text Summary" data-i18n="summarize"><i class="fas fa-brain"></i><span class="tooltip" data-i18n="summarize">Text Summary</span></a>
-        <a href="#" data-tool="length-converter" title="Length Converter" aria-label="Length Converter" data-i18n="length-converter"><i class="fas fa-ruler"></i><span class="tooltip" data-i18n="length-converter">Length Converter</span></a>
-        <a href="#" data-tool="calculator" title="Calculator" aria-label="Calculator" data-i18n="calculator"><i class="fas fa-calculator"></i><span class="tooltip" data-i18n="calculator">Calculator</span></a>
-        <a href="#" data-tool="password-generator" title="Password Generator" aria-label="Password Generator" data-i18n="password-generator"><i class="fas fa-key"></i><span class="tooltip" data-i18n="password-generator">Password Generator</span></a>
-        <a href="#" data-tool="char-counter" title="Character Counter" aria-label="Character Counter" data-i18n="char-counter"><i class="fas fa-text-width"></i><span class="tooltip" data-i18n="char-counter">Character Counter</span></a>
-        <a href="#" data-tool="url-checker" title="URL Checker" aria-label="URL Checker" data-i18n="url-checker"><i class="fas fa-globe"></i><span class="tooltip" data-i18n="url-checker">URL Checker</span></a>
-        <a href="#" data-tool="temp-converter" title="Temperature Converter" aria-label="Temperature Converter" data-i18n="temp-converter"><i class="fas fa-thermometer-half"></i><span class="tooltip" data-i18n="temp-converter">Temperature Converter</span></a>
-        <a href="#" data-tool="currency-converter" title="Currency Converter" aria-label="Currency Converter" data-i18n="currency-converter"><i class="fas fa-money-bill-wave"></i><span class="tooltip" data-i18n="currency-converter">Currency Converter</span></a>
-        <a href="#" data-tool="qr-generator" title="QR Code Generator" aria-label="QR Code Generator" data-i18n="qr-generator"><i class="fas fa-qrcode"></i><span class="tooltip" data-i18n="qr-generator">QR Code Generator</span></a>
-        <a href="#" data-tool="image-compressor" title="Image Compressor" aria-label="Image Compressor" data-i18n="image-compressor"><i class="fas fa-image"></i><span class="tooltip" data-i18n="image-compressor">Image Compressor</span></a>
-        <a href="#" data-tool="bmi-calculator" title="BMI Calculator" aria-label="BMI Calculator" data-i18n="bmi-calculator"><i class="fas fa-weight-scale"></i><span class="tooltip" data-i18n="bmi-calculator">BMI Calculator</span></a>
-        <a href="#" data-tool="area-converter" title="Area Converter" aria-label="Area Converter" data-i18n="area-converter"><i class="fas fa-square"></i><span class="tooltip" data-i18n="area-converter">Area Converter</span></a>
+        <a href="#" data-tool="summarize" title="Text Summary" aria-label="Text Summary"><i class="fas fa-brain"></i></a>
+        <a href="#" data-tool="length-converter" title="Length Converter" aria-label="Length Converter"><i class="fas fa-ruler"></i></a>
+        <a href="#" data-tool="calculator" title="Calculator" aria-label="Calculator"><i class="fas fa-calculator"></i></a>
+        <a href="#" data-tool="password-generator" title="Password Generator" aria-label="Password Generator"><i class="fas fa-key"></i></a>
+        <a href="#" data-tool="char-counter" title="Character Counter" aria-label="Character Counter"><i class="fas fa-text-width"></i></a>
+        <a href="#" data-tool="url-checker" title="URL Checker" aria-label="URL Checker"><i class="fas fa-globe"></i></a>
+        <a href="#" data-tool="temp-converter" title="Temperature Converter" aria-label="Temperature Converter"><i class="fas fa-thermometer-half"></i></a>
+        <a href="#" data-tool="currency-converter" title="Currency Converter" aria-label="Currency Converter"><i class="fas fa-money-bill-wave"></i></a>
+        <a href="#" data-tool="qr-generator" title="QR Code Generator" aria-label="QR Code Generator"><i class="fas fa-qrcode"></i></a>
+        <a href="#" data-tool="image-compressor" title="Image Compressor" aria-label="Image Compressor"><i class="fas fa-image"></i></a>
+        <a href="#" data-tool="bmi-calculator" title="BMI Calculator" aria-label="BMI Calculator"><i class="fas fa-weight-scale"></i></a>
+        <a href="#" data-tool="area-converter" title="Area Converter" aria-label="Area Converter"><i class="fas fa-square"></i></a>
     </nav>
 
     <div class="modal" id="contactModal">
@@ -123,7 +123,7 @@
                 </select>
                 <select id="lengthTo" aria-label="Select target unit">
                     <option value="m" data-i18n="meter">Meter (m)</option>
-                    <option value="km" data-i18n="kilometer">kilometer (km)</option>
+                    <option value="km" data-i18n="kilometer">Kilometer (km)</option>
                     <option value="cm" data-i18n="centimeter">Centimeter (cm)</option>
                     <option value="inch" data-i18n="inch">Inch (in)</option>
                     <option value="foot" data-i18n="foot">Foot (ft)</option>
@@ -409,7 +409,7 @@
     </main>
 
     <footer>
-        <p>&copy; 2025 ToolHub. <span data-i18n="createdBy">Created by</span> Nguyễn Trung Kiên.</p>
+        <p>© 2025 ToolHub. <span data-i18n="createdBy">Created by</span> Nguyễn Trung Kiên.</p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/i18next@22.4.9/dist/umd/i18next.min.js"></script>
