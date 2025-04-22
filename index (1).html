@@ -1,0 +1,384 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToolHub - Hộp Công Cụ Đa Năng</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">ToolHub</div>
+            <div class="nav-links">
+                <a href="#" data-action="showHome" data-i18n="home">Trang chủ</a>
+                <a href="#" data-tool="history" data-i18n="history">Lịch sử</a>
+                <a href="#" data-action="openContactModal" data-i18n="contact">Liên hệ</a>
+            </div>
+            <div class="nav-controls">
+                <select id="languageSelector">
+                    <option value="vi">Tiếng Việt</option>
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>
+                </select>
+                <button id="darkModeToggle" title="Toggle Dark Mode"><i class="fas fa-moon"></i></button>
+            </div>
+        </nav>
+    </header>
+
+    <div id="hero">
+        <h1 data-i18n="welcome">Chào mừng đến với ToolHub</h1>
+        <p data-i18n="description">Tóm tắt văn bản, chuyển đổi đơn vị, tạo mã QR và nhiều tính năng khác - miễn phí và dễ sử dụng.</p>
+        <input type="text" id="searchInput" placeholder="Tìm kiếm công cụ..." data-i18n-placeholder="searchPlaceholder">
+        <button data-action="searchTools"><i class="fas fa-search"></i></button>
+    </div>
+
+    <div class="tool-nav">
+        <a href="#" data-tool="summarize" data-i18n="summarize">Tóm tắt văn bản</a>
+        <a href="#" data-tool="length-converter" data-i18n="length-converter">Chuyển đổi độ dài</a>
+        <a href="#" data-tool="calculator" data-i18n="calculator">Máy tính</a>
+        <a href="#" data-tool="password-generator" data-i18n="password-generator">Tạo mật khẩu</a>
+        <a href="#" data-tool="char-counter" data-i18n="char-counter">Đếm ký tự</a>
+        <a href="#" data-tool="url-checker" data-i18n="url-checker">Kiểm tra URL</a>
+        <a href="#" data-tool="temp-converter" data-i18n="temp-converter">Chuyển đổi nhiệt độ</a>
+        <a href="#" data-tool="currency-converter" data-i18n="currency-converter">Chuyển đổi tiền tệ</a>
+        <a href="#" data-tool="qr-generator" data-i18n="qr-generator">Tạo mã QR</a>
+        <a href="#" data-tool="image-compressor" data-i18n="image-compressor">Nén ảnh</a>
+        <a href="#" data-tool="bmi-calculator" data-i18n="bmi-calculator">Tính BMI</a>
+        <a href="#" data-tool="area-converter" data-i18n="area-converter">Chuyển đổi diện tích</a>
+    </div>
+
+    <main>
+        <section id="summarize" class="tools-section" data-tool-name="Tóm tắt văn bản" style="display: none;">
+            <h2 data-i18n="summarize">Tóm tắt văn bản</h2>
+            <p data-i18n="summarizeDesc">Tóm tắt nội dung dài thành một bản ngắn gọn bằng AI.</p>
+            <textarea id="textInput" rows="5" data-i18n-placeholder="textInputPlaceholder"></textarea>
+            <select id="summaryLength">
+                <option value="short" data-i18n="short">Ngắn (~20%)</option>
+                <option value="medium" data-i18n="medium">Trung bình (~30%)</option>
+                <option value="long" data-i18n="long">Dài (~40%)</option>
+            </select>
+            <button data-action="summarizeText" data-i18n="summarizeText">Tóm tắt</button>
+            <div id="textError" class="error"></div>
+            <div id="textLoading" style="display: none;"><i class="fas fa-spinner fa-spin"></i></div>
+            <div id="textResult">
+                <pre id="summaryOutput"></pre>
+            </div>
+        </section>
+
+        <section id="length-converter" class="tools-section" data-tool-name="Chuyển đổi độ dài" style="display: none;">
+            <h2 data-i18n="length-converter">Chuyển đổi độ dài</h2>
+            <p data-i18n="lengthConverterDesc">Chuyển đổi độ dài giữa mét, kilômét, centimeters, inch, feet và yard.</p>
+            <input type="number" id="lengthValue" min="0" step="any" data-i18n-placeholder="valuePlaceholder">
+            <select id="lengthFrom">
+                <option value="m" data-i18n="meter">Mét (m)</option>
+                <option value="km" data-i18n="kilometer">Kilômét (km)</option>
+                <option value="cm" data-i18n="centimeter">Centimet (cm)</option>
+                <option value="inch" data-i18n="inch">Inch (in)</option>
+                <option value="foot" data-i18n="foot">Feet (ft)</option>
+                <option value="yard" data-i18n="yard">Yard (yd)</option>
+            </select>
+            <select id="lengthTo">
+                <option value="m" data-i18n="meter">Mét (m)</option>
+                <option value="km" data-i18n="kilometer">Kilômét (km)</option>
+                <option value="cm" data-i18n="centimeter">Centimet (cm)</option>
+                <option value="inch" data-i18n="inch">Inch (in)</option>
+                <option value="foot" data-i18n="foot">Feet (ft)</option>
+                <option value="yard" data-i18n="yard">Yard (yd)</option>
+            </select>
+            <button data-action="convertLength" data-i18n="convertLength">Chuyển đổi</button>
+            <div id="lengthError" class="error"></div>
+            <div id="lengthLoading" style="display: none;"><i class="fas fa-spinner fa-spin"></i></div>
+            <div id="lengthResult">
+                <table>
+                    <thead>
+                        <tr>
+                            <th data-i18n="originalValue">Giá trị gốc</th>
+                            <th data-i18n="originalUnit">Đơn vị gốc</th>
+                            <th data-i18n="convertedValue">Giá trị chuyển đổi</th>
+                            <th data-i18n="targetUnit">Đơn vị đích</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lengthOutput"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="calculator" class="tools-section" data-tool-name="Máy tính" style="display: none;">
+            <h2 data-i18n="calculator">Máy tính</h2>
+            <p data-i18n="calculatorDesc">Thực hiện các phép tính cơ bản: cộng, trừ, nhân, chia.</p>
+            <input type="number" id="num1" step="any" data-i18n-placeholder="firstNumberPlaceholder">
+            <select id="operator">
+                <option value="+" data-i18n="add">Cộng (+)</option>
+                <option value="-" data-i18n="subtract">Trừ (-)</option>
+                <option value="*" data-i18n="multiply">Nhân (*)</option>
+                <option value="/" data-i18n="divide">Chia (/)</option>
+            </select>
+            <input type="number" id="num2" step="any" data-i18n-placeholder="secondNumberPlaceholder">
+            <button data-action="calculate" data-i18n="calculate">Tính toán</button>
+            <div id="calcError" class="error"></div>
+            <div id="calcLoading" style="display: none;"><i class="fas fa-spinner fa-spin"></i></div>
+            <div id="calcResult">
+                <pre id="calcOutput"></pre>
+            </div>
+        </section>
+
+        <section id="password-generator" class="tools-section" data-tool-name="Tạo mật khẩu" style="display: none;">
+            <h2 data-i18n="password-generator">Tạo mật khẩu</h2>
+            <p data-i18n="passwordGeneratorDesc">Tạo mật khẩu ngẫu nhiên an toàn với độ dài và loại ký tự tùy chỉnh.</p>
+            <input type="number" id="passLength" min="8" max="32" data-i18n-placeholder="passLengthPlaceholder">
+            <label><input type="checkbox" id="includeUppercase" checked> <span data-i18n="uppercase">Chữ hoa (A-Z)</span></label>
+            <label><input type="checkbox" id="includeLowercase" checked> <span data-i18n="lowercase">Chữ thường (a-z)</span></label>
+            <label><input type="checkbox" id="includeNumbers" checked> <span data-i18n="numbers">Số (0-9)</span></label>
+            <label><input type="checkbox" id="includeSymbols" checked> <span data-i18n="symbols">Ký hiệu (!@#$%)</span></label>
+            <button data-action="generatePassword" data-i18n="generatePassword">Tạo</button>
+            <button data-action="copyPassword" data-i18n="copyPassword">Sao chép</button>
+            <div id="passError" class="error"></div>
+            <div id="passLoading" style="display: none;"><i class="fas fa-spinner fa-spin"></i></div>
+            <div id="passResult">
+                <pre id="passOutput"></pre>
+            </div>
+        </section>
+
+        <section id="char-counter" class="tools-section" data-tool-name="Đếm ký tự" style="display: none;">
+            <h2 data-i18n="char-counter">Đếm ký tự</h2>
+            <p data-i18n="charCounterDesc">Đếm số ký tự và từ trong văn bản của bạn.</p>
+            <textarea id="charInput" rows="5" data-i18n-placeholder="charInputPlaceholder"></textarea>
+            <button data-action="countChars" data-i18n="countChars">Đếm</button>
+            <div id="charError" class="error"></div>
+            <div id="charLoading" style="display: none;"><i class="fas fa-spinner fa-spin"></i></div>
+            <div id="charResult">
+                <pre id="charOutput"></pre>
+            </div>
+        </section>
+
+        <section id="url-checker" class="tools-section" data-tool-name="Kiểm tra URL" style="display: none;">
+            <h2 data-i18n="url-checker">Kiểm tra URL</h2>
+            <p data-i18n="urlCheckerDesc">Kiểm tra xem URL có hợp lệ và an toàn hay không.</p>
+            <input type="text" id="urlInput" data-i18n-placeholder="urlInputPlaceholder">
+            <button data-action="checkURL" data-i18n="checkURL">Kiểm tra</button>
+            <div id="urlError" class="error"></div>
+            <div id="urlLoading" style="display: none;"><i class="fas fa-spinner fa-spin"></i></div>
+            <div id="urlResult">
+                <pre id="urlOutput"></pre>
+            </div>
+        </section>
+
+        <section id="temp-converter" class="tools-section" data-tool-name="Chuyển đổi nhiệt độ" style="display: none;">
+            <h2 data-i18n="temp-converter">Chuyển đổi nhiệt độ</h2>
+            <p data-i18n="tempConverterDesc">Chuyển đổi giữa độ C, độ F và Kelvin.</p>
+            <input type="number" id="tempValue" step="any" data-i18n-placeholder="valuePlaceholder">
+            <select id="tempFrom">
+                <option value="C" data-i18n="celsius">Độ C (°C)</option>
+                <option value="F" data-i18n="fahrenheit">Độ F (°F)</option>
+                <option value="K" data-i18n="kelvin">Kelvin (K)</option>
+            </select>
+            <select id="tempTo">
+                <option value="C" data-i18n="celsius">Độ C (°C)</option>
+                <option value="F" data-i18n="fahrenheit">Độ F (°F)</option>
+                <option value="K" data-i18n="kelvin">Kelvin (K)</option>
+            </select>
+            <button data-action="convertTemp" data-i18n="convertTemp">Chuyển đổi</button>
+            <div id="tempError" class="error"></div>
+            <div id="tempLoading" style="display: none;"><i class="fas fa-spinner fa-spin"></i></div>
+            <div id="tempResult">
+                <table>
+                    <thead>
+                        <tr>
+                            <th data-i18n="originalValue">Giá trị gốc</th>
+                            <th data-i18n="originalUnit">Đơn vị gốc</th>
+                            <th data-i18n="convertedValue">Giá trị chuyển đổi</th>
+                            <th data-i18n="targetUnit">Đơn vị đích</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tempOutput"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="currency-converter" class="tools-section" data-tool-name="Chuyển đổi tiền tệ" style="display: none;">
+            <h2 data-i18n="currency-converter">Chuyển đổi tiền tệ</h2>
+            <p data-i18n="currencyConverterDesc">Chuyển đổi giữa các loại tiền tệ với tỷ giá thời gian thực.</p>
+            <input type="number" id="currencyValue" min="0" step="any" data-i18n-placeholder="valuePlaceholder">
+            <select id="currencyFrom">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="VND">VND</option>
+            </select>
+            <select id="currencyTo">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="VND">VND</option>
+            </select>
+            <button data-action="convertCurrency" data-i18n="convertCurrency">Chuyển đổi</button>
+            <div id="currencyError" class="error"></div>
+            <div id="currencyLoading" style="display: none;"><i class="fas fa-spinner fa-spin"></i></div>
+            <div id="currencyResult">
+                <table>
+                    <thead>
+                        <tr>
+                            <th data-i18n="originalValue">Giá trị gốc</th>
+                            <th data-i18n="originalUnit">Đơn vị gốc</th>
+                            <th data-i18n="convertedValue">Giá trị chuyển đổi</th>
+                            <th data-i18n="targetUnit">Đơn vị đích</th>
+                        </tr>
+                    </thead>
+                    <tbody id="currencyOutput"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="qr-generator" class="tools-section" data-tool-name="Tạo mã QR" style="display: none;">
+            <h2 data-i18n="qr-generator">Tạo mã QR</h2>
+            <p data-i18n="qrGeneratorDesc">Tạo mã QR cho URL hoặc văn bản.</p>
+            <input type="text" id="qrInput" data-i18n-placeholder="textInputPlaceholder">
+            <button data-action="generateQR" data-i18n="generateQR">Tạo mã QR</button>
+            <div id="qrError" class="error"></div>
+            <div id="qrLoading" style="display: none;"><i class="fas fa-spinner fa-spin"></i></div>
+            <div id="qrResult">
+                <img id="qrOutput" alt="QR Code">
+            </div>
+        </section>
+
+        <section id="image-compressor" class="tools-section" data-tool-name="Nén ảnh" style="display: none;">
+            <h2 data-i18n="image-compressor">Nén ảnh</h2>
+            <p data-i18n="imageCompressorDesc">Nén ảnh để giảm kích thước tệp.</p>
+            <input type="file" id="imageInput" accept="image/*">
+            <button data-action="compressImage" data-i18n="compressImage">Nén</button>
+            <div id="imageError" class="error"></div>
+            <div id="imageLoading" style="display: none;"><i class="fas fa-spinner fa-spin"></i></div>
+            <div id="imageResult"></div>
+        </section>
+
+        <section id="bmi-calculator" class="tools-section" data-tool-name="Tính BMI" style="display: none;">
+            <h2 data-i18n="bmi-calculator">Tính BMI</h2>
+            <p data-i18n="bmiCalculatorDesc">Tính chỉ số khối cơ thể (BMI) của bạn.</p>
+            <input type="number" id="weight" min="0" step="any" data-i18n-placeholder="weight">
+            <input type="number" id="height" min="0" step="any" data-i18n-placeholder="height">
+            <button data-action="calculateBMI" data-i18n="calculateBMI">Tính BMI</button>
+            <div id="bmiError" class="error"></div>
+            <div id="bmiLoading" style="display: none;"><i class="fas fa-spinner fa-spin"></i></div>
+            <div id="bmiResult">
+                <table>
+                    <thead>
+                        <tr>
+                            <th data-i18n="weight">Cân nặng (kg)</th>
+                            <th data-i18n="height">Chiều cao (cm)</th>
+                            <th>BMI</th>
+                            <th data-i18n="status">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bmiOutput"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="area-converter" class="tools-section" data-tool-name="Chuyển đổi diện tích" style="display: none;">
+            <h2 data-i18n="area-converter">Chuyển đổi diện tích</h2>
+            <p data-i18n="areaConverterDesc">Chuyển đổi giữa mét vuông, kilômét vuông, hecta, feet vuông và mẫu.</p>
+            <input type="number" id="areaValue" min="0" step="any" data-i18n-placeholder="valuePlaceholder">
+            <select id="areaFrom">
+                <option value="m2" data-i18n="m2">Mét vuông (m²)</option>
+                <option value="km2" data-i18n="km2">Kilômét vuông (km²)</option>
+                <option value="ha" data-i18n="ha">Hecta (ha)</option>
+                <option value="ft2" data-i18n="ft2">Feet vuông (ft²)</option>
+                <option value="mau" data-i18n="mau">Mẫu (mẫu)</option>
+            </select>
+            <select id="areaTo">
+                <option value="m2" data-i18n="m2">Mét vuông (m²)</option>
+                <option value="km2" data-i18n="km2">Kilômét vuông (km²)</option>
+                <option value="ha" data-i18n="ha">Hecta (ha)</option>
+                <option value="ft2" data-i18n="ft2">Feet vuông (ft²)</option>
+                <option value="mau" data-i18n="mau">Mẫu (mẫu)</option>
+            </select>
+            <button data-action="convertArea" data-i18n="convertArea">Chuyển đổi</button>
+            <div id="areaError" class="error"></div>
+            <div id="areaLoading" style="display: none;"><i class="fas fa-spinner fa-spin"></i></div>
+            <div id="areaResult">
+                <table>
+                    <thead>
+                        <tr>
+                            <th data-i18n="originalValue">Giá trị gốc</th>
+                            <th data-i18n="originalUnit">Đơn vị gốc</th>
+                            <th data-i18n="convertedValue">Giá trị chuyển đổi</th>
+                            <th data-i18n="targetUnit">Đơn vị đích</th>
+                        </tr>
+                    </thead>
+                    <tbody id="areaOutput"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="history" class="tools-section" data-tool-name="Lịch sử" style="display: none;">
+            <h2 data-i18n="history">Lịch sử</h2>
+            <button data-action="clearHistory" data-i18n="clearHistory">Xóa lịch sử</button>
+            <div id="historyStats"></div>
+            <div id="historyResult"></div>
+        </section>
+    </main>
+
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <span class="close" data-action="closeContactModal">×</span>
+            <h2 data-i18n="contact">Liên hệ</h2>
+            <p><strong data-i18n="creator">Tác giả</strong>: Nguyễn Văn A</p>
+            <p><strong data-i18n="dob">Ngày sinh</strong>: 01/01/2000</p>
+            <p><strong data-i18n="email">Email</strong>: example@email.com</p>
+            <p><strong data-i18n="phone">Số điện thoại</strong>: +84 123 456 789</p>
+            <p data-i18n="createdBy">Tạo bởi xAI</p>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/21.6.14/i18next.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.0/build/qrcode.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/compressorjs@1.1.1/dist/compressor.min.js" defer></script>
+    <script src="main.js" defer></script>
+    <script src="utils.js" defer></script>
+    <script src="i18n.js" defer></script>
+    <script src="tools.js" defer></script>
+    <script src="history.js" defer></script>
+</body>
+</html>
