@@ -1,427 +1,914 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="ToolHub - Bộ sưu tập công cụ tiện ích đa năng cho mọi nhu cầu hàng ngày.">
-    <title>ToolHub - Hộp Công Cụ Đa Năng</title>
-    <link href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/compressorjs@1.1.1/dist/compressor.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div class="bg-decor">
-        <div class="circle"></div>
-        <div class="circle"></div>
-        <div class="circle"></div>
-    </div>
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM fully loaded and parsed");
 
-    <header>
-        <div class="logo" data-action="showHome">ToolHub</div>
-        <nav class="nav">
-            <a href="#" data-action="showHome">Trang Chủ</a>
-            <a href="#" data-action="showHistory">Lịch Sử</a>
-            <a href="#" data-action="openContactModal">Liên Hệ</a>
-            <select id="languageSwitch">
-                <option value="vi">Tiếng Việt</option>
-                <option value="en">English</option>
-            </select>
-        </nav>
-        <div class="dark-mode-toggle">
-            <input type="checkbox" id="darkModeToggle">
-            <label for="darkModeToggle"><i class="fas fa-moon"></i></label>
-        </div>
-    </header>
+    let translations = {};
+    var gk_isXlsx = false;
+    var gk_xlsxFileLookup = {};
+    var gk_fileData = {};
 
-    <!-- Magic Menu -->
-    <div class="magic-menu">
-        <div class="magic-menu-toggle">
-            <i class="fas fa-bars"></i>
-        </div>
-        <div class="magic-menu-content">
-            <a href="#" data-tool="summarize"><i class="fas fa-compress-alt"></i> Tóm Tắt Văn Bản</a>
-            <a href="#" data-tool="length-converter"><i class="fas fa-ruler"></i> Chuyển Đổi Độ Dài</a>
-            <a href="#" data-tool="calculator"><i class="fas fa-calculator"></i> Máy Tính</a>
-            <a href="#" data-tool="password-generator"><i class="fas fa-lock"></i> Tạo Mật Khẩu</a>
-            <a href="#" data-tool="char-counter"><i class="fas fa-text-height"></i> Đếm Ký Tự</a>
-            <a href="#" data-tool="url-checker"><i class="fas fa-link"></i> Kiểm Tra URL</a>
-            <a href="#" data-tool="temp-converter"><i class="fas fa-thermometer-half"></i> Chuyển Đổi Nhiệt Độ</a>
-            <a href="#" data-tool="currency-converter"><i class="fas fa-dollar-sign"></i> Chuyển Đổi Tiền Tệ</a>
-            <a href="#" data-tool="qr-generator"><i class="fas fa-qrcode"></i> Tạo Mã QR</a>
-            <a href="#" data-tool="image-compressor"><i class="fas fa-image"></i> Nén Ảnh</a>
-            <a href="#" data-tool="bmi-calculator"><i class="fas fa-weight"></i> Tính BMI</a>
-            <a href="#" data-tool="area-converter"><i class="fas fa-expand-arrows-alt"></i> Chuyển Đổi Diện Tích</a>
-            <a href="#" data-tool="history"><i class="fas fa-history"></i> Lịch Sử</a>
-        </div>
-    </div>
+    // Load language file
+    fetch('/toolhub/languages.json')
+        .then(response => response.json())
+        .then(data => {
+            translations = data;
+            const savedLang = localStorage.getItem('language') || 'vi';
+            document.getElementById('languageSwitch').value = savedLang;
+            updateLanguage(savedLang);
+        })
+        .catch(error => {
+            console.error('Error loading translations:', error);
+            showToast('Không thể tải ngôn ngữ, sử dụng mặc định (Tiếng Việt)!', 'error');
+        });
 
-    <section id="hero">
-        <img src="https://via.placeholder.com/200" alt="ToolHub Logo" class="hero-image">
-        <h1 data-lang="hero_title">ToolHub - Hộp Công Cụ Đa Năng</h1>
-        <p data-lang="hero_description">Bộ sưu tập công cụ tiện ích giúp bạn giải quyết mọi vấn đề hàng ngày một cách nhanh chóng và hiệu quả!</p>
-        <div class="search-bar">
-            <i class="fas fa-search"></i>
-            <input type="text" id="searchInput" data-lang-placeholder="search_placeholder" placeholder="Tìm kiếm công cụ...">
-            <button data-action="searchTools">Tìm</button>
-        </div>
-    </section>
+    // Update language function
+    function updateLanguage(lang) {
+        document.querySelectorAll('[data-lang]').forEach(element => {
+            const key = element.getAttribute('data-lang');
+            element.textContent = translations[lang][key] || element.textContent;
+        });
+        document.querySelectorAll('[data-lang-placeholder]').forEach(element => {
+            const key = element.getAttribute('data-lang-placeholder');
+            element.placeholder = translations[lang][key] || element.placeholder;
+        });
+        document.title = translations[lang]['hero_title'] || document.title;
+        const metaDescription = document.querySelector('meta[name="description"]');
+        if (metaDescription) {
+            metaDescription.setAttribute('content', translations[lang]['hero_description'] || metaDescription.getAttribute('content'));
+        }
+        localStorage.setItem('language', lang);
+    }
 
-    <nav class="tool-nav">
-        <a href="#" data-tool="summarize" class="tooltip" data-tooltip="Tóm Tắt Văn Bản"><i class="fas fa-compress-alt"></i></a>
-        <a href="#" data-tool="length-converter" class="tooltip" data-tooltip="Chuyển Đổi Độ Dài"><i class="fas fa-ruler"></i></a>
-        <a href="#" data-tool="calculator" class="tooltip" data-tooltip="Máy Tính"><i class="fas fa-calculator"></i></a>
-        <a href="#" data-tool="password-generator" class="tooltip" data-tooltip="Tạo Mật Khẩu"><i class="fas fa-lock"></i></a>
-        <a href="#" data-tool="char-counter" class="tooltip" data-tooltip="Đếm Ký Tự"><i class="fas fa-text-height"></i></a>
-        <a href="#" data-tool="url-checker" class="tooltip" data-tooltip="Kiểm Tra URL"><i class="fas fa-link"></i></a>
-        <a href="#" data-tool="temp-converter" class="tooltip" data-tooltip="Chuyển Đổi Nhiệt Độ"><i class="fas fa-thermometer-half"></i></a>
-        <a href="#" data-tool="currency-converter" class="tooltip" data-tooltip="Chuyển Đổi Tiền Tệ"><i class="fas fa-dollar-sign"></i></a>
-        <a href="#" data-tool="qr-generator" class="tooltip" data-tooltip="Tạo Mã QR"><i class="fas fa-qrcode"></i></a>
-        <a href="#" data-tool="image-compressor" class="tooltip" data-tooltip="Nén Ảnh"><i class="fas fa-image"></i></a>
-        <a href="#" data-tool="bmi-calculator" class="tooltip" data-tooltip="Tính BMI"><i class="fas fa-weight"></i></a>
-        <a href="#" data-tool="area-converter" class="tooltip" data-tooltip="Chuyển Đổi Diện Tích"><i class="fas fa-expand-arrows-alt"></i></a>
-    </nav>
+    // Language switch event
+    document.getElementById('languageSwitch').addEventListener('change', (e) => {
+        const selectedLang = e.target.value;
+        updateLanguage(selectedLang);
+        showToast(translations[selectedLang]['language_switch_success'], 'success');
+    });
 
-    <section id="summarize" class="tools-section" data-tool-name="summarize">
-        <div class="tool-card">
-            <h3><i class="fas fa-compress-alt"></i> <span data-lang="summarize_title">Tóm Tắt Văn Bản</span></h3>
-            <p data-lang="summarize_description">Tóm tắt nội dung văn bản dài thành ngắn gọn, dễ hiểu.</p>
-            <textarea id="textInput" data-lang-placeholder="summarize_input_placeholder" placeholder="Nhập văn bản cần tóm tắt..."></textarea>
-            <div class="error-message" id="textError"></div>
-            <select id="summaryLength">
-                <option value="short">Ngắn</option>
-                <option value="medium">Trung bình</option>
-                <option value="long">Dài</option>
-            </select>
-            <button data-action="summarizeText">Tóm Tắt</button>
-            <div class="loading" id="textLoading">
-                <span class="spinner"></span> <span data-lang="loading">Đang xử lý...</span>
-            </div>
-            <div class="result" id="textResult">
-                <h4 data-lang="summarize_result">Kết Quả Tóm Tắt:</h4>
-                <p id="summaryOutput"></p>
-            </div>
-        </div>
-    </section>
+    // Utility Functions
+    function escapeHTML(str) {
+        return str.replace(/[&<>"']/g, match => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        }[match]));
+    }
 
-    <section id="length-converter" class="tools-section" data-tool-name="length-converter">
-        <div class="tool-card">
-            <h3><i class="fas fa-ruler"></i> <span data-lang="length_converter_title">Chuyển Đổi Độ Dài</span></h3>
-            <p data-lang="length_converter_description">Chuyển đổi giữa các đơn vị độ dài như mét, kilomet, inch, foot...</p>
-            <input type="number" id="lengthValue" data-lang-placeholder="length_converter_input_placeholder" placeholder="Nhập giá trị độ dài">
-            <div class="error-message" id="lengthError"></div>
-            <select id="lengthFrom">
-                <option value="m">Mét (m)</option>
-                <option value="km">Kilomet (km)</option>
-                <option value="cm">Centimet (cm)</option>
-                <option value="inch">Inch</option>
-                <option value="foot">Foot</option>
-                <option value="yard">Yard</option>
-            </select>
-            <select id="lengthTo">
-                <option value="m">Mét (m)</option>
-                <option value="km">Kilomet (km)</option>
-                <option value="cm">Centimet (cm)</option>
-                <option value="inch">Inch</option>
-                <option value="foot">Foot</option>
-                <option value="yard">Yard</option>
-            </select>
-            <button data-action="convertLength">Chuyển Đổi</button>
-            <div class="loading" id="lengthLoading">
-                <span class="spinner"></span> <span data-lang="loading">Đang xử lý...</span>
-            </div>
-            <div class="result" id="lengthResult">
-                <table class="result-table">
-                    <thead>
-                        <tr>
-                            <th data-lang="length_converter_original">Giá Trị Gốc</th>
-                            <th data-lang="length_converter_from">Đơn Vị Gốc</th>
-                            <th data-lang="length_converter_converted">Giá Trị Đã Chuyển</th>
-                            <th data-lang="length_converter_to">Đơn Vị Đích</th>
-                        </tr>
-                    </thead>
-                    <tbody id="lengthOutput"></tbody>
-                </table>
-            </div>
-        </div>
-    </section>
+    function showError(inputElement, errorElementId, messageKey) {
+        const lang = localStorage.getItem('language') || 'vi';
+        const errorElement = document.getElementById(errorElementId);
+        if (!errorElement) {
+            console.error(`Error element with ID ${errorElementId} not found`);
+            return false;
+        }
+        inputElement.classList.add('error');
+        errorElement.textContent = translations[lang][messageKey] || messageKey;
+        errorElement.classList.add('active');
+        showToast(translations[lang][messageKey] || messageKey, 'error');
+        return false;
+    }
 
-    <section id="calculator" class="tools-section" data-tool-name="calculator">
-        <div class="tool-card">
-            <h3><i class="fas fa-calculator"></i> <span data-lang="calculator_title">Máy Tính</span></h3>
-            <p data-lang="calculator_description">Thực hiện các phép tính cơ bản: cộng, trừ, nhân, chia.</p>
-            <input type="number" id="num1" data-lang-placeholder="calculator_num1_placeholder" placeholder="Số thứ nhất">
-            <select id="operator">
-                <option value="+">+</option>
-                <option value="-">-</option>
-                <option value="*">×</option>
-                <option value="/">÷</option>
-            </select>
-            <input type="number" id="num2" data-lang-placeholder="calculator_num2_placeholder" placeholder="Số thứ hai">
-            <div class="error-message" id="calcError"></div>
-            <button data-action="calculate">Tính</button>
-            <div class="loading" id="calcLoading">
-                <span class="spinner"></span> <span data-lang="loading">Đang xử lý...</span>
-            </div>
-            <div class="result" id="calcResult">
-                <p id="calcOutput"></p>
-            </div>
-        </div>
-    </section>
+    function clearError(inputElement, errorElementId) {
+        const errorElement = document.getElementById(errorElementId);
+        if (!errorElement) {
+            console.error(`Error element with ID ${errorElementId} not found`);
+            return false;
+        }
+        inputElement.classList.remove('error');
+        errorElement.textContent = '';
+        errorElement.classList.remove('active');
+        return true;
+    }
 
-    <section id="password-generator" class="tools-section" data-tool-name="password-generator">
-        <div class="tool-card">
-            <h3><i class="fas fa-lock"></i> <span data-lang="password_generator_title">Tạo Mật Khẩu</span></h3>
-            <p data-lang="password_generator_description">Tạo mật khẩu ngẫu nhiên an toàn với các tùy chọn linh hoạt.</p>
-            <input type="number" id="passLength" value="12" min="8" max="32" data-lang-placeholder="password_generator_length_placeholder" placeholder="Độ dài mật khẩu (8-32)">
-            <div class="checkbox-group">
-                <label><input type="checkbox" id="includeUppercase" checked> <span data-lang="password_generator_uppercase">Chữ hoa</span></label>
-                <label><input type="checkbox" id="includeLowercase" checked> <span data-lang="password_generator_lowercase">Chữ thường</span></label>
-                <label><input type="checkbox" id="includeNumbers" checked> <span data-lang="password_generator_numbers">Số</span></label>
-                <label><input type="checkbox" id="includeSymbols" checked> <span data-lang="password_generator_symbols">Ký tự đặc biệt</span></label>
-            </div>
-            <div class="error-message" id="passError"></div>
-            <button data-action="generatePassword">Tạo Mật Khẩu</button>
-            <div class="loading" id="passLoading">
-                <span class="spinner"></span> <span data-lang="loading">Đang xử lý...</span>
-            </div>
-            <div class="result" id="passResult">
-                <p id="passOutput"></p>
-                <button class="copy-btn" data-action="copyPassword" data-lang="password_generator_copy">Sao Chép</button>
-            </div>
-        </div>
-    </section>
+    function showToast(messageKey, type) {
+        const lang = localStorage.getItem('language') || 'vi';
+        const toast = document.getElementById('toast');
+        if (!toast) {
+            console.error("Toast element not found");
+            return;
+        }
+        toast.textContent = translations[lang][messageKey] || messageKey;
+        toast.className = `toast ${type} active animate__animated animate__slideInRight`;
+        setTimeout(() => {
+            toast.className = 'toast';
+        }, 3000);
+    }
 
-    <section id="char-counter" class="tools-section" data-tool-name="char-counter">
-        <div class="tool-card">
-            <h3><i class="fas fa-text-height"></i> <span data-lang="char_counter_title">Đếm Ký Tự</span></h3>
-            <p data-lang="char_counter_description">Đếm số ký tự và từ trong văn bản của bạn.</p>
-            <textarea id="charInput" data-lang-placeholder="char_counter_input_placeholder" placeholder="Nhập văn bản để đếm..."></textarea>
-            <div class="error-message" id="charError"></div>
-            <button data-action="countChars">Đếm</button>
-            <div class="loading" id="charLoading">
-                <span class="spinner"></span> <span data-lang="loading">Đang xử lý...</span>
-            </div>
-            <div class="result" id="charResult">
-                <p id="charOutput"></p>
-            </div>
-        </div>
-    </section>
+    function showLoading(button, loadingId, resultId, callback) {
+        const loading = document.getElementById(loadingId);
+        const result = document.getElementById(resultId);
+        if (!loading || !result) {
+            console.error(`Loading or result element not found: ${loadingId}, ${resultId}`);
+            return;
+        }
+        loading.classList.add('active');
+        result.classList.remove('active');
+        button.disabled = true;
+        setTimeout(() => {
+            loading.classList.remove('active');
+            button.disabled = false;
+            callback();
+        }, 300);
+    }
 
-    <section id="url-checker" class="tools-section" data-tool-name="url-checker">
-        <div class="tool-card">
-            <h3><i class="fas fa-link"></i> <span data-lang="url_checker_title">Kiểm Tra URL</span></h3>
-            <p data-lang="url_checker_description">Kiểm tra tính hợp lệ của một URL.</p>
-            <input type="text" id="urlInput" data-lang-placeholder="url_checker_input_placeholder" placeholder="Nhập URL để kiểm tra...">
-            <div class="error-message" id="urlError"></div>
-            <button data-action="checkURL">Kiểm Tra</button>
-            <div class="loading" id="urlLoading">
-                <span class="spinner"></span> <span data-lang="loading">Đang xử lý...</span>
-            </div>
-            <div class="result" id="urlResult">
-                <p id="urlOutput"></p>
-            </div>
-        </div>
-    </section>
+    function processTool(button, loadingId, resultId, validateFn, processFn) {
+        showLoading(button, loadingId, resultId, () => {
+            const validation = validateFn();
+            if (!validation.isValid) {
+                return showError(validation.input, validation.errorId, validation.messageKey);
+            }
+            clearError(validation.input, validation.errorId);
+            processFn();
+            document.getElementById(resultId).classList.add('active', 'animate__animated', 'animate__fadeIn');
+        });
+    }
 
-    <section id="temp-converter" class="tools-section" data-tool-name="temp-converter">
-        <div class="tool-card">
-            <h3><i class="fas fa-thermometer-half"></i> <span data-lang="temp_converter_title">Chuyển Đổi Nhiệt Độ</span></h3>
-            <p data-lang="temp_converter_description">Chuyển đổi giữa các đơn vị nhiệt độ: Celsius, Fahrenheit, Kelvin.</p>
-            <input type="number" id="tempValue" data-lang-placeholder="temp_converter_input_placeholder" placeholder="Nhập giá trị nhiệt độ">
-            <div class="error-message" id="tempError"></div>
-            <select id="tempFrom">
-                <option value="C">Celsius (C)</option>
-                <option value="F">Fahrenheit (F)</option>
-                <option value="K">Kelvin (K)</option>
-            </select>
-            <select id="tempTo">
-                <option value="C">Celsius (C)</option>
-                <option value="F">Fahrenheit (F)</option>
-                <option value="K">Kelvin (K)</option>
-            </select>
-            <button data-action="convertTemp">Chuyển Đổi</button>
-            <div class="loading" id="tempLoading">
-                <span class="spinner"></span> <span data-lang="loading">Đang xử lý...</span>
-            </div>
-            <div class="result" id="tempResult">
-                <table class="result-table">
-                    <thead>
-                        <tr>
-                            <th data-lang="temp_converter_original">Giá Trị Gốc</th>
-                            <th data-lang="temp_converter_from">Đơn Vị Gốc</th>
-                            <th data-lang="temp_converter_converted">Giá Trị Đã Chuyển</th>
-                            <th data-lang="temp_converter_to">Đơn Vị Đích</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tempOutput"></tbody>
-                </table>
-            </div>
-        </div>
-    </section>
+    function saveToHistory(toolId, result) {
+        let history = JSON.parse(localStorage.getItem('toolHistory') || '[]');
+        const lang = localStorage.getItem('language') || 'vi';
+        history.push({
+            toolId,
+            toolName: translations[lang][`${toolId}_title`] || toolId,
+            result,
+            timestamp: new Date().toLocaleString(lang === 'vi' ? 'vi-VN' : 'en-US')
+        });
+        if (history.length > 100) history = history.slice(-100);
+        localStorage.setItem('toolHistory', JSON.stringify(history));
+    }
 
-    <section id="currency-converter" class="tools-section" data-tool-name="currency-converter">
-        <div class="tool-card">
-            <h3><i class="fas fa-dollar-sign"></i> <span data-lang="currency_converter_title">Chuyển Đổi Tiền Tệ</span></h3>
-            <p data-lang="currency_converter_description">Chuyển đổi giữa các loại tiền tệ phổ biến.</p>
-            <input type="number" id="currencyValue" data-lang-placeholder="currency_converter_input_placeholder" placeholder="Nhập số tiền">
-            <div class="error-message" id="currencyError"></div>
-            <select id="currencyFrom">
-                <option value="USD">USD</option>
-                <option value="VND">VND</option>
-                <option value="EUR">EUR</option>
-                <option value="JPY">JPY</option>
-                <option value="GBP">GBP</option>
-                <option value="CNY">CNY</option>
-            </select>
-            <select id="currencyTo">
-                <option value="USD">USD</option>
-                <option value="VND">VND</option>
-                <option value="EUR">EUR</option>
-                <option value="JPY">JPY</option>
-                <option value="GBP">GBP</option>
-                <option value="CNY">CNY</option>
-            </select>
-            <button data-action="convertCurrency">Chuyển Đổi</button>
-            <div class="loading" id="currencyLoading">
-                <span class="spinner"></span> <span data-lang="loading">Đang xử lý...</span>
-            </div>
-            <div class="result" id="currencyResult">
-                <table class="result-table">
-                    <thead>
-                        <tr>
-                            <th data-lang="currency_converter_original">Số Tiền Gốc</th>
-                            <th data-lang="currency_converter_from">Tiền Tệ Gốc</th>
-                            <th data-lang="currency_converter_converted">Số Tiền Đã Chuyển</th>
-                            <th data-lang="currency_converter_to">Tiền Tệ Đích</th>
-                        </tr>
-                    </thead>
-                    <tbody id="currencyOutput"></tbody>
-                </table>
-            </div>
-        </div>
-    </section>
+    function saveToolState(toolId, inputData) {
+        localStorage.setItem(`toolState_${toolId}`, JSON.stringify(inputData));
+    }
 
-    <section id="qr-generator" class="tools-section" data-tool-name="qr-generator">
-        <div class="tool-card">
-            <h3><i class="fas fa-qrcode"></i> <span data-lang="qr_generator_title">Tạo Mã QR</span></h3>
-            <p data-lang="qr_generator_description">Tạo mã QR từ văn bản hoặc URL.</p>
-            <input type="text" id="qrInput" data-lang-placeholder="qr_generator_input_placeholder" placeholder="Nhập văn bản hoặc URL">
-            <div class="error-message" id="qrError"></div>
-            <button data-action="generateQR">Tạo Mã QR</button>
-            <div class="loading" id="qrLoading">
-                <span class="spinner"></span> <span data-lang="loading">Đang xử lý...</span>
-            </div>
-            <div class="result" id="qrResult">
-                <img id="qrOutput" alt="QR Code">
-            </div>
-        </div>
-    </section>
+    function loadToolState(toolId) {
+        return JSON.parse(localStorage.getItem(`toolState_${toolId}`) || '{}');
+    }
 
-    <section id="image-compressor" class="tools-section" data-tool-name="image-compressor">
-        <div class="tool-card">
-            <h3><i class="fas fa-image"></i> <span data-lang="image_compressor_title">Nén Ảnh</span></h3>
-            <p data-lang="image_compressor_description">Giảm dung lượng ảnh mà vẫn giữ chất lượng tốt.</p>
-            <input type="file" id="imageInput" accept="image/*">
-            <div class="error-message" id="imageError"></div>
-            <button data-action="compressImage">Nén Ảnh</button>
-            <div class="loading" id="imageLoading">
-                <span class="spinner"></span> <span data-lang="loading">Đang xử lý...</span>
-            </div>
-            <div class="result" id="imageResult"></div>
-        </div>
-    </section>
+    // UI Functions
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode', 'animate__animated', 'animate__fadeIn');
+        localStorage.setItem('darkMode', document.getElementById('darkModeToggle').checked);
+        if (document.body.classList.contains('dark-mode')) {
+            document.querySelectorAll('pre').forEach(pre => pre.style.background = '#3a3a4e');
+        } else {
+            document.querySelectorAll('pre').forEach(pre => pre.style.background = '#f5f5f5');
+        }
+    }
 
-    <section id="bmi-calculator" class="tools-section" data-tool-name="bmi-calculator">
-        <div class="tool-card">
-            <h3><i class="fas fa-weight"></i> <span data-lang="bmi_calculator_title">Tính BMI</span></h3>
-            <p data-lang="bmi_calculator_description">Tính chỉ số BMI dựa trên cân nặng và chiều cao.</p>
-            <input type="number" id="weight" data-lang-placeholder="bmi_calculator_weight_placeholder" placeholder="Cân nặng (kg)">
-            <input type="number" id="height" data-lang-placeholder="bmi_calculator_height_placeholder" placeholder="Chiều cao (cm)">
-            <div class="error-message" id="bmiError"></div>
-            <button data-action="calculateBMI">Tính BMI</button>
-            <div class="loading" id="bmiLoading">
-                <span class="spinner"></span> <span data-lang="loading">Đang xử lý...</span>
-            </div>
-            <div class="result" id="bmiResult">
-                <table class="result-table">
-                    <thead>
-                        <tr>
-                            <th data-lang="bmi_calculator_weight">Cân Nặng (kg)</th>
-                            <th data-lang="bmi_calculator_height">Chiều Cao (cm)</th>
-                            <th data-lang="bmi_calculator_bmi">Chỉ Số BMI</th>
-                            <th data-lang="bmi_calculator_status">Trạng Thái</th>
-                        </tr>
-                    </thead>
-                    <tbody id="bmiOutput"></tbody>
-                </table>
-            </div>
-        </div>
-    </section>
+    function openContactModal() {
+        const modal = document.getElementById('contactModal');
+        if (!modal) {
+            console.error("Contact modal not found");
+            return;
+        }
+        modal.classList.add('active', 'animate__animated', 'animate__fadeIn');
+    }
 
-    <section id="area-converter" class="tools-section" data-tool-name="area-converter">
-        <div class="tool-card">
-            <h3><i class="fas fa-expand-arrows-alt"></i> <span data-lang="area_converter_title">Chuyển Đổi Diện Tích</span></h3>
-            <p data-lang="area_converter_description">Chuyển đổi giữa các đơn vị diện tích: m², km², ha, ft²...</p>
-            <input type="number" id="areaValue" data-lang-placeholder="area_converter_input_placeholder" placeholder="Nhập giá trị diện tích">
-            <div class="error-message" id="areaError"></div>
-            <select id="areaFrom">
-                <option value="m2">Mét vuông (m²)</option>
-                <option value="km2">Kilomet vuông (km²)</option>
-                <option value="ha">Hecta (ha)</option>
-                <option value="ft2">Feet vuông (ft²)</option>
-            </select>
-            <select id="areaTo">
-                <option value="m2">Mét vuông (m²)</option>
-                <option value="km2">Kilomet vuông (km²)</option>
-                <option value="ha">Hecta (ha)</option>
-                <option value="ft2">Feet vuông (ft²)</option>
-            </select>
-            <button data-action="convertArea">Chuyển Đổi</button>
-            <div class="loading" id="areaLoading">
-                <span class="spinner"></span> <span data-lang="loading">Đang xử lý...</span>
-            </div>
-            <div class="result" id="areaResult">
-                <table class="result-table">
-                    <thead>
-                        <tr>
-                            <th data-lang="area_converter_original">Giá Trị Gốc</th>
-                            <th data-lang="area_converter_from">Đơn Vị Gốc</th>
-                            <th data-lang="area_converter_converted">Giá Trị Đã Chuyển</th>
-                            <th data-lang="area_converter_to">Đơn Vị Đích</th>
-                        </tr>
-                    </thead>
-                    <tbody id="areaOutput"></tbody>
-                </table>
-            </div>
-        </div>
-    </section>
+    function closeContactModal() {
+        const modal = document.getElementById('contactModal');
+        if (!modal) {
+            console.error("Contact modal not found");
+            return;
+        }
+        modal.classList.remove('active');
+    }
 
-    <section id="history" class="tools-section">
-        <div class="tool-card">
-            <h3><i class="fas fa-history"></i> <span data-lang="history_title">Lịch Sử Sử Dụng</span></h3>
-            <button data-action="clearHistory">Xóa Lịch Sử</button>
-            <div class="result" id="historyResult"></div>
-        </div>
-    </section>
+    function showHome() {
+        const toolsSections = document.querySelectorAll('.tools-section');
+        const heroSection = document.getElementById('hero');
+        if (!heroSection) {
+            console.error("Hero section not found");
+            return;
+        }
+        toolsSections.forEach(section => {
+            section.classList.remove('active');
+            section.style.display = 'none';
+        });
+        heroSection.style.display = 'block';
+        heroSection.classList.add('animate__animated', 'animate__fadeIn');
+        document.querySelectorAll('.tool-nav a').forEach(link => link.classList.remove('active'));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const lang = localStorage.getItem('language') || 'vi';
+        document.title = translations[lang]['hero_title'] || 'ToolHub - Hộp Công Cụ Đa Năng';
+    }
 
-    <div class="modal" id="contactModal">
-        <div class="modal-content">
-            <h2 data-lang="contact_title">Liên Hệ Với Chúng Tôi</h2>
-            <p><strong>Email:</strong> support@toolhub.com</p>
-            <p><strong data-lang="contact_phone">Số Điện Thoại:</strong> +84 123 456 789</p>
-            <p><strong data-lang="contact_address">Địa Chỉ:</strong> 123 Đường Công Nghệ, TP. Hồ Chí Minh, Việt Nam</p>
-            <button data-action="closeContactModal">Đóng</button>
-        </div>
-    </div>
+    function showTool(toolId) {
+        const heroSection = document.getElementById('hero');
+        const toolsSections = document.querySelectorAll('.tools-section');
+        if (!heroSection) {
+            console.error("Hero section not found");
+            return;
+        }
+        heroSection.style.display = 'none';
+        toolsSections.forEach(section => {
+            section.classList.remove('active');
+            section.style.display = 'none';
+        });
+        const targetSection = document.getElementById(toolId);
+        if (targetSection) {
+            targetSection.classList.add('active', 'animate__animated', 'animate__fadeInUp');
+            targetSection.style.display = 'block';
+            targetSection.scrollIntoView({ behavior: 'smooth' });
+            const lang = localStorage.getItem('language') || 'vi';
+            document.title = `${translations[lang][`${toolId}_title`]} - ToolHub`;
+            restoreToolState(toolId);
+            document.querySelectorAll('.tool-nav a, .magic-menu-content a').forEach(link => {
+                link.classList.toggle('active', link.dataset.tool === toolId);
+            });
+        } else {
+            console.error(`Tool section with ID ${toolId} not found`);
+        }
+    }
 
-    <div class="toast" id="toast"></div>
+    function restoreToolState(toolId) {
+        const state = loadToolState(toolId);
+        const section = document.getElementById(toolId);
+        if (!section) {
+            console.error(`Tool section with ID ${toolId} not found for state restoration`);
+            return;
+        }
+        Object.keys(state).forEach(id => {
+            const element = section.querySelector(`#${id}`);
+            if (element) {
+                if (element.type === 'checkbox') element.checked = state[id];
+                else element.value = state[id];
+            } else {
+                console.warn(`Element with ID ${id} not found in section ${toolId}`);
+            }
+        });
+    }
 
-    <footer>
-        <p>&copy; 2025 ToolHub. <span data-lang="footer_text">Mọi quyền được bảo lưu.</span> | <a href="#" data-action="openContactModal">Liên Hệ</a></p>
-    </footer>
+    function showHistory() {
+        showTool('history');
+        const lang = localStorage.getItem('language') || 'vi';
+        const historyResult = document.getElementById('historyResult');
+        if (!historyResult) {
+            console.error("History result element not found");
+            return;
+        }
+        const history = JSON.parse(localStorage.getItem('toolHistory') || '[]');
+        historyResult.innerHTML = history.length ? `
+            <ul style="list-style: none; padding: 0;">
+                ${history.map(item => `
+                    <li style="margin-bottom: 15px;">
+                        <strong>${item.toolName}</strong> (${item.timestamp}): 
+                        <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto;">
+                            ${escapeHTML(JSON.stringify(item.result, null, 2))}
+                        </pre>
+                    </li>
+                `).join('')}
+            </ul>
+        ` : `<p>${translations[lang]['history_empty']}</p>`;
+        if (document.body.classList.contains('dark-mode')) {
+            historyResult.querySelectorAll('pre').forEach(pre => pre.style.background = '#3a3a4e');
+        }
+    }
 
-    <script src="script.js"></script>
-</body>
-</html>
+    function clearHistory() {
+        localStorage.removeItem('toolHistory');
+        showHistory();
+        showToast('history_clear_success', 'success');
+    }
+
+    function searchTools() {
+        const lang = localStorage.getItem('language') || 'vi';
+        const searchInput = document.getElementById('searchInput');
+        if (!searchInput) {
+            console.error("Search input not found");
+            return;
+        }
+        const searchValue = searchInput.value.trim().toLowerCase();
+        const toolsSections = document.querySelectorAll('.tools-section');
+        const heroSection = document.getElementById('hero');
+        if (!heroSection) {
+            console.error("Hero section not found");
+            return;
+        }
+
+        if (!searchValue) {
+            showHome();
+            return;
+        }
+
+        let found = false;
+        toolsSections.forEach(section => {
+            const toolName = translations[lang][`${section.dataset.toolName}_title`].toLowerCase();
+            if (toolName.includes(searchValue)) {
+                heroSection.style.display = 'none';
+                section.style.display = 'block';
+                section.classList.add('active', 'animate__animated', 'animate__fadeInUp');
+                section.scrollIntoView({ behavior: 'smooth' });
+                found = true;
+            } else {
+                section.style.display = 'none';
+                section.classList.remove('active');
+            }
+        });
+
+        if (!found) {
+            showToast('Không tìm thấy công cụ nào!', 'error');
+        }
+
+        document.querySelectorAll('.tool-nav a, .magic-menu-content a').forEach(link => link.classList.remove('active'));
+    }
+
+    // Magic Menu Toggle
+    function toggleMagicMenu() {
+        const magicMenuContent = document.querySelector('.magic-menu-content');
+        if (!magicMenuContent) {
+            console.error("Magic Menu content not found");
+            return;
+        }
+        magicMenuContent.classList.toggle('active');
+    }
+
+    // Tool Functions
+    function summarizeText(button) {
+        processTool(button, 'textLoading', 'textResult',
+            () => {
+                const textInput = document.getElementById('textInput');
+                if (!textInput) {
+                    console.error("Text input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập văn bản!", 'error');
+                    return { isValid: false };
+                }
+                const text = textInput.value.trim();
+                return {
+                    isValid: text && text.length <= 10000,
+                    input: textInput,
+                    errorId: 'textError',
+                    messageKey: text ? 'summarize_error_length' : 'summarize_error_empty'
+                };
+            },
+            () => {
+                const text = document.getElementById('textInput').value.trim();
+                const summaryLength = document.getElementById('summaryLength').value;
+                const sentences = text.split(/[.!?]+/).filter(s => s.trim());
+                const ratio = { short: 0.2, medium: 0.3, long: 0.4 }[summaryLength];
+                const count = Math.max(1, Math.ceil(sentences.length * ratio));
+                const summary = sentences.slice(0, count).join('. ') + (count ? '.' : '');
+                document.getElementById('summaryOutput').textContent = summary;
+                saveToHistory('summarize', { input: text.slice(0, 50) + '...', summary });
+                saveToolState('summarize', { textInput: text, summaryLength });
+                showToast('summarize_success', 'success');
+            }
+        );
+    }
+
+    function convertLength(button) {
+        processTool(button, 'lengthLoading', 'lengthResult',
+            () => {
+                const lengthInput = document.getElementById('lengthValue');
+                if (!lengthInput) {
+                    console.error("Length input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập giá trị độ dài!", 'error');
+                    return { isValid: false };
+                }
+                const value = parseFloat(lengthInput.value);
+                return {
+                    isValid: !isNaN(value) && value >= 0,
+                    input: lengthInput,
+                    errorId: 'lengthError',
+                    messageKey: 'length_converter_error'
+                };
+            },
+            () => {
+                const value = parseFloat(document.getElementById('lengthValue').value);
+                const fromUnit = document.getElementById('lengthFrom').value;
+                const toUnit = document.getElementById('lengthTo').value;
+                const conversions = { m: 1, km: 1000, cm: 0.01, inch: 0.0254, foot: 0.3048, yard: 0.9144 };
+                const result = (value * conversions[fromUnit]) / conversions[toUnit];
+                const output = {
+                    original: value.toFixed(2),
+                    fromUnit,
+                    converted: result.toFixed(2),
+                    toUnit
+                };
+                document.getElementById('lengthOutput').querySelector('tbody').innerHTML = `
+                    <tr>
+                        <td>${output.original}</td>
+                        <td>${output.fromUnit.toUpperCase()}</td>
+                        <td>${output.converted}</td>
+                        <td>${output.toUnit.toUpperCase()}</td>
+                    </tr>
+                `;
+                saveToHistory('length-converter', output);
+                saveToolState('length-converter', { lengthValue: value, lengthFrom: fromUnit, lengthTo: toUnit });
+                showToast('length_converter_success', 'success');
+            }
+        );
+    }
+
+    function calculate(button) {
+        processTool(button, 'calcLoading', 'calcResult',
+            () => {
+                const num1Input = document.getElementById('num1');
+                const num2Input = document.getElementById('num2');
+                if (!num1Input || !num2Input) {
+                    console.error("Calculator inputs not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập số!", 'error');
+                    return { isValid: false };
+                }
+                const num1 = parseFloat(num1Input.value);
+                const num2 = parseFloat(num2Input.value);
+                const operator = document.getElementById('operator').value;
+                if (isNaN(num1)) return { isValid: false, input: num1Input, errorId: 'calcError', messageKey: 'calculator_error_num1' };
+                if (isNaN(num2)) return { isValid: false, input: num2Input, errorId: 'calcError', messageKey: 'calculator_error_num2' };
+                if (operator === '/' && num2 === 0) return { isValid: false, input: num2Input, errorId: 'calcError', messageKey: 'calculator_error_divide_by_zero' };
+                return { isValid: true, input: num1Input, errorId: 'calcError' };
+            },
+            () => {
+                const lang = localStorage.getItem('language') || 'vi';
+                const num1 = parseFloat(document.getElementById('num1').value);
+                const num2 = parseFloat(document.getElementById('num2').value);
+                const operator = document.getElementById('operator').value;
+                let result;
+                switch (operator) {
+                    case '+': result = num1 + num2; break;
+                    case '-': result = num1 - num2; break;
+                    case '*': result = num1 * num2; break;
+                    case '/': result = num1 / num2; break;
+                }
+                const output = { num1, operator, num2, result: result.toFixed(2) };
+                document.getElementById('calcOutput').textContent = `${translations[lang]['calculator_result'] || 'Kết quả'}: ${output.result}`;
+                saveToHistory('calculator', output);
+                saveToolState('calculator', { num1, num2, operator });
+                showToast('calculator_success', 'success');
+            }
+        );
+    }
+
+    function generatePassword(button) {
+        processTool(button, 'passLoading', 'passResult',
+            () => {
+                const passLengthInput = document.getElementById('passLength');
+                if (!passLengthInput) {
+                    console.error("Password length input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập độ dài mật khẩu!", 'error');
+                    return { isValid: false };
+                }
+                const passLength = parseInt(passLengthInput.value);
+                const includeUppercase = document.getElementById('includeUppercase').checked;
+                const includeLowercase = document.getElementById('includeLowercase').checked;
+                const includeNumbers = document.getElementById('includeNumbers').checked;
+                const includeSymbols = document.getElementById('includeSymbols').checked;
+                if (isNaN(passLength) || passLength < 8 || passLength > 32) {
+                    return { isValid: false, input: passLengthInput, errorId: 'passError', messageKey: 'password_generator_error_length' };
+                }
+                if (!includeUppercase && !includeLowercase && !includeNumbers && !includeSymbols) {
+                    return { isValid: false, input: passLengthInput, errorId: 'passError', messageKey: 'password_generator_error_chars' };
+                }
+                return { isValid: true, input: passLengthInput, errorId: 'passError' };
+            },
+            () => {
+                const passLength = parseInt(document.getElementById('passLength').value);
+                const includeUppercase = document.getElementById('includeUppercase').checked;
+                const includeLowercase = document.getElementById('includeLowercase').checked;
+                const includeNumbers = document.getElementById('includeNumbers').checked;
+                const includeSymbols = document.getElementById('includeSymbols').checked;
+                let chars = '';
+                if (includeUppercase) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                if (includeLowercase) chars += 'abcdefghijklmnopqrstuvwxyz';
+                if (includeNumbers) chars += '0123456789';
+                if (includeSymbols) chars += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+                let password = '';
+                for (let i = 0; i < passLength; i++) {
+                    password += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                document.getElementById('passOutput').textContent = password;
+                saveToHistory('password-generator', { length: passLength, password });
+                saveToolState('password-generator', {
+                    passLength,
+                    includeUppercase,
+                    includeLowercase,
+                    includeNumbers,
+                    includeSymbols
+                });
+                showToast('password_generator_success', 'success');
+            }
+        );
+    }
+
+    function copyPassword() {
+        const passOutput = document.getElementById('passOutput');
+        if (!passOutput) {
+            console.error("Password output not found");
+            showToast("Lỗi: Không tìm thấy mật khẩu để sao chép!", 'error');
+            return;
+        }
+        const text = passOutput.textContent;
+        if (!navigator.clipboard) {
+            console.error("Clipboard API not supported");
+            showToast("Lỗi: Trình duyệt không hỗ trợ sao chép!", 'error');
+            return;
+        }
+        navigator.clipboard.writeText(text).then(() => {
+            const copyBtn = document.querySelector('#passResult .copy-btn');
+            if (copyBtn) {
+                const lang = localStorage.getItem('language') || 'vi';
+                copyBtn.textContent = translations[lang]['password_generator_copy_success'];
+                showToast('password_generator_copy_success', 'success');
+                setTimeout(() => {
+                    copyBtn.textContent = translations[lang]['password_generator_copy'];
+                }, 2000);
+            }
+        }).catch(err => {
+            console.error("Failed to copy password:", err);
+            showError(document.getElementById('passLength'), 'passError', 'Không thể sao chép mật khẩu!');
+        });
+    }
+
+    function countChars(button) {
+        processTool(button, 'charLoading', 'charResult',
+            () => {
+                const charInput = document.getElementById('charInput');
+                if (!charInput) {
+                    console.error("Char input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập văn bản để đếm!", 'error');
+                    return { isValid: false };
+                }
+                const text = charInput.value.trim();
+                return {
+                    isValid: !!text,
+                    input: charInput,
+                    errorId: 'charError',
+                    messageKey: 'char_counter_error'
+                };
+            },
+            () => {
+                const lang = localStorage.getItem('language') || 'vi';
+                const text = document.getElementById('charInput').value;
+                const charCount = text.length;
+                const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+                document.getElementById('charOutput').textContent = `${translations[lang]['char_counter_chars'] || 'Ký tự'}: ${charCount}, ${translations[lang]['char_counter_words'] || 'Từ'}: ${wordCount}`;
+                saveToHistory('char-counter', { text: text.slice(0, 50) + '...', charCount, wordCount });
+                saveToolState('char-counter', { charInput: text });
+                showToast('char_counter_success', 'success');
+            }
+        );
+    }
+
+    function checkURL(button) {
+        processTool(button, 'urlLoading', 'urlResult',
+            () => {
+                const urlInput = document.getElementById('urlInput');
+                if (!urlInput) {
+                    console.error("URL input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập URL!", 'error');
+                    return { isValid: false };
+                }
+                const url = urlInput.value.trim();
+                const urlPattern = /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)(\/[\w-./?%&=]*)?$/i;
+                return {
+                    isValid: url && urlPattern.test(url),
+                    input: urlInput,
+                    errorId: 'urlError',
+                    messageKey: 'url_checker_error'
+                };
+            },
+            () => {
+                const lang = localStorage.getItem('language') || 'vi';
+                const url = document.getElementById('urlInput').value.trim();
+                document.getElementById('urlOutput').textContent = `${translations[lang]['url_checker_valid'] || 'URL hợp lệ'}: ${url}`;
+                saveToHistory('url-checker', { url });
+                saveToolState('url-checker', { urlInput: url });
+                showToast('url_checker_success', 'success');
+            }
+        );
+    }
+
+    function convertTemp(button) {
+        processTool(button, 'tempLoading', 'tempResult',
+            () => {
+                const tempInput = document.getElementById('tempValue');
+                if (!tempInput) {
+                    console.error("Temperature input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập giá trị nhiệt độ!", 'error');
+                    return { isValid: false };
+                }
+                const value = parseFloat(tempInput.value);
+                return {
+                    isValid: !isNaN(value),
+                    input: tempInput,
+                    errorId: 'tempError',
+                    messageKey: 'temp_converter_error'
+                };
+            },
+            () => {
+                const value = parseFloat(document.getElementById('tempValue').value);
+                const fromUnit = document.getElementById('tempFrom').value;
+                const toUnit = document.getElementById('tempTo').value;
+                let celsius;
+                if (fromUnit === 'C') celsius = value;
+                else if (fromUnit === 'F') celsius = (value - 32) * 5 / 9;
+                else celsius = value - 273.15;
+                let result;
+                if (toUnit === 'C') result = celsius;
+                else if (toUnit === 'F') result = celsius * 9 / 5 + 32;
+                else result = celsius + 273.15;
+                const output = {
+                    original: value.toFixed(2),
+                    fromUnit,
+                    converted: result.toFixed(2),
+                    toUnit
+                };
+                document.getElementById('tempOutput').querySelector('tbody').innerHTML = `
+                    <tr>
+                        <td>${output.original}</td>
+                        <td>${output.fromUnit}</td>
+                        <td>${output.converted}</td>
+                        <td>${output.toUnit}</td>
+                    </tr>
+                `;
+                saveToHistory('temp-converter', output);
+                saveToolState('temp-converter', { tempValue: value, tempFrom: fromUnit, tempTo: toUnit });
+                showToast('temp_converter_success', 'success');
+            }
+        );
+    }
+
+    function convertCurrency(button) {
+        processTool(button, 'currencyLoading', 'currencyResult',
+            () => {
+                const currencyInput = document.getElementById('currencyValue');
+                if (!currencyInput) {
+                    console.error("Currency input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập giá trị tiền tệ!", 'error');
+                    return { isValid: false };
+                }
+                const value = parseFloat(currencyInput.value);
+                return {
+                    isValid: !isNaN(value) && value >= 0,
+                    input: currencyInput,
+                    errorId: 'currencyError',
+                    messageKey: 'currency_converter_error'
+                };
+            },
+            () => {
+                const value = parseFloat(document.getElementById('currencyValue').value);
+                const fromCurrency = document.getElementById('currencyFrom').value;
+                const toCurrency = document.getElementById('currencyTo').value;
+
+                // Simulated rates (replace with real API for accurate rates)
+                const rates = {
+                    USD: { USD: 1, VND: 25000, EUR: 0.85, JPY: 110, GBP: 0.75, CNY: 6.5 },
+                    VND: { USD: 0.00004, VND: 1, EUR: 0.000035, JPY: 0.0044, GBP: 0.00003, CNY: 0.00026 },
+                    EUR: { USD: 1.18, VND: 29400, EUR: 1, JPY: 129, GBP: 0.88, CNY: 7.65 },
+                    JPY: { USD: 0.0091, VND: 227, EUR: 0.0078, JPY: 1, GBP: 0.0068, CNY: 0.059 },
+                    GBP: { USD: 1.33, VND: 33300, EUR: 1.14, JPY: 147, GBP: 1, CNY: 8.67 },
+                    CNY: { USD: 0.15, VND: 3850, EUR: 0.13, JPY: 16.9, GBP: 0.12, CNY: 1 }
+                };
+
+                const result = value * rates[fromCurrency][toCurrency];
+                const output = {
+                    original: value.toFixed(2),
+                    fromCurrency,
+                    converted: result.toFixed(2),
+                    toCurrency
+                };
+
+                document.getElementById('currencyOutput').querySelector('tbody').innerHTML = `
+                    <tr>
+                        <td>${output.original}</td>
+                        <td>${output.fromCurrency}</td>
+                        <td>${output.converted}</td>
+                        <td>${output.toCurrency}</td>
+                    </tr>
+                `;
+                saveToHistory('currency-converter', output);
+                saveToolState('currency-converter', { currencyValue: value, currencyFrom: fromCurrency, currencyTo: toCurrency });
+                showToast('currency_converter_success', 'success');
+            }
+        );
+    }
+
+    function generateQR(button) {
+        processTool(button, 'qrLoading', 'qrResult',
+            () => {
+                const qrInput = document.getElementById('qrInput');
+                if (!qrInput) {
+                    console.error("QR input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập văn bản hoặc URL!", 'error');
+                    return { isValid: false };
+                }
+                const text = qrInput.value.trim();
+                return {
+                    isValid: !!text,
+                    input: qrInput,
+                    errorId: 'qrError',
+                    messageKey: 'qr_generator_error'
+                };
+            },
+            () => {
+                const text = document.getElementById('qrInput').value.trim();
+                const qrOutput = document.getElementById('qrOutput');
+                if (!qrOutput) {
+                    console.error("QR output not found");
+                    showToast("Lỗi: Không tìm thấy phần tử để hiển thị mã QR!", 'error');
+                    return;
+                }
+                QRCode.toDataURL(text, { width: 200, margin: 1 }, (err, url) => {
+                    if (err) {
+                        console.error("QR Code generation failed:", err);
+                        showError(document.getElementById('qrInput'), 'qrError', 'Không thể tạo mã QR!');
+                        return;
+                    }
+                    qrOutput.src = url;
+                    saveToHistory('qr-generator', { input: text });
+                    saveToolState('qr-generator', { qrInput: text });
+                    showToast('qr_generator_success', 'success');
+                });
+            }
+        );
+    }
+
+    function compressImage(button) {
+        processTool(button, 'imageLoading', 'imageResult',
+            () => {
+                const imageInput = document.getElementById('imageInput');
+                if (!imageInput) {
+                    console.error("Image input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập ảnh!", 'error');
+                    return { isValid: false };
+                }
+                const file = imageInput.files[0];
+                const validFormats = ['image/jpeg', 'image/png', 'image/gif'];
+                if (!file) return { isValid: false, input: imageInput, errorId: 'imageError', messageKey: 'image_compressor_error_empty' };
+                if (!validFormats.includes(file.type)) return { isValid: false, input: imageInput, errorId: 'imageError', messageKey: 'image_compressor_error_format' };
+                return { isValid: true, input: imageInput, errorId: 'imageError' };
+            },
+            () => {
+                const file = document.getElementById('imageInput').files[0];
+                const imageResult = document.getElementById('imageResult');
+                if (!imageResult) {
+                    console.error("Image result not found");
+                    showToast("Lỗi: Không tìm thấy phần tử để hiển thị kết quả nén ảnh!", 'error');
+                    return;
+                }
+                new Compressor(file, {
+                    quality: 0.6,
+                    maxWidth: 800,
+                    maxHeight: 800,
+                    success(compressed) {
+                        const url = URL.createObjectURL(compressed);
+                        imageResult.innerHTML = `
+                            <p>Kích thước gốc: ${(file.size / 1024).toFixed(2)} KB</p>
+                            <p>Kích thước sau nén: ${(compressed.size / 1024).toFixed(2)} KB</p>
+                            <img src="${url}" alt="Compressed image" style="max-width: 200px; margin-top: 10px;">
+                            <a href="${url}" download="compressed-image.jpg" style="display: block; margin-top: 10px; color: #007bff;">Tải ảnh đã nén</a>
+                        `;
+                        saveToHistory('image-compressor', {
+                            originalSize: (file.size / 1024).toFixed(2),
+                            compressedSize: (compressed.size / 1024).toFixed(2)
+                        });
+                        showToast('image_compressor_success', 'success');
+                    },
+                    error(err) {
+                        console.error("Image compression failed:", err);
+                        showError(document.getElementById('imageInput'), 'imageError', 'Không thể nén ảnh!');
+                    }
+                });
+            }
+        );
+    }
+
+    function calculateBMI(button) {
+        processTool(button, 'bmiLoading', 'bmiResult',
+            () => {
+                const weightInput = document.getElementById('weight');
+                const heightInput = document.getElementById('height');
+                if (!weightInput || !heightInput) {
+                    console.error("BMI inputs not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập cân nặng hoặc chiều cao!", 'error');
+                    return { isValid: false };
+                }
+                const weight = parseFloat(weightInput.value);
+                const height = parseFloat(heightInput.value);
+                if (isNaN(weight) || weight <= 0) return { isValid: false, input: weightInput, errorId: 'bmiError', messageKey: 'bmi_calculator_error_weight' };
+                if (isNaN(height) || height <= 0) return { isValid: false, input: heightInput, errorId: 'bmiError', messageKey: 'bmi_calculator_error_height' };
+                return { isValid: true, input: weightInput, errorId: 'bmiError' };
+            },
+            () => {
+                const lang = localStorage.getItem('language') || 'vi';
+                const weight = parseFloat(document.getElementById('weight').value);
+                const height = parseFloat(document.getElementById('height').value);
+                const bmi = (weight / ((height / 100) ** 2)).toFixed(2);
+                let statusKey;
+                if (bmi < 18.5) statusKey = 'bmi_underweight';
+                else if (bmi < 25) statusKey = 'bmi_normal';
+                else if (bmi < 30) statusKey = 'bmi_overweight';
+                else statusKey = 'bmi_obese';
+                const output = { weight, height, bmi, status: translations[lang][statusKey] };
+                document.getElementById('bmiOutput').querySelector('tbody').innerHTML = `
+                    <tr>
+                        <td>${weight}</td>
+                        <td>${height}</td>
+                        <td>${bmi}</td>
+                        <td>${translations[lang][statusKey]}</td>
+                    </tr>
+                `;
+                saveToHistory('bmi-calculator', output);
+                saveToolState('bmi-calculator', { weight, height });
+                showToast('bmi_calculator_success', 'success');
+            }
+        );
+    }
+
+    function convertArea(button) {
+        processTool(button, 'areaLoading', 'areaResult',
+            () => {
+                const areaInput = document.getElementById('areaValue');
+                if (!areaInput) {
+                    console.error("Area input not found");
+                    showToast("Lỗi: Không tìm thấy trường nhập giá trị diện tích!", 'error');
+                    return { isValid: false };
+                }
+                const value = parseFloat(areaInput.value);
+                return {
+                    isValid: !isNaN(value) && value >= 0,
+                    input: areaInput,
+                    errorId: 'areaError',
+                    messageKey: 'area_converter_error'
+                };
+            },
+            () => {
+                const value = parseFloat(document.getElementById('areaValue').value);
+                const fromUnit = document.getElementById('areaFrom').value;
+                const toUnit = document.getElementById('areaTo').value;
+                const conversions = { m2: 1, km2: 1000000, ha: 10000, ft2: 0.092903 };
+                const result = (value * conversions[fromUnit]) / conversions[toUnit];
+                const output = {
+                    original: value.toFixed(2),
+                    fromUnit,
+                    converted: result.toFixed(2),
+                    toUnit
+                };
+                document.getElementById('areaOutput').querySelector('tbody').innerHTML = `
+                    <tr>
+                        <td>${output.original}</td>
+                        <td>${output.fromUnit.toUpperCase()}</td>
+                        <td>${output.converted}</td>
+                        <td>${output.toUnit.toUpperCase()}</td>
+                    </tr>
+                `;
+                saveToHistory('area-converter', output);
+                saveToolState('area-converter', { areaValue: value, areaFrom: fromUnit, areaTo: toUnit });
+                showToast('area_converter_success', 'success');
+            }
+        );
+    }
+
+    // Event Listeners
+    document.addEventListener('click', (e) => {
+        const target = e.target.closest('[data-action]');
+        if (!target) return;
+        const action = target.dataset.action;
+        const actions = {
+            showHome,
+            showHistory,
+            openContactModal,
+            closeContactModal,
+            clearHistory,
+            searchTools,
+            summarizeText: () => summarizeText(target),
+            convertLength: () => convertLength(target),
+            calculate: () => calculate(target),
+            generatePassword: () => generatePassword(target),
+            copyPassword,
+            countChars: () => countChars(target),
+            checkURL: () => checkURL(target),
+            convertTemp: () => convertTemp(target),
+            convertCurrency: () => convertCurrency(target),
+            generateQR: () => generateQR(target),
+            compressImage: () => compressImage(target),
+            calculateBMI: () => calculateBMI(target),
+            convertArea: () => convertArea(target),
+            toggleMagicMenu
+        };
+        if (actions[action]) actions[action]();
+    });
+
+    document.addEventListener('click', (e) => {
+        const target = e.target.closest('[data-tool]');
+        if (target) {
+            const toolId = target.dataset.tool;
+            showTool(toolId);
+        }
+    });
+
+    document.getElementById('darkModeToggle')?.addEventListener('change', toggleDarkMode);
+
+    document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') searchTools();
+    });
+
+    // Initialize
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.getElementById('darkModeToggle').checked = true;
+        toggleDarkMode();
+    }
+
+    showHome();
+});
