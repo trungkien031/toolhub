@@ -16,7 +16,7 @@
         style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com 'unsafe-inline';
         font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
         img-src 'self' data:;
-        connect-src 'self' https://v6.exchangerate-api.com https://safebrowsing.googleapis.com;
+        connect-src 'self' https://v6.exchangerate-api.com https://safebrowsing.googleapis.com https://api.x.ai;
     ">
     <title data-i18n="title">ToolHub - Hộp Công Cụ Đa Năng</title>
     <link rel="icon" href="/toolhub/assets/icons/favicon.ico" type="image/x-icon">
@@ -36,6 +36,7 @@
     <select class="language-selector" id="languageSelector" aria-label="Select language">
         <option value="vi">Tiếng Việt</option>
         <option value="en">English</option>
+        <option value="ja">日本語</option>
     </select>
 
     <header>
@@ -67,7 +68,7 @@
             <h2 data-i18n="contact">Contact Information</h2>
             <p><strong data-i18n="creator">Creator</strong>: Nguyễn Trung Kiên</p>
             <p><strong data-i18n="dob">Date of Birth</strong>: 03/01/2006</p>
-            <p><strong data-i18n="email">Email</strong>: <a href="mailto:kiennt@example.com">kiennt@example.com</a></p>
+            <p><strong data-i18n="email">Email</strong>: <a href="/cdn-cgi/l/email-protection#3813111d16160c381d00191508141d561b1715"><span class="__cf_email__" data-cfemail="5c3735393232281c39243d312c3039723f3331">[email&#160;protected]</span></a></p>
             <p><strong data-i18n="phone">Phone</strong>: <a href="tel:0925344777">0925344777</a></p>
             <button data-action="closeContactModal" data-i18n="close">Close</button>
         </div>
@@ -87,10 +88,10 @@
     </section>
 
     <main>
-        <section class="tools-section" id="summarize" data-tool-name="summarize">
+        <section class="tools-section" id="summarize" data-tool-name="summarize" loading="lazy">
             <div class="tool-card">
                 <h3><img src="/toolhub/assets/icons/brain.png" alt="Text Summary" class="tool-icon"> <span data-i18n="summarize">Text Summary</span></h3>
-                <p data-i18n="summarizeDesc">Condense long content into a concise summary.</p>
+                <p data-i18n="summarizeDesc">Condense long content into a concise summary using AI.</p>
                 <textarea id="textInput" rows="4" placeholder="Enter text to summarize..." aria-label="Text to summarize" aria-describedby="textError" data-i18n-placeholder="textInputPlaceholder"></textarea>
                 <select id="summaryLength" aria-label="Select summary length">
                     <option value="short" data-i18n="short">Short (~20%)</option>
@@ -108,7 +109,7 @@
             </div>
         </section>
 
-        <section class="tools-section" id="length-converter" data-tool-name="length converter">
+        <section class="tools-section" id="length-converter" data-tool-name="length converter" loading="lazy">
             <div class="tool-card">
                 <h3><img src="/toolhub/assets/icons/ruler.png" alt="Length Converter" class="tool-icon"> <span data-i18n="length-converter">Length Converter</span></h3>
                 <p data-i18n="lengthConverterDesc">Convert length between meters, kilometers, centimeters, inches, feet, and yards.</p>
@@ -150,7 +151,7 @@
             </div>
         </section>
 
-        <section class="tools-section" id="calculator" data-tool-name="calculator">
+        <section class="tools-section" id="calculator" data-tool-name="calculator" loading="lazy">
             <div class="tool-card">
                 <h3><img src="/toolhub/assets/icons/calculator.png" alt="Calculator" class="tool-icon"> <span data-i18n="calculator">Calculator</span></h3>
                 <p data-i18n="calculatorDesc">Perform basic calculations: addition, subtraction, multiplication, division.</p>
@@ -173,7 +174,7 @@
             </div>
         </section>
 
-        <section class="tools-section" id="password-generator" data-tool-name="password generator">
+        <section class="tools-section" id="password-generator" data-tool-name="password generator" loading="lazy">
             <div class="tool-card">
                 <h3><img src="/toolhub/assets/icons/key.png" alt="Password Generator" class="tool-icon"> <span data-i18n="password-generator">Password Generator</span></h3>
                 <p data-i18n="passwordGeneratorDesc">Generate secure random passwords with customizable length and character types.</p>
@@ -194,7 +195,7 @@
             </div>
         </section>
 
-        <section class="tools-section" id="char-counter" data-tool-name="character counter">
+        <section class="tools-section" id="char-counter" data-tool-name="character counter" loading="lazy">
             <div class="tool-card">
                 <h3><img src="/toolhub/assets/icons/text-width.png" alt="Character Counter" class="tool-icon"> <span data-i18n="char-counter">Character Counter</span></h3>
                 <p data-i18n="charCounterDesc">Count characters and words in your text.</p>
@@ -210,7 +211,7 @@
             </div>
         </section>
 
-        <section class="tools-section" id="url-checker" data-tool-name="url checker">
+        <section class="tools-section" id="url-checker" data-tool-name="url checker" loading="lazy">
             <div class="tool-card">
                 <h3><img src="/toolhub/assets/icons/globe.png" alt="URL Checker" class="tool-icon"> <span data-i18n="url-checker">URL Checker</span></h3>
                 <p data-i18n="urlCheckerDesc">Check if a URL is valid and safe.</p>
@@ -226,7 +227,7 @@
             </div>
         </section>
 
-        <section class="tools-section" id="temp-converter" data-tool-name="temperature converter">
+        <section class="tools-section" id="temp-converter" data-tool-name="temperature converter" loading="lazy">
             <div class="tool-card">
                 <h3><img src="/toolhub/assets/icons/thermometer.png" alt="Temperature Converter" class="tool-icon"> <span data-i18n="temp-converter">Temperature Converter</span></h3>
                 <p data-i18n="tempConverterDesc">Convert between Celsius, Fahrenheit, and Kelvin.</p>
@@ -262,7 +263,7 @@
             </div>
         </section>
 
-        <section class="tools-section" id="currency-converter" data-tool-name="currency converter">
+        <section class="tools-section" id="currency-converter" data-tool-name="currency converter" loading="lazy">
             <div class="tool-card">
                 <h3><img src="/toolhub/assets/icons/money.png" alt="Currency Converter" class="tool-icon"> <span data-i18n="currency-converter">Currency Converter</span></h3>
                 <p data-i18n="currencyConverterDesc">Convert between different currencies using real-time rates.</p>
@@ -302,7 +303,7 @@
             </div>
         </section>
 
-        <section class="tools-section" id="qr-generator" data-tool-name="qr code generator">
+        <section class="tools-section" id="qr-generator" data-tool-name="qr code generator" loading="lazy">
             <div class="tool-card">
                 <h3><img src="/toolhub/assets/icons/qr-code.png" alt="QR Code Generator" class="tool-icon"> <span data-i18n="qr-generator">QR Code Generator</span></h3>
                 <p data-i18n="qrGeneratorDesc">Generate QR codes for URLs or text.</p>
@@ -318,7 +319,7 @@
             </div>
         </section>
 
-        <section class="tools-section" id="image-compressor" data-tool-name="image compressor">
+        <section class="tools-section" id="image-compressor" data-tool-name="image compressor" loading="lazy">
             <div class="tool-card">
                 <h3><img src="/toolhub/assets/icons/image.png" alt="Image Compressor" class="tool-icon"> <span data-i18n="image-compressor">Image Compressor</span></h3>
                 <p data-i18n="imageCompressorDesc">Compress images to reduce file size.</p>
@@ -332,7 +333,7 @@
             </div>
         </section>
 
-        <section class="tools-section" id="bmi-calculator" data-tool-name="bmi calculator">
+        <section class="tools-section" id="bmi-calculator" data-tool-name="bmi calculator" loading="lazy">
             <div class="tool-card">
                 <h3><img src="/toolhub/assets/icons/weight.png" alt="BMI Calculator" class="tool-icon"> <span data-i18n="bmi-calculator">BMI Calculator</span></h3>
                 <p data-i18n="bmiCalculatorDesc">Calculate your Body Mass Index (BMI).</p>
@@ -359,22 +360,24 @@
             </div>
         </section>
 
-        <section class="tools-section" id="area-converter" data-tool-name="area converter">
+        <section class="tools-section" id="area-converter" data-tool-name="area converter" loading="lazy">
             <div class="tool-card">
                 <h3><img src="/toolhub/assets/icons/square.png" alt="Area Converter" class="tool-icon"> <span data-i18n="area-converter">Area Converter</span></h3>
-                <p data-i18n="areaConverterDesc">Convert between square meters, kilometers, hectares, and square feet.</p>
+                <p data-i18n="areaConverterDesc">Convert between square meters, kilometers, hectares, square feet, and mau.</p>
                 <input type="number" id="areaValue" placeholder="Enter value" min="0" step="any" aria-label="Area value" aria-describedby="areaError" data-i18n-placeholder="valuePlaceholder">
                 <select id="areaFrom" aria-label="Select original unit">
                     <option value="m2" data-i18n="m2">Square Meter (m²)</option>
                     <option value="km2" data-i18n="km2">Square Kilometer (km²)</option>
                     <option value="ha" data-i18n="ha">Hectare (ha)</option>
                     <option value="ft2" data-i18n="ft2">Square Foot (ft²)</option>
+                    <option value="mau" data-i18n="mau">Mau (mẫu)</option>
                 </select>
                 <select id="areaTo" aria-label="Select target unit">
                     <option value="m2" data-i18n="m2">Square Meter (m²)</option>
                     <option value="km2" data-i18n="km2">Square Kilometer (km²)</option>
                     <option value="ha" data-i18n="ha">Hectare (ha)</option>
                     <option value="ft2" data-i18n="ft2">Square Foot (ft²)</option>
+                    <option value="mau" data-i18n="mau">Mau (mẫu)</option>
                 </select>
                 <p class="error-message" id="areaError"></p>
                 <div class="button-group">
@@ -397,12 +400,15 @@
             </div>
         </section>
 
-        <section class="tools-section" id="history" data-tool-name="history">
+        <section class="tools-section" id="history" data-tool-name="history" loading="lazy">
             <div class="tool-card">
                 <h3><i class="fas fa-history"></i> <span data-i18n="history">History</span></h3>
                 <div class="button-group">
                     <button data-action="clearHistory" data-i18n="clearHistory">Clear History</button>
+                    <button data-action="exportJSON" data-i18n="exportJSON">Export JSON</button>
+                    <button data-action="exportPDF" data-i18n="exportPDF">Export PDF</button>
                 </div>
+                <div id="historyStats" class="result"></div>
                 <div id="historyResult" class="result"></div>
             </div>
         </section>
@@ -412,9 +418,12 @@
         <p>© 2025 ToolHub. <span data-i18n="createdBy">Created by</span> Nguyễn Trung Kiên.</p>
     </footer>
 
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/i18next@22.4.9/dist/umd/i18next.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/compressorjs@1.2.1/dist/compressor.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <script src="script.js"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'934337098ecd7b98',t:'MTc0NTMwNDkyMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>
